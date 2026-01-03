@@ -1,0 +1,16 @@
+@import "tailwindcss";
+
+/* Default site font */
+@layer base {
+  html,
+  body {
+    font-family: "Lato", sans-serif;
+  }
+}
+
+/* Guaranteed utility (works even if config didn’t load) */
+@layer utilities {
+  .font-handwriting {
+    font-family: "Just Me Again Down Here", cursive !important;
+  }
+}
