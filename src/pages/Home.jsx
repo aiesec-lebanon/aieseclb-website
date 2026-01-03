@@ -6,6 +6,7 @@ import raoucheImage from "../assets/images/raouche.png";
 import lauLogo from "../assets/images/lau_logo.png";
 import aubLogo from "../assets/images/aub_logo.png";
 import uniPicImage from "../assets/images/uni_pic.png";
+import exploreOppsImage from "../assets/images/explore_opps.png";
 
 const clamp01 = (n) => Math.max(0, Math.min(1, n));
 
@@ -267,39 +268,39 @@ const Page = () => {
       </section>
 
       {/* Universities */}
-      <section className="pt-4 pb-24">
+      <section className="pt-0 pb-24 -mt-20">
         <div className="mx-auto max-w-[1440px] px-8">
-          <h2 className="font-handwriting text-black text-8xl md:text-9xl drop-shadow text-center">
+          <h2 className="font-handwriting text-black text-5xl sm:text-6xl lg:text-7xl xl:text-8xl drop-shadow text-center">
             Universities
           </h2>
 
-          <div className="mt-8 mx-auto max-w-[920px] relative">
+          <div className="mt-6 mx-auto max-w-[1020px] relative">
             {/* Blue rounded container */}
-            <div className="relative bg-[#cfe7ff] border-[3px] border-[#0b63ff] rounded-[48px] h-[260px] flex items-center justify-center shadow-lg">
+            <div className="relative bg-[#cfe7ff] border-[3px] border-[#0b63ff] rounded-[48px] h-[360px] flex items-center justify-center shadow-lg">
               {/* Decorative image - positioned absolutely */}
               <img
                 src={uniPicImage}
                 alt="Universities decorative"
-                className="absolute right-[140px] top-[-120px] w-[260px] h-auto pointer-events-none select-none"
+                className="absolute right-[-60px] top-[-165px] w-[410px] h-auto pointer-events-none select-none"
               />
 
               {/* Logo cards */}
-              <div className="flex gap-12 items-center justify-center z-10">
+              <div className="flex gap-14 items-center justify-center z-10">
                 {/* LAU Logo Card */}
-                <div className="bg-white rounded-[22px] w-[360px] h-[160px] flex items-center justify-center shadow-md">
+                <div className="bg-white rounded-[22px] w-[440px] h-[200px] flex items-center justify-center shadow-none">
                   <img
                     src={lauLogo}
                     alt="LAU Logo"
-                    className="max-h-[160px] w-auto object-contain"
+                    className="max-h-[200px] w-auto object-contain"
                   />
                 </div>
 
                 {/* AUB Logo Card */}
-                <div className="bg-[#6B1B47] rounded-[22px] w-[360px] h-[160px] flex items-center justify-center shadow-md">
+                <div className="bg-[#6B1B47] rounded-[22px] w-[440px] h-[200px] flex items-center justify-center shadow-none">
                   <img
                     src={aubLogo}
                     alt="AUB Logo"
-                    className="max-h-[180px] w-auto object-contain"
+                    className="max-h-[220px] w-auto object-contain"
                   />
                 </div>
               </div>
@@ -311,21 +312,36 @@ const Page = () => {
       {/* Explore opportunities */}
       <section className="py-24">
         <div className="mx-auto max-w-[1440px] px-8">
-          <h2 className="font-handwriting text-black text-6xl sm:text-8xl md:text-9xl drop-shadow text-center">
+          {/* Centered title */}
+          <h2 className="mt-8 font-handwriting text-black text-6xl sm:text-8xl md:text-9xl drop-shadow text-center">
             Explore our opportunities
           </h2>
 
-          <p className="mt-10 max-w-2xl text-[#828282] text-lg sm:text-[26px] leading-7 sm:leading-[39px]">
-            Discover the experiences AIESEC offers: volunteer abroad through
-            Global Volunteer, build your career with Global Talent, or teach and
-            inspire through Global Teacher.
-          </p>
+          {/* Two-column grid below title */}
+          <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+            {/* Left column: Description and Button */}
+            <div className="-translate-y-4 md:-translate-y-20">
+              <p className="text-[#828282] text-lg sm:text-[26px] leading-7 sm:leading-[39px]">
+                Discover the experiences AIESEC offers: volunteer abroad through Global Volunteer, build your career with Global Talent, or teach and inspire through Global Teacher.
+              </p>
 
-          <div className="mt-10 inline-flex items-center gap-4 bg-[#037ef3] rounded-[20px] px-8 py-4">
-            <span className="text-white text-2xl sm:text-3xl">
-              View all Programs
-            </span>
-            <span className="text-white text-2xl">→</span>
+              <button
+                type="button"
+                className="mt-10 inline-flex items-center gap-4 bg-[#037ef3] rounded-[20px] px-8 py-4 text-white text-2xl sm:text-3xl transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+              >
+                <span>View all Programs</span>
+                <span className="text-2xl">→</span>
+              </button>
+            </div>
+
+            {/* Right column: Image */}
+            <div className="flex justify-center items-center -translate-y-4 md:-translate-y-8">
+              <img
+                src={exploreOppsImage}
+                alt="Explore opportunities"
+                className="w-full max-w-[550px] h-auto object-contain"
+              />
+            </div>
           </div>
         </div>
       </section>
