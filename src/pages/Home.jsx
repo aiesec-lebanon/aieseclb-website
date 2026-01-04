@@ -1,32 +1,66 @@
 import React, { useEffect, useRef, useState } from "react";
 import heroImage from "../assets/images/landing_page_bg.png";
 import logo from "../assets/images/aiesec_logo.png";
+import logoBlue from "../assets/images/aiesec_logo_blue.png";
 import manImage from "../assets/images/aiesec_man.png";
 import raoucheImage from "../assets/images/raouche.png";
 import lauLogo from "../assets/images/lau_logo.png";
 import aubLogo from "../assets/images/aub_logo.png";
 import uniPicImage from "../assets/images/uni_pic.png";
 import exploreOppsImage from "../assets/images/explore_opps.png";
+import mapImage from "../assets/images/map.png";
+import bubbleImage from "../assets/images/bubble.png";
+import dhlLogo from "../assets/images/DHL_logo.png";
+import electroluxLogo from "../assets/images/Electrolux_logo.png";
+import schneiderLogo from "../assets/images/Shneider_logo.png";
+import tcsLogo from "../assets/images/tcs_logo.png";
+import terrawindLogo from "../assets/images/terrawind_logo.png";
+import lorealLogo from "../assets/images/loreal_logo.png";
+import henkelLogo from "../assets/images/Henkel_logo.png";
+import pwcLogo from "../assets/images/pwc_logo.png";
+import slbLogo from "../assets/images/slb_logo.png";
+import person1 from "../assets/images/person1.png";
+import person2 from "../assets/images/person2.png";
+import person3 from "../assets/images/person3.png";
+import fbLogo from "../assets/images/fb_logo.png";
+import igLogo from "../assets/images/ig_logo.png";
+import linkedinLogo from "../assets/images/linkedin_logo.png";
+import ytLogo from "../assets/images/yt_logo.png";
 
 const clamp01 = (n) => Math.max(0, Math.min(1, n));
 
 const Page = () => {
-  const partners = [
-    "DHL",
-    "TCS",
-    "Partner",
-    "Electrolux",
-    "Terrawind",
-    "Schneider Electric",
-    "SLB",
-    "Partner",
-    "Partner",
+  const partnerLogos = [
+    { src: dhlLogo, alt: "DHL" },
+    { src: electroluxLogo, alt: "Electrolux" },
+    { src: schneiderLogo, alt: "Schneider Electric" },
+    { src: tcsLogo, alt: "TCS" },
+    { src: terrawindLogo, alt: "Terrawind" },
+    { src: lorealLogo, alt: "L'Oréal" },
+    { src: henkelLogo, alt: "Henkel" },
+    { src: pwcLogo, alt: "PwC" },
+    { src: slbLogo, alt: "SLB" },
   ];
 
-  const feedback = [
-    "A terrific piece of praise",
-    "A fantastic bit of feedback",
-    "A genuinely glowing review",
+  const testimonials = [
+    {
+      quote: "A terrific piece of praise",
+      name: "Sarah Johnson",
+      role: "Global Volunteer",
+      avatar: person1,
+    },
+    {
+      quote: "A fantastic bit of feedback",
+      name: "Michael Chen",
+      role: "Global Talent",
+      avatar: person2,
+    },
+    {
+      quote: "A genuinely glowing review",
+      name: "Emma Williams",
+      role: "Global Teacher",
+      avatar: person3,
+    },
   ];
 
   // ===== Scroll scene (Option A) =====
@@ -111,12 +145,19 @@ const Page = () => {
       <section className="w-full bg-[#037ef3]">
         {/* Navbar */}
         <header className="w-full overflow-visible relative z-50">
-          <div className="mx-auto max-w-[1440px] h-[80px] px-8 flex items-center justify-between overflow-visible">
+          <div className="mx-auto max-w-[1440px] h-[80px] px-4 md:px-8 flex items-center justify-between overflow-visible">
             {/* LOGO */}
-            <img src={logo} alt="AIESEC logo" className="h-[55px] w-auto" />
+            <img src={logo} alt="AIESEC logo" className="h-[45px] md:h-[55px] w-auto" />
 
-            {/* NAV */}
-            <nav className="flex items-center gap-3 text-white text-[20px] leading-[32px]">
+            {/* Hamburger Menu (Mobile Only) */}
+            <button className="md:hidden text-white p-2">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+
+            {/* NAV - Hidden on mobile, visible on desktop */}
+            <nav className="hidden md:flex items-center gap-3 text-white text-[20px] leading-[32px]">
               {/* Home */}
               <a
                 href="#"
@@ -164,29 +205,31 @@ const Page = () => {
         </header>
 
         {/* HERO */}
-        <section className="relative w-full min-h-[calc(100vh-80px)] bg-[#037ef3] overflow-hidden pt-24 md:pt-32">
-          <div className="mx-auto max-w-[1440px] h-full px-8 flex items-center">
-            {/* LEFT TEXT */}
-            <div className="z-10 max-w-[1100px] mt-[-100px]">
-              <h1 className="font-handwriting text-[#ffc845] text-[185px] leading-[1.0] whitespace-nowrap drop-shadow-[6px_6px_0_rgba(0,0,0,0.3)]">
-                Turn potential
-                <br />
-                <span className="inline-block">into impact</span>
-              </h1>
+        <section className="relative w-full bg-[#037ef3] overflow-hidden py-8 sm:py-12 md:py-24">
+          <div className="mx-auto max-w-[1440px] px-4 md:px-8">
+            <div className="flex flex-col md:flex-row md:items-center gap-6 md:gap-12">
+              {/* LEFT TEXT */}
+              <div className="z-10 w-full md:max-w-[1100px]">
+                <h1 className="font-handwriting text-[#ffc845] text-5xl sm:text-6xl md:text-8xl lg:text-[185px] leading-tight md:leading-[1.0] drop-shadow-[4px_4px_0_rgba(0,0,0,0.3)] md:drop-shadow-[6px_6px_0_rgba(0,0,0,0.3)]">
+                  Turn potential
+                  <br />
+                  <span className="inline-block">into impact</span>
+                </h1>
 
-              <p className="mt-8 text-white text-base sm:text-lg md:text-[22px] leading-8 max-w-[420px]">
-                Build your potential through global exchange and volunteering
-                projects in 110+ countries.
-              </p>
-            </div>
+                <p className="mt-4 md:mt-8 text-white text-base sm:text-lg md:text-[22px] leading-7 md:leading-8 max-w-[420px]">
+                  Build your potential through global exchange and volunteering
+                  projects in 110+ countries.
+                </p>
+              </div>
 
-            {/* RIGHT IMAGE */}
-            <div className="absolute -bottom-12 -right-2">
-              <img
-                src={heroImage}
-                alt="AIESEC youth"
-                className="w-[1200px] max-w-none object-contain"
-              />
+              {/* RIGHT IMAGE */}
+              <div className="w-full md:absolute md:-bottom-12 md:-right-2 flex justify-center md:justify-end">
+                <img
+                  src={heroImage}
+                  alt="AIESEC youth"
+                  className="w-full max-w-[360px] sm:max-w-[420px] md:w-[1200px] md:max-w-none object-contain"
+                />
+              </div>
             </div>
           </div>
         </section>
@@ -267,7 +310,7 @@ const Page = () => {
         </div>
       </section>
 
-      {/* Universities */}
+            {/* Universities */}
       <section className="pt-0 pb-24 -mt-20">
         <div className="mx-auto max-w-[1440px] px-8">
           <h2 className="font-handwriting text-black text-5xl sm:text-6xl lg:text-7xl xl:text-8xl drop-shadow text-center">
@@ -347,21 +390,37 @@ const Page = () => {
       </section>
 
       {/* Partners */}
-      <section className="py-24">
+      <section className="py-24 bg-[#edf6ff]">
         <div className="mx-auto max-w-[1440px] px-8">
-          <h2 className="font-handwriting text-black text-6xl sm:text-8xl md:text-9xl drop-shadow text-center">
-            Our Partners
-          </h2>
+          <div className="relative mt-12">
+            {/* Background map covering title + grid */}
+            <div className="absolute inset-0 opacity-80 translate-y-4 pointer-events-none select-none">
+              <img
+                src={mapImage}
+                alt="World map"
+                className="w-full h-full object-contain object-top"
+              />
+            </div>
 
-          <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {partners.map((name, idx) => (
-              <div
-                key={`${name}-${idx}`}
-                className="bg-white rounded-[20px] h-[90px] flex items-center justify-center text-xl"
-              >
-                {name}
-              </div>
-            ))}
+            <h2 className="relative z-10 font-handwriting text-black text-6xl sm:text-8xl md:text-9xl drop-shadow text-center">
+              Our Partners
+            </h2>
+
+            {/* Logo grid */}
+            <div className="relative z-10 mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {partnerLogos.map((logo, idx) => (
+                <div
+                  key={`${logo.alt}-${idx}`}
+                  className="bg-white rounded-[22px] px-8 py-5 flex items-center justify-center shadow-sm"
+                >
+                  <img
+                    src={logo.src}
+                    alt={logo.alt}
+                    className="w-full max-w-[240px] max-h-[80px] object-contain"
+                  />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -369,20 +428,52 @@ const Page = () => {
       {/* Feedback */}
       <section className="py-24">
         <div className="mx-auto max-w-[1440px] px-8">
-          <h2 className="font-handwriting text-black text-6xl sm:text-8xl md:text-9xl drop-shadow text-center">
-            Feedback
-          </h2>
+          <div className="flex items-center justify-center gap-4">
+            {/* Chat bubble with sparkle */}
+            <div className="relative">
+              <img
+                src={bubbleImage}
+                alt="Chat bubble"
+                className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain"
+              />
+              {/* Yellow sparkle star */}
+              <svg
+                className="absolute -top-1 -right-1 w-5 h-5 sm:w-6 sm:h-6"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z"
+                  fill="#FFC845"
+                />
+              </svg>
+            </div>
+            <h2 className="font-handwriting text-black text-6xl sm:text-8xl md:text-9xl drop-shadow">
+              Feedback
+            </h2>
+          </div>
 
           <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-8">
-            {feedback.map((txt, idx) => (
+            {testimonials.map((testimonial, idx) => (
               <div
-                key={`${idx}-${txt}`}
+                key={`${idx}-${testimonial.name}`}
                 className="bg-white rounded-xl border border-gray-200 p-8"
               >
                 <p className="text-xl sm:text-2xl font-medium text-black">
-                  “{txt}”
+                  "{testimonial.quote}"
                 </p>
-                <div className="mt-8 text-[#828282]">Name • Description</div>
+                <div className="mt-8 flex items-center gap-3">
+                  <img
+                    src={testimonial.avatar}
+                    alt={testimonial.name}
+                    className="w-14 h-14 rounded-full object-cover"
+                  />
+                  <div>
+                    <div className="text-black font-medium">{testimonial.name}</div>
+                    <div className="text-[#828282] text-sm">{testimonial.role}</div>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
@@ -390,12 +481,26 @@ const Page = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-white py-16">
+      <footer className="bg-white py-4">
         <div className="mx-auto max-w-[1440px] px-8">
-          <div className="w-full h-px bg-gray-200 mb-10" />
-
           <div className="flex flex-col md:flex-row gap-10 md:items-start md:justify-between">
-            <div className="text-3xl font-bold">AIESEC</div>
+            <div className="flex flex-col gap-0">
+              <img src={logoBlue} alt="AIESEC logo" className="h-[115px] w-auto" />
+              <div className="flex items-center gap-4 -mt-2">
+                <a href="#" className="transition-all opacity-90 hover:opacity-100 hover:scale-110">
+                  <img src={fbLogo} alt="Facebook" className="w-11 h-11 object-contain" />
+                </a>
+                <a href="#" className="transition-all opacity-90 hover:opacity-100 hover:scale-110">
+                  <img src={igLogo} alt="Instagram" className="w-11 h-11 object-contain" />
+                </a>
+                <a href="#" className="transition-all opacity-90 hover:opacity-100 hover:scale-110">
+                  <img src={linkedinLogo} alt="LinkedIn" className="w-11 h-11 object-contain" />
+                </a>
+                <a href="#" className="transition-all opacity-90 hover:opacity-100 hover:scale-110">
+                  <img src={ytLogo} alt="YouTube" className="w-11 h-11 object-contain" />
+                </a>
+              </div>
+            </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 text-right sm:text-left">
               <div>
