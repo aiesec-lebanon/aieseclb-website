@@ -7,7 +7,9 @@ import raoucheImage from "../assets/images/raouche.png";
 import lauLogo from "../assets/images/lau_logo.png";
 import aubLogo from "../assets/images/aub_logo.png";
 import uniPicImage from "../assets/images/uni_pic.png";
-import exploreOppsImage from "../assets/images/explore_opps.png";
+import earthLogo from "../assets/images/earth_logo.png";
+import teacherLogo from "../assets/images/teacher_logo.png";
+import capLogo from "../assets/images/cap_logo.png";
 import mapImage from "../assets/images/map.png";
 import bubbleImage from "../assets/images/bubble.png";
 import dhlLogo from "../assets/images/DHL_logo.png";
@@ -124,7 +126,44 @@ const Page = () => {
   const textTranslateY = 18 * (1 - textReveal);
 
   return (
-    <div className="bg-[#edf6ff] w-full min-h-screen font-lato">
+    <>
+      <style>{`
+        @keyframes circularOrbit {
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg);
+          }
+        }
+
+        @keyframes counterRotate {
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(-360deg);
+          }
+        }
+
+        .orbit-container {
+          animation: circularOrbit 12s linear infinite;
+        }
+
+        .orbit-icon {
+          animation: counterRotate 12s linear infinite;
+        }
+
+        @media (min-width: 768px) {
+          .orbit-container:hover {
+            animation-play-state: paused;
+          }
+          .orbit-container:hover .orbit-icon {
+            animation-play-state: paused;
+          }
+        }
+      `}</style>
+      <div className="bg-[#edf6ff] w-full min-h-screen font-lato overflow-x-hidden">
       {/* HERO AREA */}
       <section className="w-full bg-[#037ef3]">
         {/* Navbar */}
@@ -153,7 +192,7 @@ const Page = () => {
                 Home
               </a>
               <a
-                href="#"
+                href="#partners"
                 className="px-5 py-2 rounded-lg transition-all duration-300 ease-out hover:-translate-y-1 hover:bg-white/20 hover:shadow-[0_10px_25px_rgba(0,0,0,0.25)]"
               >
                 Partners
@@ -178,7 +217,7 @@ const Page = () => {
                 Home
               </a>
               <a
-                href="#"
+                href="#partners"
                 className="block rounded-xl px-4 py-3 text-white text-lg hover:bg-white/15"
                 onClick={() => setMenuOpen(false)}
               >
@@ -248,7 +287,7 @@ const Page = () => {
       {/* Mobile simple version */}
       <section className="md:hidden py-16">
         <div className="mx-auto max-w-[1440px] px-4">
-          <h2 className="font-handwriting text-black text-5xl drop-shadow">What is Aiesec?</h2>
+          <h2 className="font-handwriting text-black text-6xl drop-shadow pb-2">What is Aiesec?</h2>
           <p className="mt-2 text-[#828282] text-base leading-7">
             AIESEC is a global platform for young people to develop their leadership potential through practical
             experiences of many kinds, including internships, volunteering opportunities, and more.
@@ -257,8 +296,8 @@ const Page = () => {
             Founded in 1948, AIESEC is a non-governmental and not-for-profit organization entirely run by youth for
             youth.
           </p>
-          <div className="mt-10 flex justify-center">
-            <img src={manImage} alt="Walking man" className="w-[260px] h-auto" />
+          <div className="mt-0 flex justify-center">
+            <img src={manImage} alt="Walking man" className="w-[200px] h-auto" />
           </div>
         </div>
       </section>
@@ -302,19 +341,19 @@ const Page = () => {
       </section>
 
       {/* Our story */}
-      <section className="pt-4 pb-24 md:pb-32 md:-mt-[320px] relative z-10">
+      <section className="pt-4 pb-24 md:pb-22 md:-mt-[1100px] relative z-10">
         <div className="mx-auto max-w-[1440px] px-4 md:px-8">
-          <div className="flex flex-col lg:flex-row items-center lg:items-center gap-10 lg:gap-20">
-            <div className="w-full lg:w-1/2 flex-shrink-0 flex justify-center lg:justify-start overflow-visible">
-              <img src={raoucheImage} alt="Raouche, Beirut" className="w-full max-w-[900px] h-auto object-contain" />
+          <div className="flex flex-col lg:flex-row items-center lg:items-center gap-0 lg:gap-20">
+            <div className="w-full lg:w-1/2 flex-shrink-0 flex justify-end lg:justify-start overflow-visible order-2 lg:order-1 -mt-19 lg:mt-0">
+              <img src={raoucheImage} alt="Raouche, Beirut" className="w-full max-w-[300px] lg:max-w-[900px] h-auto object-contain" />
             </div>
 
-            <div className="w-full lg:w-1/2 lg:-ml-8">
+            <div className="w-full lg:w-1/2 lg:-ml-8 order-1 lg:order-2">
               <h2 className="font-handwriting text-black text-5xl sm:text-6xl lg:text-7xl xl:text-8xl drop-shadow leading-none">
                 Our story in Lebanon
               </h2>
 
-              <p className="mt-6 md:mt-8 text-[#828282] text-base sm:text-xl md:text-2xl leading-7 sm:leading-9 max-w-[540px]">
+              <p className="mt-4 md:mt-8 text-[#828282] text-base sm:text-xl md:text-2xl leading-7 sm:leading-9 max-w-[540px]">
                 From the heart of Lebanon, we connect passionate youth with opportunities that create change across
                 borders, cultures, and communities.
               </p>
@@ -361,29 +400,48 @@ const Page = () => {
 
           <div className="mt-10 md:mt-12 grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-12 items-center">
             <div className="md:-translate-y-20">
-              <p className="text-[#828282] text-base sm:text-xl md:text-[26px] leading-7 sm:leading-9 md:leading-[39px]">
+              <p className="text-[#828282] text-base sm:text-xl md:text-[26px] leading-7 sm:leading-9 md:leading-[39px] -mt-5 md:mt-0">
                 Discover the experiences AIESEC offers: volunteer abroad through Global Volunteer, build your career
                 with Global Talent, or teach and inspire through Global Teacher.
               </p>
 
               <button
                 type="button"
-                className="mt-8 md:mt-10 inline-flex items-center gap-4 bg-[#037ef3] rounded-[18px] md:rounded-[20px] px-6 md:px-8 py-4 text-white text-lg sm:text-2xl md:text-3xl transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+                className="mt-12 md:mt-10 inline-flex items-center gap-1 md:gap-4 bg-[#037ef3] rounded-[18px] md:rounded-[20px] px-3 py-3 sm:px-6 sm:py-4 md:px-8 text-white text-base sm:text-xl md:text-3xl transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
               >
                 <span>View all Programs</span>
                 <span className="text-xl md:text-2xl">→</span>
               </button>
             </div>
 
-            <div className="flex justify-center items-center md:-translate-y-8">
-              <img src={exploreOppsImage} alt="Explore opportunities" className="w-full max-w-[520px] h-auto object-contain" />
+            <div className="flex justify-center items-center -mt-32 md:mt-0 md:-translate-y-8 translate-x-24 md:translate-x-0">
+              <div className="relative w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 orbit-container">
+                {/* Top icon */}
+                <img
+                  src={earthLogo}
+                  alt="Global Volunteer"
+                  className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 object-contain orbit-icon"
+                />
+                {/* Bottom-left icon */}
+                <img
+                  src={capLogo}
+                  alt="Global Talent"
+                  className="absolute bottom-0 left-0 w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 object-contain orbit-icon"
+                />
+                {/* Bottom-right icon */}
+                <img
+                  src={teacherLogo}
+                  alt="Global Teacher"
+                  className="absolute bottom-0 right-0 w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 object-contain orbit-icon"
+                />
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Partners */}
-      <section className="py-20 md:py-24 bg-[#edf6ff]">
+      <section id="partners" className="py-20 md:py-24 bg-[#edf6ff]">
         <div className="mx-auto max-w-[1440px] px-4 md:px-8">
           <div className="relative mt-8 md:mt-12">
             <div className="absolute inset-0 opacity-80 translate-y-4 pointer-events-none select-none">
@@ -398,9 +456,17 @@ const Page = () => {
               {partnerLogos.map((lg, idx) => (
                 <div
                   key={`${lg.alt}-${idx}`}
-                  className="bg-white rounded-[18px] md:rounded-[22px] px-4 md:px-8 py-4 md:py-5 flex items-center justify-center shadow-sm"
+                  className={`bg-white rounded-[18px] md:rounded-[22px] px-4 md:px-8 py-4 md:py-5 flex items-center justify-center shadow-sm ${
+                    idx === partnerLogos.length - 1 ? 'col-span-2 sm:col-span-1 justify-self-center w-full max-w-[calc(50%-0.5rem)] sm:max-w-none' : ''
+                  }`}
                 >
-                  <img src={lg.src} alt={lg.alt} className="w-full max-w-[180px] md:max-w-[240px] max-h-[60px] md:max-h-[80px] object-contain" />
+                  <img 
+                    src={lg.src} 
+                    alt={lg.alt} 
+                    className={`w-full max-h-[60px] md:max-h-[80px] object-contain ${
+                      lg.alt === 'DHL' ? 'max-w-[140px] md:max-w-[200px]' : 'max-w-[180px] md:max-w-[240px]'
+                    }`} 
+                  />
                 </div>
               ))}
             </div>
@@ -443,7 +509,7 @@ const Page = () => {
         <div className="mx-auto max-w-[1440px] px-4 md:px-8">
           <div className="flex flex-col md:flex-row gap-10 md:items-start md:justify-between">
             <div className="flex flex-col gap-0">
-              <img src={logoBlue} alt="AIESEC logo" className="h-[95px] md:h-[115px] w-auto" />
+              <img src={logoBlue} alt="AIESEC logo" className="h-[95px] md:h-[115px] w-auto max-w-[200px] md:max-w-none" />
               <div className="flex items-center gap-4 -mt-2">
                 <a href="#" className="transition-all opacity-90 hover:opacity-100 hover:scale-110">
                   <img src={fbLogo} alt="Facebook" className="w-10 h-10 md:w-11 md:h-11 object-contain" />
@@ -483,6 +549,7 @@ const Page = () => {
         </div>
       </footer>
     </div>
+    </>
   );
 };
 
