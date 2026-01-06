@@ -7,6 +7,7 @@ import raoucheImage from "../assets/images/raouche.png";
 import lauLogo from "../assets/images/lau_logo.png";
 import aubLogo from "../assets/images/aub_logo.png";
 import uniPicImage from "../assets/images/uni_pic.png";
+import exploreOppsImage from "../assets/images/explore_opps.png";
 import earthLogo from "../assets/images/earth_logo.png";
 import teacherLogo from "../assets/images/teacher_logo.png";
 import capLogo from "../assets/images/cap_logo.png";
@@ -67,6 +68,7 @@ const Page = () => {
 
   // Mobile nav
   const [menuOpen, setMenuOpen] = useState(false);
+  const [mobileManX, setMobileManX] = useState(-100);
 
   // ===== Scroll scene (desktop only) =====
   const sceneRef = useRef(null);
@@ -77,20 +79,30 @@ const Page = () => {
 
   useEffect(() => {
     const updateProgressFromScroll = () => {
-      if (window.innerWidth < 768) return;
+      if (window.innerWidth >= 768) {
+        // Desktop scroll logic
 
-      const el = sceneRef.current;
-      if (!el) return;
+        const el = sceneRef.current;
+        if (!el) return;
 
-      const rect = el.getBoundingClientRect();
-      const vh = window.innerHeight;
+        const rect = el.getBoundingClientRect();
+        const vh = window.innerHeight;
 
-      const preRoll = vh * 1.0;
-      const total = rect.height - vh + preRoll;
-      const scrolled = -rect.top + preRoll;
+        const preRoll = vh * 1.0;
+        const total = rect.height - vh + preRoll;
+        const scrolled = -rect.top + preRoll;
 
-      const p = total > 0 ? scrolled / total : 0;
-      targetRef.current = clamp01(p);
+        const p = total > 0 ? scrolled / total : 0;
+        targetRef.current = clamp01(p);
+      } else {
+        // Mobile scroll logic - move man from left to center based on scroll
+        const scrollY = window.scrollY;
+        const maxScroll = 1200; // Adjust based on when you want movement to complete
+        const progress = Math.min(scrollY / maxScroll, 1);
+        const startOffset = -100; // Start from left edge
+        const endOffset = 0; // End at center
+        setMobileManX(startOffset + (endOffset - startOffset) * progress);
+      }
     };
 
     const animate = () => {
@@ -296,8 +308,13 @@ const Page = () => {
             Founded in 1948, AIESEC is a non-governmental and not-for-profit organization entirely run by youth for
             youth.
           </p>
-          <div className="mt-0 flex justify-center">
-            <img src={manImage} alt="Walking man" className="w-[200px] h-auto" />
+          <div className="mt-0 flex justify-center overflow-visible">
+            <img 
+              src={manImage} 
+              alt="Walking man" 
+              className="w-[200px] h-auto" 
+              style={{ transform: `translateX(${mobileManX}px)`, transition: 'transform 0.1s cubic-bezier(0, 0, 0, 1)' }}
+            />
           </div>
         </div>
       </section>
@@ -399,7 +416,7 @@ const Page = () => {
           </h2>
 
           <div className="mt-10 md:mt-12 grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-12 items-center">
-            <div className="md:-translate-y-20">
+            <div className="md:-translate-y-12">
               <p className="text-[#828282] text-base sm:text-xl md:text-[26px] leading-7 sm:leading-9 md:leading-[39px] -mt-5 md:mt-0">
                 Discover the experiences AIESEC offers: volunteer abroad through Global Volunteer, build your career
                 with Global Talent, or teach and inspire through Global Teacher.
@@ -414,25 +431,25 @@ const Page = () => {
               </button>
             </div>
 
-            <div className="flex justify-center items-center -mt-32 md:mt-0 md:-translate-y-8 translate-x-24 md:translate-x-0">
-              <div className="relative w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 orbit-container">
+            <div className="flex justify-center items-center -mt-32 md:mt-0 md:translate-y-0 translate-x-24 md:-translate-x-6">
+              <div className="relative w-40 h-40 sm:w-56 sm:h-56 md:w-96 md:h-96 orbit-container">
                 {/* Top icon */}
                 <img
                   src={earthLogo}
                   alt="Global Volunteer"
-                  className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 object-contain orbit-icon"
+                  className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-16 sm:w-24 sm:h-24 md:w-40 md:h-40 object-contain orbit-icon"
                 />
                 {/* Bottom-left icon */}
                 <img
                   src={capLogo}
                   alt="Global Talent"
-                  className="absolute bottom-0 left-0 w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 object-contain orbit-icon"
+                  className="absolute bottom-0 left-0 w-16 h-16 sm:w-24 sm:h-24 md:w-40 md:h-40 object-contain orbit-icon"
                 />
                 {/* Bottom-right icon */}
                 <img
                   src={teacherLogo}
                   alt="Global Teacher"
-                  className="absolute bottom-0 right-0 w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 object-contain orbit-icon"
+                  className="absolute bottom-0 right-0 w-16 h-16 sm:w-24 sm:h-24 md:w-40 md:h-40 object-contain orbit-icon"
                 />
               </div>
             </div>
