@@ -1,5 +1,25 @@
 @import "tailwindcss";
 
+/* Global cedar cursor */
+html,
+body {
+  cursor: url('/cedar.png') 0 0, auto !important;
+}
+
+* {
+  cursor: url('/cedar.png') 0 0, auto !important;
+}
+
+a,
+button,
+[role="button"],
+input[type="button"],
+input[type="submit"],
+label,
+.cursor-pointer {
+  cursor: pointer !important;
+}
+
 /* Default site font */
 @layer base {
   html,
@@ -14,3 +34,4 @@
     font-family: "Just Me Again Down Here", cursive !important;
   }
 }
+ 

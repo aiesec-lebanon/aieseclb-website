@@ -7,7 +7,6 @@ import raoucheImage from "../assets/images/raouche.png";
 import lauLogo from "../assets/images/lau_logo.png";
 import aubLogo from "../assets/images/aub_logo.png";
 import uniPicImage from "../assets/images/uni_pic.png";
-import exploreOppsImage from "../assets/images/explore_opps.png";
 import earthLogo from "../assets/images/earth_logo.png";
 import teacherLogo from "../assets/images/teacher_logo.png";
 import capLogo from "../assets/images/cap_logo.png";
@@ -267,7 +266,7 @@ const Page = () => {
                 </div>
               </div>
 
-              {/* ✅ MOBILE IMAGE ONLY (zoomed & centered – always works) */}
+              {/* mobile image*/}
               <div className="md:hidden w-full -mt-8">
                 <div className="relative h-[450px] w-[450px] -translate-x-[30px] overflow-hidden">
 
@@ -501,7 +500,7 @@ const Page = () => {
                 <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" fill="#FFC845" />
               </svg>
             </div>
-            <h2 className="font-handwriting text-black text-5xl sm:text-7xl md:text-9xl drop-shadow">Feedback</h2>
+            <h2 className="font-handwriting text-black text-5xl sm:text-7xl md:text-9xl drop-shadow">Testimonials</h2>
           </div>
 
           <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
