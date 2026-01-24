@@ -209,7 +209,7 @@ const Page = () => {
                 Partners
               </a>
               <a
-                href="#"
+                href="https://signup.aieseclb.org"
                 className="px-5 py-2 rounded-lg transition-all duration-300 ease-out hover:-translate-y-1 hover:bg-white hover:text-[#000000] hover:shadow-[0_12px_30px_rgba(0,0,0,0.35)]"
               >
                 Sign up
@@ -252,7 +252,7 @@ const Page = () => {
                 </h1>
 
                 <p className="mt-4 md:mt-8 text-white text-left text-base sm:text-lg md:text-[22px] leading-7 md:leading-8 max-w-[320px] md:max-w-[520px] ml-10 md:ml-0">
-                  Build your potential through global exchange and volunteering projects in 110+ countries.
+                  Volunteer. Intern. Teach. Go global with AIESEC in Lebanon and build your leadership potential through exchanges in 110+ countries.
                 </p>
 
                 {/* CTA on mobile */}
@@ -300,12 +300,16 @@ const Page = () => {
         <div className="mx-auto max-w-[1440px] px-4">
           <h2 className="font-handwriting text-black text-6xl drop-shadow pb-2">What is Aiesec?</h2>
           <p className="mt-2 text-[#828282] text-base leading-7">
-            AIESEC is a global platform for young people to develop their leadership potential through practical
-            experiences of many kinds, including internships, volunteering opportunities, and more.
+            AIESEC is a global organization entirely run by youth, for youth. Founded in 1948, 
+            it serves as a platform for young people to explore and develop their leadership potential through practical,
+            hands-on experiences such as internships and volunteering opportunities in challenging environments. 
+            Present in over 100 countries and territories, AIESEC activates youth leadership to strive for peace
+            and the fulfillment of humankind's potential. 
             <br />
             <br />
-            Founded in 1948, AIESEC is a non-governmental and not-for-profit organization entirely run by youth for
-            youth.
+            Today, the organization brings together 40,000+ members worldwide,
+            collaborates with 5,000+ partner organizations, delivers 30,000+ global experiences every year,
+            and is supported by a strong network of 1,000,000+ alumni across the globe.
           </p>
           <div className="mt-0 flex justify-center overflow-visible">
             <img 
@@ -332,13 +336,17 @@ const Page = () => {
                 }}
               >
                 <h2 className="font-handwriting text-black text-[160px]">What is Aiesec?</h2>
-                <p className="mt--5 max-w-3xl text-[#828282] text-2xl leading-9">
-                  AIESEC is a global platform for young people to develop their leadership potential through practical
-                  experiences of many kinds, including internships, volunteering opportunities, and more.
+                <p className="mt--5 max-w-3xl text-[#828282] text-l leading-6">
+                  AIESEC is a global organization entirely run by youth, for youth. Founded in 1948, 
+                  it serves as a platform for young people to explore and develop their leadership potential through practical,
+                  hands-on experiences such as internships and volunteering opportunities in challenging environments. 
+                  Present in over 100 countries and territories, AIESEC activates youth leadership to strive for peace
+                  and the fulfillment of humankind's potential. 
                   <br />
                   <br />
-                  Founded in 1948, AIESEC is a non-governmental and not-for-profit organization entirely run by youth
-                  for youth.
+                  Today, the organization brings together 40,000+ members worldwide,
+                  collaborates with 5,000+ partner organizations, delivers 30,000+ global experiences every year,
+                  and is supported by a strong network of 1,000,000+ alumni across the globe.
                 </p>
               </div>
 
@@ -357,7 +365,7 @@ const Page = () => {
       </section>
 
       {/* Our story */}
-      <section className="pt-4 pb-24 md:pb-22 md:-mt-[1100px] relative z-10">
+      <section className="pt-4 pb-24 md:pb-22 md:-mt-[1080px] relative z-10">
         <div className="mx-auto max-w-[1440px] px-4 md:px-8">
           <div className="flex flex-col lg:flex-row items-center lg:items-center gap-0 lg:gap-20">
             <div className="w-full lg:w-1/2 flex-shrink-0 flex justify-end lg:justify-start overflow-visible order-2 lg:order-1 -mt-19 lg:mt-0">
@@ -369,17 +377,38 @@ const Page = () => {
                 Our story in Lebanon
               </h2>
 
-              <p className="mt-4 md:mt-8 text-[#828282] text-base sm:text-xl md:text-2xl leading-7 sm:leading-9 max-w-[540px]">
-                From the heart of Lebanon, we connect passionate youth with opportunities that create change across
-                borders, cultures, and communities.
+              <p className="mt-4 md:mt-8 text-[#828282] text-base sm:text-xl md:text-xl leading-7 sm:leading-9 max-w-[540px]">
+                Founded in 2011 in Beirut, AIESEC in Lebanon delivers its impact through local activities 
+                and international engagement.
               </p>
             </div>
           </div>
         </div>
       </section>
 
+      {/* Story description */}
+      <section className="pt-4 pb-24 md:pb-22 md:-mt-[180px] relative z-10">
+        <div className="mx-auto max-w-[1440px] px-4 md:px-8">
+          <div className="mx-auto max-w-[820px]">
+            <p className="text-[#828282] text-base sm:text-lg md:text-xl leading-7 sm:leading-8 text-justify">
+              AIESEC in Lebanon was established with the vision of empowering young people to become
+              proactive leaders who can positively impact their communities and the wider world.
+              Through a strong network of local chapters, the organization creates opportunities
+              for youth to develop leadership skills in real-world contexts.
+            </p>
+
+            <p className="mt-6 text-[#828282] text-base sm:text-lg md:text-xl leading-7 sm:leading-8 text-justify">
+              By connecting Lebanese youth with international experiences and fostering partnerships
+              with educational institutions and organizations, AIESEC in Lebanon plays a key role in
+              promoting cross-cultural understanding, global citizenship, and sustainable development.
+            </p>
+          </div>
+        </div>
+      </section>
+
+
       {/* Universities */}
-      <section className="pt-0 pb-20 md:pb-24 -mt-10 md:-mt-20">
+      <section className="pt-0 pb-20 md:pb-24 -mt-10 md:-mt-0">
         <div className="mx-auto max-w-[1440px] px-4 md:px-8">
           <h2 className="font-handwriting text-black text-5xl sm:text-6xl lg:text-7xl xl:text-8xl drop-shadow text-center">
             Universities
@@ -408,7 +437,7 @@ const Page = () => {
       </section>
 
       {/* Explore opportunities */}
-      <section className="py-20 md:py-24">
+      <section className="pt-4 pb-24 md:pb-22 md:-mt-0 relative z-10">
         <div className="mx-auto max-w-[1440px] px-4 md:px-8">
           <h2 className="mt-4 md:mt-8 font-handwriting text-black text-5xl sm:text-7xl md:text-9xl drop-shadow text-center">
             Explore our opportunities
@@ -416,7 +445,7 @@ const Page = () => {
 
           <div className="mt-10 md:mt-12 grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-12 items-center">
             <div className="md:-translate-y-12">
-              <p className="text-[#828282] text-base sm:text-xl md:text-[26px] leading-7 sm:leading-9 md:leading-[39px] -mt-5 md:mt-0">
+              <p className="text-[#828282] text-base sm:text-lg md:text-xl leading-7 sm:leading-8 text-justify">
                 Discover the experiences AIESEC offers: volunteer abroad through Global Volunteer, build your career
                 with Global Talent, or teach and inspire through Global Teacher.
               </p>
@@ -424,6 +453,7 @@ const Page = () => {
               <button
                 type="button"
                 className="mt-12 md:mt-10 inline-flex items-center gap-1 md:gap-4 bg-[#037ef3] rounded-[18px] md:rounded-[20px] px-3 py-3 sm:px-6 sm:py-4 md:px-8 text-white text-base sm:text-xl md:text-3xl transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+                onClick={() => window.location.href = 'https://signup.aieseclb.org'}
               >
                 <span>View all Programs</span>
                 <span className="text-xl md:text-2xl">→</span>
@@ -457,7 +487,7 @@ const Page = () => {
       </section>
 
       {/* Partners */}
-      <section id="partners" className="py-20 md:py-24 bg-[#edf6ff]">
+      <section id="partners" className="pt-4 pb-24 md:pb-22 md:-mt-0 relative z-10">
         <div className="mx-auto max-w-[1440px] px-4 md:px-8">
           <div className="relative mt-8 md:mt-12">
             <div className="absolute inset-0 opacity-80 translate-y-4 pointer-events-none select-none">
@@ -491,7 +521,7 @@ const Page = () => {
       </section>
 
       {/* Feedback */}
-      <section className="py-20 md:py-24">
+      <section className="pt-4 pb-24 md:pb-22 md:-mt-0 relative z-10">
         <div className="mx-auto max-w-[1440px] px-4 md:px-8">
           <div className="flex items-center justify-center gap-4">
             <div className="relative">
