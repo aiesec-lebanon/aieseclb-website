@@ -180,7 +180,7 @@ const Page = () => {
         {/* Navbar */}
         <header className="w-full overflow-visible relative z-50">
           <div className="mx-auto max-w-[1440px] h-[72px] md:h-[80px] px-4 md:px-8 flex items-center justify-between overflow-visible">
-            <img src={logo} alt="AIESEC logo" className="h-[40px] md:h-[55px] w-auto" />
+            <img src={manImage} alt="AIESEC logo" className="h-[40px] md:h-[55px] w-auto" />
 
             {/* Hamburger (Mobile) */}
             <button
@@ -234,6 +234,13 @@ const Page = () => {
               >
                 Partners
               </a>
+              <a
+                href="https://signup.aieseclb.org"
+                className="block rounded-xl px-4 py-3 text-white text-lg hover:bg-white/15"
+                onClick={() => setMenuOpen(false)}
+              >
+                Sign up
+              </a>
             </div>
           </div>
         </header>
@@ -258,7 +265,7 @@ const Page = () => {
                 {/* CTA on mobile */}
                 <div className="mt-6 md:hidden flex justify-center mb-0">
                   <a
-                    href="#"
+                    href="https://signup.aieseclb.org"
                     className="inline-flex items-center justify-center bg-[#ffc845] text-black font-semibold rounded-full px-10 py-4 shadow-[0_10px_25px_rgba(0,0,0,0.25)] active:scale-[0.98]"
                   >
                     Sign up
@@ -298,7 +305,7 @@ const Page = () => {
       {/* Mobile simple version */}
       <section className="md:hidden py-16">
         <div className="mx-auto max-w-[1440px] px-4">
-          <h2 className="font-handwriting text-black text-6xl drop-shadow pb-2">What is Aiesec?</h2>
+          <h2 className="font-handwriting text-black text-6xl drop-shadow pb-2">What is AIESEC?</h2>
           <p className="mt-2 text-[#828282] text-base leading-7">
             AIESEC is a global organization entirely run by youth, for youth. Founded in 1948, 
             it serves as a platform for young people to explore and develop their leadership potential through practical,
@@ -335,7 +342,7 @@ const Page = () => {
                   transition: "opacity 450ms ease, transform 450ms ease",
                 }}
               >
-                <h2 className="font-handwriting text-black text-[160px]">What is Aiesec?</h2>
+                <h2 className="font-handwriting text-black text-[160px]">What is AIESEC?</h2>
                 <p className="mt--5 max-w-3xl text-[#828282] text-l leading-6">
                   AIESEC is a global organization entirely run by youth, for youth. Founded in 1948, 
                   it serves as a platform for young people to explore and develop their leadership potential through practical,
@@ -520,7 +527,7 @@ const Page = () => {
         </div>
       </section>
 
-      {/* Feedback */}
+      {/*
       <section className="pt-4 pb-24 md:pb-22 md:-mt-0 relative z-10">
         <div className="mx-auto max-w-[1440px] px-4 md:px-8">
           <div className="flex items-center justify-center gap-4">
@@ -549,47 +556,32 @@ const Page = () => {
           </div>
         </div>
       </section>
+      */}
 
       {/* Footer */}
       <footer className="bg-white py-6">
         <div className="mx-auto max-w-[1440px] px-4 md:px-8">
-          <div className="flex flex-col md:flex-row gap-10 md:items-start md:justify-between">
-            <div className="flex flex-col gap-0">
-              <img src={logoBlue} alt="AIESEC logo" className="h-[95px] md:h-[115px] w-auto max-w-[200px] md:max-w-none" />
-              <div className="flex items-center gap-4 -mt-2">
-                <a href="#" className="transition-all opacity-90 hover:opacity-100 hover:scale-110">
-                  <img src={fbLogo} alt="Facebook" className="w-10 h-10 md:w-11 md:h-11 object-contain" />
-                </a>
-                <a href="#" className="transition-all opacity-90 hover:opacity-100 hover:scale-110">
-                  <img src={igLogo} alt="Instagram" className="w-10 h-10 md:w-11 md:h-11 object-contain" />
-                </a>
-                <a href="#" className="transition-all opacity-90 hover:opacity-100 hover:scale-110">
-                  <img src={linkedinLogo} alt="LinkedIn" className="w-10 h-10 md:w-11 md:h-11 object-contain" />
-                </a>
-                <a href="#" className="transition-all opacity-90 hover:opacity-100 hover:scale-110">
-                  <img src={ytLogo} alt="YouTube" className="w-10 h-10 md:w-11 md:h-11 object-contain" />
-                </a>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-8 text-left">
-              <div>
-                <div className="text-black font-medium">Links</div>
-                <div className="text-[#444444] mt-4">Page</div>
-                <div className="text-[#444444] mt-2">Page</div>
-              </div>
-
-              <div>
-                <div className="text-black font-medium">Contact us</div>
-                <div className="text-[#444444] mt-4">Page</div>
-                <div className="text-[#444444] mt-2">Page</div>
-              </div>
-
-              <div className="col-span-2 sm:col-span-1">
-                <div className="text-black font-medium">Topic</div>
-                <div className="text-[#444444] mt-4">Page</div>
-                <div className="text-[#444444] mt-2">Page</div>
-              </div>
+          <div className="flex flex-col gap-0 items-start">
+            <img src={logoBlue} alt="AIESEC logo" className="h-[95px] md:h-[115px] w-auto max-w-[200px] md:max-w-none" />
+            <div className="flex items-center gap-4 -mt-2">
+              <a
+                href="https://www.instagram.com/aiesecinleb?igsh=ZjV4aXY4cXg5ZnY="
+                className="transition-all opacity-90 hover:opacity-100 hover:scale-110"
+              >
+                <img src={igLogo} alt="Instagram" className="w-10 h-10 md:w-11 md:h-11 object-contain" />
+              </a>
+              <a
+                href="https://www.linkedin.com/company/aiesec-in-lebanon/"
+                className="transition-all opacity-90 hover:opacity-100 hover:scale-110"
+              >
+                <img src={linkedinLogo} alt="LinkedIn" className="w-10 h-10 md:w-11 md:h-11 object-contain" />
+              </a>
+              <a
+                href="https://youtube.com/@aiesecinleb?si=tW57RuN_mlIxiVsi"
+                className="transition-all opacity-90 hover:opacity-100 hover:scale-110"
+              >
+                <img src={ytLogo} alt="YouTube" className="w-10 h-10 md:w-11 md:h-11 object-contain" />
+              </a>
             </div>
           </div>
         </div>
