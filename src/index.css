@@ -20,6 +20,30 @@ label,
   cursor: url('/cedar.png') 0 0, auto !important;
 }
 
+a:hover,
+a:active,
+a:focus,
+button:hover,
+button:active,
+button:focus,
+[role="button"]:hover,
+[role="button"]:active,
+[role="button"]:focus,
+input[type="button"]:hover,
+input[type="button"]:active,
+input[type="button"]:focus,
+input[type="submit"]:hover,
+input[type="submit"]:active,
+input[type="submit"]:focus,
+label:hover,
+label:active,
+label:focus,
+.cursor-pointer:hover,
+.cursor-pointer:active,
+.cursor-pointer:focus {
+  cursor: url('/cedar.png') 0 0, auto !important;
+}
+
 /* Default site font */
 @layer base {
   html,
