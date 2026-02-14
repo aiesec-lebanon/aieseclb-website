@@ -17,7 +17,7 @@ input[type="button"],
 input[type="submit"],
 label,
 .cursor-pointer {
-  cursor: pointer !important;
+  cursor: url('/cedar.png') 0 0, auto !important;
 }
 
 /* Default site font */
