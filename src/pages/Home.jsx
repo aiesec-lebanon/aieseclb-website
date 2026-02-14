@@ -502,7 +502,7 @@ const Page = () => {
             </div>
 
             <h2 className="relative z-10 font-handwriting text-black text-5xl sm:text-7xl md:text-9xl drop-shadow text-center">
-              Our Partners
+              Our Global Partners
             </h2>
 
             <div className="relative z-10 mt-10 md:mt-12 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-4 md:gap-6">
