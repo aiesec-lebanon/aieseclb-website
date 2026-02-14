@@ -561,9 +561,9 @@ const Page = () => {
       {/* Footer */}
       <footer className="bg-white border-t border-[#e5e7eb] py-10">
         <div className="mx-auto max-w-[1440px] px-4 md:px-8">
-          <div className="flex flex-col items-center text-center">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between">
             <img src={logoBlue} alt="AIESEC logo" className="h-[95px] md:h-[115px] w-auto max-w-[200px] md:max-w-none" />
-            <div className="mt-2 flex items-center gap-5">
+            <div className="mt-4 md:mt-0 flex items-center gap-5">
               <a
                 href="https://www.instagram.com/aiesecinleb?igsh=ZjV4aXY4cXg5ZnY="
                 className="transition-all opacity-90 hover:opacity-100 hover:scale-110"
@@ -583,8 +583,8 @@ const Page = () => {
                 <img src={ytLogo} alt="YouTube" className="w-10 h-10 md:w-11 md:h-11 object-contain" />
               </a>
             </div>
-            <p className="mt-4 text-sm text-[#6b7280]">© 2026 AIESEC in Lebanon. All rights reserved.</p>
           </div>
+          <p className="mt-6 text-sm text-[#6b7280]">© 2026 AIESEC in Lebanon. All rights reserved.</p>
         </div>
       </footer>
     </div>
