@@ -559,32 +559,42 @@ const Page = () => {
       */}
 
       {/* Footer */}
-      <footer className="bg-white border-t border-[#e5e7eb] py-10">
+      <footer className="relative overflow-hidden bg-gradient-to-br from-[#e9f4ff] via-white to-[#fff3d6] py-12">
+        <div className="pointer-events-none absolute -left-20 -top-24 h-56 w-56 rounded-full bg-[#bfe0ff] opacity-40 blur-2xl" />
+        <div className="pointer-events-none absolute -right-24 -bottom-20 h-64 w-64 rounded-full bg-[#ffe6a6] opacity-40 blur-2xl" />
         <div className="mx-auto max-w-[1440px] px-4 md:px-8">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-            <img src={logoBlue} alt="AIESEC logo" className="h-[95px] md:h-[115px] w-auto max-w-[200px] md:max-w-none" />
-            <div className="mt-4 md:mt-0 flex items-center gap-5">
+          <div className="flex flex-col gap-8 rounded-[28px] border border-white/70 bg-white/70 p-6 backdrop-blur md:flex-row md:items-center md:justify-between md:p-8">
+            <div className="flex items-center gap-5">
+              <div className="rounded-2xl bg-white/90 p-3 shadow-[0_8px_24px_rgba(3,126,243,0.18)]">
+                <img src={logoBlue} alt="AIESEC logo" className="h-[70px] md:h-[84px] w-auto" />
+              </div>
+              <div>
+                <div className="text-xl md:text-2xl font-semibold text-[#0b63ff]">AIESEC in Lebanon</div>
+                <div className="text-sm md:text-base text-[#3c4a60]">Activate your potential. Create global impact.</div>
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
               <a
                 href="https://www.instagram.com/aiesecinleb?igsh=ZjV4aXY4cXg5ZnY="
-                className="transition-all opacity-90 hover:opacity-100 hover:scale-110"
+                className="rounded-full bg-white p-2 shadow-[0_6px_18px_rgba(0,0,0,0.08)] transition-all hover:-translate-y-0.5 hover:shadow-[0_10px_24px_rgba(0,0,0,0.12)]"
               >
-                <img src={igLogo} alt="Instagram" className="w-10 h-10 md:w-11 md:h-11 object-contain" />
+                <img src={igLogo} alt="Instagram" className="w-9 h-9 md:w-10 md:h-10 object-contain" />
               </a>
               <a
                 href="https://www.linkedin.com/company/aiesec-in-lebanon/"
-                className="transition-all opacity-90 hover:opacity-100 hover:scale-110"
+                className="rounded-full bg-white p-2 shadow-[0_6px_18px_rgba(0,0,0,0.08)] transition-all hover:-translate-y-0.5 hover:shadow-[0_10px_24px_rgba(0,0,0,0.12)]"
               >
-                <img src={linkedinLogo} alt="LinkedIn" className="w-10 h-10 md:w-11 md:h-11 object-contain" />
+                <img src={linkedinLogo} alt="LinkedIn" className="w-9 h-9 md:w-10 md:h-10 object-contain" />
               </a>
               <a
                 href="https://youtube.com/@aiesecinleb?si=tW57RuN_mlIxiVsi"
-                className="transition-all opacity-90 hover:opacity-100 hover:scale-110"
+                className="rounded-full bg-white p-2 shadow-[0_6px_18px_rgba(0,0,0,0.08)] transition-all hover:-translate-y-0.5 hover:shadow-[0_10px_24px_rgba(0,0,0,0.12)]"
               >
-                <img src={ytLogo} alt="YouTube" className="w-10 h-10 md:w-11 md:h-11 object-contain" />
+                <img src={ytLogo} alt="YouTube" className="w-9 h-9 md:w-10 md:h-10 object-contain" />
               </a>
             </div>
           </div>
-          <p className="mt-6 text-sm text-[#6b7280]">© 2026 AIESEC in Lebanon. All rights reserved.</p>
+          <div className="mt-6 text-center text-xs md:text-sm text-[#5b6b84]">© 2026 AIESEC in Lebanon. All rights reserved.</div>
         </div>
       </footer>
     </div>
