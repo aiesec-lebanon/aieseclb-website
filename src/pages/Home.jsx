@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react";
 import { Link } from "react-router-dom";
 import DawnHero from "../scenes/DawnHero";
+import DawnHeroReal from "../scenes/DawnHeroReal";
 import Reveal, { Lines } from "../components/Reveal";
 import Counter from "../components/Counter";
 import Media from "../components/Scenic";
@@ -361,10 +362,14 @@ function Company() {
   );
 }
 
+// Two versions of the opening scene live side by side on this branch. The realistic one is the
+// default here; add ?hero=graphic to the address to see the drawn one.
+const graphicHero = new URLSearchParams(window.location.search).get("hero") === "graphic";
+
 export default function Home() {
   return (
     <>
-      <DawnHero />
+      {graphicHero ? <DawnHero /> : <DawnHeroReal />}
       <Manifest />
       <LazyMount minHeight="100svh" className="bg-aiesec" data-shot="globe">
         <Suspense fallback={<div className="h-svh bg-aiesec" />}>

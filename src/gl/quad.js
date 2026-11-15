@@ -19,7 +19,11 @@ function compile(gl, type, src) {
   return sh;
 }
 
-export function createQuad(canvas, frag, { maxDpr = 1.5, onFrame } = {}) {
+export function createQuad(
+  canvas,
+  frag,
+  { maxDpr = 1.5, onFrame, initialScale = 1, minScale = 0.55, maxScale = 1 } = {},
+) {
   const gl = canvas.getContext("webgl2", {
     antialias: false,
     alpha: false,
@@ -72,7 +76,8 @@ export function createQuad(canvas, frag, { maxDpr = 1.5, onFrame } = {}) {
 
   const textures = [];
   // Upload a canvas or image as a texture bound to a fixed unit.
-  const texture = (name, source, unit) => {
+  // tiling: a repeating lookup table (noise), sampled without mipmaps and without flipping.
+  const texture = (name, source, unit, { tiling = false } = {}) => {
     let tex = textures[unit];
     if (!tex) {
       tex = gl.createTexture();
@@ -80,19 +85,23 @@ export function createQuad(canvas, frag, { maxDpr = 1.5, onFrame } = {}) {
     }
     gl.activeTexture(gl.TEXTURE0 + unit);
     gl.bindTexture(gl.TEXTURE_2D, tex);
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, !tiling);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
-    gl.generateMipmap(gl.TEXTURE_2D);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+    if (tiling) {
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    } else {
+      gl.generateMipmap(gl.TEXTURE_2D);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+    }
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, tiling ? gl.REPEAT : gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, tiling ? gl.REPEAT : gl.CLAMP_TO_EDGE);
     const l = getLoc(name);
     if (l !== null) gl.uniform1i(l, unit);
   };
 
   // Resolution: device pixel ratio capped, then scaled down further if frames run long.
-  let scale = 1;
+  let scale = initialScale;
   let width = 0;
   let height = 0;
   const resize = () => {
@@ -127,12 +136,12 @@ export function createQuad(canvas, frag, { maxDpr = 1.5, onFrame } = {}) {
     else slow = Math.max(0, slow - 1);
     if (dt < 18) fast++;
     else fast = 0;
-    if (slow > 20 && scale > 0.55) {
-      scale = Math.max(0.55, scale - 0.15);
+    if (slow > 20 && scale > minScale) {
+      scale = Math.max(minScale, scale * 0.85);
       slow = 0;
       resize();
-    } else if (fast > 240 && scale < 1) {
-      scale = Math.min(1, scale + 0.1);
+    } else if (fast > 240 && scale < maxScale) {
+      scale = Math.min(maxScale, scale * 1.1);
       fast = 0;
       resize();
     }

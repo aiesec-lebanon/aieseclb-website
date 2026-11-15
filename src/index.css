@@ -340,3 +340,16 @@ html.lenis body {
     opacity: 0.35;
   }
 }
+
+/* The hero title of the realistic opening: lines rise once on load */
+@media (prefers-reduced-motion: no-preference) {
+  .hero-title .rl > span {
+    animation: line-rise 1.4s var(--ease-out-expo) both;
+    animation-delay: calc(var(--i, 0) * 120ms + 350ms);
+  }
+}
+@keyframes line-rise {
+  from {
+    transform: translateY(108%);
+  }
+}
