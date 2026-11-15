@@ -8,7 +8,8 @@ export default defineConfig({
     watch: {
       // full-size originals of the photographs: large files, often still being copied in, and
       // never imported by the site (npm run images makes the web versions)
-      ignored: ['**/src/assets/gen/originals/**'],
+      // (a regular expression: this watcher does not apply glob strings)
+      ignored: [/[\\/]src[\\/]assets[\\/]gen[\\/]originals[\\/]/],
     },
   },
 })
