@@ -35,6 +35,10 @@
     2000,
     1000
   ],
+  "exchange-hero": [
+    2400,
+    1000
+  ],
   "lebanon-baalbek": [
     2000,
     1000
@@ -54,6 +58,18 @@
   "lebanon-raouche": [
     2000,
     1000
+  ],
+  "place-baalbek": [
+    1611,
+    806
+  ],
+  "place-byblos": [
+    1611,
+    806
+  ],
+  "place-jeita": [
+    1611,
+    806
   ],
   "platforms-cover": [
     2000,
