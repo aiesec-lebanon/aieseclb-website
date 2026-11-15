@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react";
 import Reveal, { Lines } from "../components/Reveal";
 import Media from "../components/Scenic";
+import { hasGen } from "../lib/media";
 import SampleNote from "../components/SampleNote";
 import { EVENTS } from "../content/events";
 import { SIGNUP_URL } from "../content/site";
@@ -56,7 +57,7 @@ export default function Events() {
                   </div>
                   <div className="overflow-clip rounded-[1.6rem]">
                     <Media
-                      name={e.image}
+                      name={hasGen(e.image) || !e.stand ? e.image : e.stand}
                       alt={e.name}
                       tone={e.tone}
                       seed={400 + i * 9}

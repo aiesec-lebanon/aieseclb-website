@@ -48,10 +48,10 @@ export default function Platforms() {
       <section className="relative isolate overflow-clip bg-night text-white">
         <div className="shell relative z-10 pt-32 text-center md:pt-36">
           <Reveal className="is-in">
-            <h1 id="page-title" tabIndex={-1} className="display text-mega mx-auto max-w-[12ch] outline-none">
+            <h1 id="page-title" tabIndex={-1} className="display text-title mx-auto max-w-[13ch] outline-none md:text-[clamp(3rem,5.8vw,6rem)]">
               <Lines text={["What we build", "after class."]} />
             </h1>
-            <p className="fade text-lead mx-auto mt-6 max-w-[36rem] text-white/80" style={{ "--i": 3 }}>
+            <p className="fade text-lead mx-auto mt-5 max-w-[36rem] text-white/80" style={{ "--i": 3 }}>
               AIESEC in Lebanon is run by volunteers. Its information management team writes the software that lets
               it run like something much bigger.
             </p>
@@ -65,7 +65,7 @@ export default function Platforms() {
             aria-hidden="true"
             className="arc-rise pointer-events-none absolute left-1/2 top-[9%] -z-10 aspect-square w-[170vw] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,#0a2a66_0%,#06215a_88%,#0b63d6_96.5%,#ffd27a_99.2%,#fff3cf_100%)] shadow-[0_-18px_70px_rgb(255_200_69/0.55),0_-60px_180px_rgb(3_126_243/0.55)] md:w-[124vw]"
           />
-          <div className="shell relative grid grid-cols-12 items-end gap-3 pb-0 md:gap-5">
+          <div className="shell relative grid max-w-[66rem] grid-cols-12 items-end gap-3 pb-0 md:gap-5">
             <div className="parallax col-span-3 hidden translate-y-6 md:block" style={{ "--py": "3.2rem" }}>
               <Screen platform={second} seed={501} className="origin-bottom-right -rotate-3" />
             </div>
