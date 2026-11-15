@@ -201,10 +201,10 @@ export default function DawnHero() {
       const halfNow = (aspect / F) * Math.max(TITLE_Z - cam.z, 1);
       const x0 = camX + (wide ? -halfNow + 0.065 * 2 * halfNow : -width / 2);
       const e = 1 - Math.pow(1 - titleReady, 4);
-      const y0 = 0.14 + (wide ? 0.15 : 0.22) * TITLE_Z - (1 - e) * height * 1.05;
+      const y0 = 0.14 + (wide ? 0.138 : 0.22) * TITLE_Z - (1 - e) * height * 1.05;
       quad.set("uTitleRect", x0, y0, x0 + width, y0 + height);
       quad.set("uTitleZ", TITLE_Z);
-      quad.set("uTitleA", (titleReady > 0 ? 1 : 0) * (1 - smoothstep(0.1, 0.19, s)));
+      quad.set("uTitleA", (titleReady > 0 ? 1 : 0) * (1 - smoothstep(0.12, 0.2, s)));
 
       // DOM beats
       for (const b of BEATS) {

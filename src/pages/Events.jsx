@@ -11,12 +11,12 @@ export default function Events() {
   return (
     <>
       <section className="relative isolate overflow-clip bg-night text-white">
-        <div className="shell relative z-10 pt-36 text-center md:pt-40">
+        <div className="shell relative z-10 pt-28 text-center md:pt-32">
           <Reveal className="is-in">
-            <h1 id="page-title" tabIndex={-1} className="display text-mega outline-none">
+            <h1 id="page-title" tabIndex={-1} className="display text-title outline-none md:text-[clamp(3rem,6.4vw,6.4rem)]">
               <Lines text={["What we gather for."]} />
             </h1>
-            <p className="fade text-lead mx-auto mt-5 max-w-[34rem] text-white/80" style={{ "--i": 2 }}>
+            <p className="fade text-lead mx-auto mt-4 max-w-[34rem] text-white/80" style={{ "--i": 2 }}>
               The year has a rhythm. These are the days it is built around. Drag the ring, or use the arrows.
             </p>
           </Reveal>
