@@ -1,7 +1,18 @@
 // Minimal WebGL2 full-screen shader runner. No three.js here on purpose: the hero must paint
 // before the 3D bundle is even requested.
 //
-// createQuad(canvas, fragmentSource, { uniforms, maxDpr, onFrame }) -> { set, texture, resize, start, stop, destroy, ok }
+// createQuad(canvas, fragmentSource, options) -> { ok, gl, set, seti, texture, resize, setScale,
+//   start, stop, renderOnce, destroy, getScale, getSize, hasTimer }
+//
+// options:
+//   maxDpr        cap on device pixel ratio (default 1.5)
+//   initialScale  starting fraction of the CSS-pixel resolution (default 1)
+//   minScale, maxScale  bounds for the built-in adaptive resolution
+//   adaptive      let the runner lower and raise resolution from frame times (default true).
+//                 Turn off when something else (a quality governor) decides.
+//   timer         measure GPU time per frame where the browser allows it (default false)
+//   onFrame(time, dtSeconds, info)   called before each draw; info = { gpuMs, rawDtMs }
+//   shouldDraw(now)                  return false to skip a frame (idle throttling)
 
 const VERT = `#version 300 es
 in vec2 aPos;
@@ -22,7 +33,16 @@ function compile(gl, type, src) {
 export function createQuad(
   canvas,
   frag,
-  { maxDpr = 1.5, onFrame, initialScale = 1, minScale = 0.55, maxScale = 1 } = {},
+  {
+    maxDpr = 1.5,
+    onFrame,
+    shouldDraw,
+    initialScale = 1,
+    minScale = 0.55,
+    maxScale = 1,
+    adaptive = true,
+    timer = false,
+  } = {},
 ) {
   const gl = canvas.getContext("webgl2", {
     antialias: false,
@@ -47,7 +67,7 @@ export function createQuad(
     }
   } catch (err) {
     console.error(err);
-    return { ok: false, error: err };
+    return { ok: false, error: err, gl };
   }
 
   gl.useProgram(program);
@@ -72,6 +92,10 @@ export function createQuad(
     else if (v.length === 2) gl.uniform2f(l, v[0], v[1]);
     else if (v.length === 3) gl.uniform3f(l, v[0], v[1], v[2]);
     else gl.uniform4f(l, v[0], v[1], v[2], v[3]);
+  };
+  const seti = (name, v) => {
+    const l = getLoc(name);
+    if (l !== null) gl.uniform1i(l, Math.round(v));
   };
 
   const textures = [];
@@ -100,7 +124,7 @@ export function createQuad(
     if (l !== null) gl.uniform1i(l, unit);
   };
 
-  // Resolution: device pixel ratio capped, then scaled down further if frames run long.
+  // Resolution: device pixel ratio capped, then scaled.
   let scale = initialScale;
   let width = 0;
   let height = 0;
@@ -118,6 +142,27 @@ export function createQuad(
     set("uRes", w, h);
     return { width: w, height: h, cssWidth: canvas.clientWidth, cssHeight: canvas.clientHeight };
   };
+  const setScale = (s) => {
+    scale = Math.max(0.1, Math.min(1, s));
+    return resize();
+  };
+
+  // GPU time, where the browser exposes it (desktop Chromium mostly). Results arrive a few
+  // frames late; a small pool of queries is kept in flight.
+  const tq = timer ? gl.getExtension("EXT_disjoint_timer_query_webgl2") : null;
+  const pending = [];
+  const pollTimer = () => {
+    if (!tq || !pending.length) return null;
+    const q = pending[0];
+    const available = gl.getQueryParameter(q, gl.QUERY_RESULT_AVAILABLE);
+    const disjoint = gl.getParameter(tq.GPU_DISJOINT_EXT);
+    if (!available && !disjoint) return null;
+    pending.shift();
+    let ms = null;
+    if (available && !disjoint) ms = gl.getQueryParameter(q, gl.QUERY_RESULT) / 1e6;
+    gl.deleteQuery(q);
+    return ms;
+  };
 
   let raf = 0;
   let running = false;
@@ -126,29 +171,46 @@ export function createQuad(
   let fast = 0;
   const t0 = performance.now();
 
+  const draw = () => {
+    let q = null;
+    if (tq && pending.length < 5) {
+      q = gl.createQuery();
+      gl.beginQuery(tq.TIME_ELAPSED_EXT, q);
+    }
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    if (q) {
+      gl.endQuery(tq.TIME_ELAPSED_EXT);
+      pending.push(q);
+    }
+  };
+
   const frame = (now) => {
     if (!running) return;
     raf = requestAnimationFrame(frame);
+    if (shouldDraw && !shouldDraw(now)) return;
     const dt = last ? now - last : 16;
     last = now;
-    // adaptive resolution: drop quickly when slow, recover carefully
-    if (dt > 26) slow++;
-    else slow = Math.max(0, slow - 1);
-    if (dt < 18) fast++;
-    else fast = 0;
-    if (slow > 20 && scale > minScale) {
-      scale = Math.max(minScale, scale * 0.85);
-      slow = 0;
-      resize();
-    } else if (fast > 240 && scale < maxScale) {
-      scale = Math.min(maxScale, scale * 1.1);
-      fast = 0;
-      resize();
+    if (adaptive) {
+      // drop quickly when slow, recover carefully
+      if (dt > 26) slow++;
+      else slow = Math.max(0, slow - 1);
+      if (dt < 18) fast++;
+      else fast = 0;
+      if (slow > 20 && scale > minScale) {
+        scale = Math.max(minScale, scale * 0.85);
+        slow = 0;
+        resize();
+      } else if (fast > 240 && scale < maxScale) {
+        scale = Math.min(maxScale, scale * 1.1);
+        fast = 0;
+        resize();
+      }
     }
+    const gpuMs = pollTimer();
     const time = (now - t0) / 1000;
     set("uTime", time);
-    if (onFrame) onFrame(time, Math.min(dt, 100) / 1000);
-    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    if (onFrame) onFrame(time, Math.min(dt, 100) / 1000, { gpuMs, rawDtMs: dt });
+    draw();
   };
 
   const start = () => {
@@ -166,7 +228,7 @@ export function createQuad(
     const now = performance.now();
     const time = (now - t0) / 1000;
     set("uTime", time);
-    if (onFrame) onFrame(time, 0);
+    if (onFrame) onFrame(time, 0, { gpuMs: null, rawDtMs: 0 });
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   };
 
@@ -179,6 +241,7 @@ export function createQuad(
   const destroy = () => {
     stop();
     canvas.removeEventListener("webglcontextlost", onLost);
+    pending.forEach((q) => gl.deleteQuery(q));
     textures.forEach((t) => t && gl.deleteTexture(t));
     gl.deleteBuffer(buf);
     gl.deleteProgram(program);
@@ -187,5 +250,20 @@ export function createQuad(
   };
 
   resize();
-  return { ok: true, gl, set, texture, resize, start, stop, renderOnce, destroy, getScale: () => scale };
+  return {
+    ok: true,
+    gl,
+    set,
+    seti,
+    texture,
+    resize,
+    setScale,
+    start,
+    stop,
+    renderOnce,
+    destroy,
+    getScale: () => scale,
+    getSize: () => ({ width, height }),
+    hasTimer: Boolean(tq),
+  };
 }

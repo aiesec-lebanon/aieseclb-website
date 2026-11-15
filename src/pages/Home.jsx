@@ -1,7 +1,8 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useState } from "react";
 import { Link } from "react-router-dom";
 import DawnHero from "../scenes/DawnHero";
 import DawnHeroReal from "../scenes/DawnHeroReal";
+import { readStored } from "../gl/quality";
 import Reveal, { Lines } from "../components/Reveal";
 import Counter from "../components/Counter";
 import Media from "../components/Scenic";
@@ -363,13 +364,25 @@ function Company() {
 }
 
 // Two versions of the opening scene live side by side on this branch. The realistic one is the
-// default here; add ?hero=graphic to the address to see the drawn one.
-const graphicHero = new URLSearchParams(window.location.search).get("hero") === "graphic";
+// default; a device that cannot run it smoothly gets the drawn one instead, and is remembered.
+// ?hero=graphic or ?hero=real in the address picks one by hand.
+function initialHero() {
+  const asked = new URLSearchParams(window.location.search).get("hero");
+  if (asked === "graphic" || asked === "real") return asked;
+  const stored = readStored();
+  return stored && stored.fallback ? "graphic" : "real";
+}
+
+function Hero() {
+  const [kind, setKind] = useState(initialHero);
+  if (kind === "graphic") return <DawnHero />;
+  return <DawnHeroReal onTooSlow={() => setKind("graphic")} />;
+}
 
 export default function Home() {
   return (
     <>
-      {graphicHero ? <DawnHero /> : <DawnHeroReal />}
+      <Hero />
       <Manifest />
       <LazyMount minHeight="100svh" className="bg-aiesec" data-shot="globe">
         <Suspense fallback={<div className="h-svh bg-aiesec" />}>

@@ -24,6 +24,18 @@ uniform vec3  uPageBg;
 uniform float uIntro;
 uniform float uFrame;
 uniform float uCover;      // how much of the low cloud has formed, 0..1
+
+// Quality. Chosen per device and adjusted while it runs: see src/gl/quality.js.
+uniform int   uSteps;      // terrain march steps
+uniform int   uOct;        // terrain octaves while marching
+uniform int   uNOct;       // terrain octaves for surface normals
+uniform int   uExact;      // how many of the large octaves use exact interpolation
+uniform float uGrow;       // how fast march steps lengthen with distance
+uniform int   uShadowN;    // sun shadow steps (0 = long-range test only)
+uniform int   uReflN;      // steps to find the land in the water (0 = a painted stand-in)
+uniform int   uCloudN;     // cloud march steps
+uniform int   uCloudLight; // light samples per cloud step (0, 1 or 2)
+uniform int   uHighCloud;  // high cloud layer on or off
 uniform sampler2D uNoise;  // 256x256 random values, repeating
 uniform sampler2D uTitle;
 uniform vec4  uTitleRect;  // world x0, y0, x1, y1 on the plane z = uTitleZ
@@ -78,7 +90,7 @@ float ridged(vec2 p, int oct) {
   float a = 0.5, s = 0.0, w = 0.0;
   for (int i = 0; i < 9; i++) {
     if (i >= oct) break;
-    float n = 1.0 - abs(2.0 * (i < 4 ? n2x(p) : n2(p)) - 1.0);
+    float n = 1.0 - abs(2.0 * (i < uExact ? n2x(p) : n2(p)) - 1.0);
     s += a * n * n;
     w += a;
     p = ROT * p * 2.03 + 7.1;
@@ -109,7 +121,7 @@ float marchTerrain(vec3 ro, vec3 rd, float tmax, int oct, int steps, float stepK
   if (ro.z < -1.0 && rd.z > 1e-4) t = max(t, (-1.0 - ro.z) / rd.z);
   if (t > tmax) return -1.0;                                   // the sea is nearer than the coast
   float lastD = 0.0, lastT = t;
-  for (int i = 0; i < 140; i++) {
+  for (int i = 0; i < 200; i++) {
     if (i >= steps) break;
     vec3 p = ro + rd * t;
     if (p.y > 4.6 && rd.y > 0.0) return -1.0;                  // above every summit and climbing
@@ -128,7 +140,7 @@ float marchTerrain(vec3 ro, vec3 rd, float tmax, int oct, int steps, float stepK
     lastD = d;
     lastT = t;
     // steps lengthen with distance, or the far range would never be reached
-    t += max(d * stepK, 0.02 * t + 0.003);
+    t += max(d * stepK, uGrow * t + 0.003);
     if (t > tmax) return -1.0;
   }
   return -1.0;
@@ -136,9 +148,9 @@ float marchTerrain(vec3 ro, vec3 rd, float tmax, int oct, int steps, float stepK
 
 vec3 terrainNormal(vec2 p, float t) {
   float e = max(0.004, 0.0009 * t);
-  float h0 = terrain(p, 8);
-  float hx = terrain(p + vec2(e, 0.0), 8);
-  float hz = terrain(p + vec2(0.0, e), 8);
+  float h0 = terrain(p, uNOct);
+  float hx = terrain(p + vec2(e, 0.0), uNOct);
+  float hz = terrain(p + vec2(0.0, e), uNOct);
   return normalize(vec3(h0 - hx, e, h0 - hz));
 }
 
@@ -157,7 +169,8 @@ float sunShadow(vec3 p) {
   }
   float res = 1.0;
   float t = 0.05;
-  for (int i = 0; i < 22; i++) {
+  for (int i = 0; i < 32; i++) {
+    if (i >= uShadowN) break;
     vec3 q = p + uSunDir * t;
     if (q.y > 4.6) break;
     float d = q.y - terrain(q.xz, 3);
@@ -225,7 +238,7 @@ vec3 starField(vec3 rd) {
 
 // thin high cloud on a plane far above, lit from underneath by the low sun
 vec3 highCloud(vec3 ro, vec3 rd, vec3 sky) {
-  if (rd.y < 0.012) return sky;
+  if (uHighCloud == 0 || rd.y < 0.012) return sky;
   float t = (9.0 - ro.y) / rd.y;
   vec2 p = (ro.xz + rd.xz * t) * 0.045 + vec2(uTime * 0.0016, 0.0);
   float n = n2(p) * 0.55 + n2(p * 2.3 + 4.0) * 0.28 + n2(p * 5.1 + 9.0) * 0.12 + n2g(p * 11.0) * 0.05;
@@ -317,17 +330,28 @@ vec3 waterNormal(vec2 p, float t) {
   return normalize(vec3(-grad.x * 0.055 * amp, 1.0, -grad.y * 0.055 * amp));
 }
 
+float marchRocks(vec3 ro, vec3 rd);   // defined further down, with the rocks
+
 // what a reflected ray sees: sky, high cloud, and the dark shape of the land
 vec3 reflection(vec3 p, vec3 rr, vec3 rm) {
   vec3 c = highCloud(p, rr, skyColor(rr, true));
   // the land is found along the plain mirror direction, barely ruffled, so its dark shape in the
   // water holds still instead of breaking into specks
-  float t = marchTerrain(p + vec3(0.0, 0.002, 0.0), rm, 70.0, 3, 60, 0.9);
-  if (t > 0.0) {
-    vec3 q = p + rr * t;
-    vec3 land = mix(vec3(0.012, 0.018, 0.030), vec3(0.10, 0.12, 0.13), uDay) * (0.7 + 0.6 * n2(q.xz * 2.0));
-    c = applyAir(land, rr, t);
+  vec3 landDark = mix(vec3(0.012, 0.018, 0.030), vec3(0.10, 0.12, 0.13), uDay);
+  if (uReflN > 0) {
+    float t = marchTerrain(p + vec3(0.0, 0.002, 0.0), rm, 70.0, 3, uReflN, 0.9);
+    if (t > 0.0) {
+      vec3 q = p + rr * t;
+      c = applyAir(landDark * (0.7 + 0.6 * n2(q.xz * 2.0)), rr, t);
+    }
+  } else {
+    // weakest devices: the range in the water is painted as a dark band above the mirror line
+    float band = (1.0 - smoothstep(0.006, 0.05, rm.y)) * smoothstep(-0.3, 0.4, rm.z);
+    c = mix(c, applyAir(landDark, rr, 26.0), band);
   }
+  // the rocks stand in their own reflection
+  float tr = marchRocks(p + vec3(0.0, 0.0005, 0.0), rm);
+  if (tr > 0.0) c = mix(vec3(0.006, 0.014, 0.034), vec3(0.18, 0.20, 0.23), uDay);
   return c;
 }
 
@@ -349,52 +373,101 @@ vec3 shadeSea(vec3 p, vec3 rd, float t) {
   return col;
 }
 
-// the Pigeon Rocks of Raouche, a little way off the bow
+// The Pigeon Rocks of Raouche, a little way off the bow. Seen from the sea the spire stands on
+// the left; the big rock, about as tall as it is wide, has its arch on the side facing the spire.
+// Proportions follow photographs: the big rock about 72 m high and wide with an arch half its
+// height, the spire nine tenths of its height and under half its width. Units are kilometres.
+const vec3  ROCK_B = vec3(0.322, 0.0, -4.400);
+const vec3  ROCK_S = vec3(0.2545, 0.0, -4.418);
+const float RH = 0.072;
+const float SH = 0.064;
+
+// Weathered limestone: broad, rounded lumps seen from two directions so no grain shows, and
+// only the faintest relief from the beds. The layering itself is drawn in the colour.
+float rockNoise(vec3 q) {
+  float a = n2(vec2(q.x * 70.0 + q.z * 31.0, q.y * 40.0));
+  float b = n2(vec2(q.z * 70.0 - q.x * 23.0, q.y * 40.0 + 7.0));
+  float fine = n2g(vec2(q.x * 260.0 + q.z * 190.0, q.y * 210.0));
+  float beds = sin(q.y * 1150.0 + 5.0 * a);
+  return (a + b - 1.0) * 0.0016 + (fine - 0.5) * 0.0005 + beds * 0.00010;
+}
+
+float sdBigRock(vec3 q) {
+  float yn = clamp(q.y / RH, 0.0, 1.0);
+  float notch = exp(-pow((q.y - 0.002) / 0.003, 2.0));     // where the waves cut in
+  float hw = 0.037 * (1.0 + 0.05 * (1.0 - yn) + 0.04 * sin(yn * 3.1416)) - 0.0024 * notch;
+  float hd = 0.027 * (1.0 + 0.05 * (1.0 - yn) + 0.03 * sin(yn * 3.1416)) - 0.0018 * notch;
+  // a domed crown, highest toward the open-sea side
+  // a domed, uneven crown, clearly lower over the arch, rounding over into the walls
+  float top = RH * (0.80 + 0.20 * smoothstep(-0.030, 0.016, q.x))
+            - RH * 0.12 * pow(clamp(length(vec2((q.x - 0.006) / 0.040, q.z / 0.030)), 0.0, 1.0), 2.4)
+            + RH * 0.05 * (n2(vec2(q.x * 55.0, q.z * 55.0 + 3.0)) - 0.5);
+  float r = 0.0105;
+  float cy = (top - 0.03) * 0.5;
+  vec3 e = vec3(abs(q.x) - hw + r, abs(q.y - cy) - (top + 0.03) * 0.5 + r, abs(q.z) - hd + r);
+  float d = length(max(e, 0.0)) + min(max(e.x, max(e.y, e.z)), 0.0) - r;
+  // the arch: straight legs and a round head, a little ragged, running right through
+  float ax = q.x + 0.0130 + 0.0012 * (n2(vec2(q.y * 420.0, 3.0)) - 0.5);
+  float aw = 0.0128, ah = 0.0380, ar = aw * 1.05;
+  float f = length(vec2(ax / aw, max(q.y - (ah - ar), 0.0) / ar)) - 1.0;
+  return max(d, -f * aw * 0.9);
+}
+
+float sdSpire(vec3 q) {
+  float yn = clamp(q.y / SH, 0.0, 1.0);
+  float lean = 0.0055 * yn * yn;                            // toward its neighbour
+  // tapering all the way up, closing over in a rounded tip
+  float rx = 0.0185 * (1.0 - 0.56 * yn) * sqrt(max(1.0 - pow(yn, 3.0), 0.0))
+           - 0.0016 * exp(-pow((q.y - 0.002) / 0.003, 2.0));
+  rx = max(rx, 0.0005);
+  float rz = rx * 0.82;
+  vec2 c = vec2(q.x - lean, q.z);
+  float side = (length(c / vec2(rx, rz)) - 1.0) * min(rx, rz);
+  return max(max(side, q.y - SH), -q.y - 0.03);
+}
+
 float sdRocks(vec3 p) {
-  vec3 q = p - vec3(0.322, 0.0, -4.40);
-  float bump = (n2(q.xy * 60.0 + q.z * 31.0) - 0.5) * 0.006 + (n2(q.zy * 23.0) - 0.5) * 0.010;
-  // main rock: a tall block leaning slightly, flat on top
-  vec3 b = q - vec3(0.0, 0.024, 0.0);
-  vec3 d = abs(b) - vec3(0.036, 0.034, 0.024);
-  float box = length(max(d, 0.0)) + min(max(d.x, max(d.y, d.z)), 0.0) - 0.008;
-  // the arch through it, low on the seaward end
-  float arch = length(vec2(q.x - 0.012, q.y) * vec2(1.0, 0.62)) - 0.0135;
-  float main = max(box, -arch);
-  // the smaller rock beside it
-  vec3 s = q - vec3(-0.078, 0.012, 0.012);
-  vec3 ds = abs(s) - vec3(0.012, 0.020, 0.010);
-  float small = length(max(ds, 0.0)) + min(max(ds.x, max(ds.y, ds.z)), 0.0) - 0.006;
-  return min(main, small) + bump;
+  return min(sdBigRock(p - ROCK_B), sdSpire(p - ROCK_S)) + rockNoise(p - ROCK_B);
 }
 float marchRocks(vec3 ro, vec3 rd) {
-  // bounding sphere first
-  vec3 c = vec3(0.303, 0.03, -4.40);
+  // bounding sphere first: almost every pixel stops here
+  vec3 c = vec3(0.2985, 0.035, -4.41);
   vec3 oc = ro - c;
   float b = dot(oc, rd);
-  float h = b * b - dot(oc, oc) + 0.012;
+  float h = b * b - dot(oc, oc) + 0.0075;
   if (h < 0.0) return -1.0;
+  float tEnd = -b + sqrt(h);
   float t = max(-b - sqrt(h), 0.0);
-  for (int i = 0; i < 40; i++) {
+  for (int i = 0; i < 64; i++) {
     float d = sdRocks(ro + rd * t);
-    if (d < 0.0006) return t;
-    t += d * 0.8;
-    if (t > -b + sqrt(h)) break;
+    if (d < max(0.0003, t * 0.00035)) return t;
+    t += d * 0.7;
+    if (t > tEnd) break;
   }
   return -1.0;
 }
 vec3 shadeRocks(vec3 p, vec3 rd) {
-  vec2 e = vec2(0.0012, 0.0);
+  vec2 e = vec2(0.0009, 0.0);
   vec3 n = normalize(vec3(sdRocks(p + e.xyy) - sdRocks(p - e.xyy), sdRocks(p + e.yxy) - sdRocks(p - e.yxy), sdRocks(p + e.yyx) - sdRocks(p - e.yyx)));
-  float strata = 0.85 + 0.15 * sin(p.y * 900.0 + n2(p.xz * 40.0) * 8.0);
-  vec3 albedo = mix(vec3(0.240, 0.210, 0.170), vec3(0.360, 0.320, 0.260), n2(p.xy * 90.0)) * strata;
-  albedo *= 0.55 + 0.45 * smoothstep(0.0, 0.012, p.y);     // wet and dark at the waterline
+  vec3 q = p - ROCK_B;
+  // pale limestone in beds, dark and wet where the sea reaches, scrub on the tops
+  float beds = 0.86 + 0.14 * sin(p.y * 1150.0 + 6.0 * n2(vec2(q.x * 140.0 + q.z * 97.0, q.y * 30.0)));
+  vec3 albedo = mix(vec3(0.50, 0.44, 0.35), vec3(0.66, 0.60, 0.50), n2(vec2(q.x * 300.0 + q.z * 170.0, q.y * 260.0))) * beds;
+  albedo = mix(albedo, albedo * 0.35, 1.0 - smoothstep(0.001, 0.007, p.y));
+  float scrub = smoothstep(0.55, 0.8, n.y) * smoothstep(0.050, 0.058, p.y);
+  albedo = mix(albedo, vec3(0.09, 0.11, 0.05), scrub);
+  // darker in hollows and inside the arch
+  float ao = clamp(0.4 + 0.6 * sdRocks(p + n * 0.003) / 0.003, 0.0, 1.0);
   float ndl = max(dot(n, uSunDir), 0.0);
+  float sh = ndl > 0.0 ? sunShadow(p + n * 0.002) : 0.0;
   vec3 sun = sunColor() * 5.5 * smoothstep(-0.02, 0.05, uSunDir.y);
   vec3 skyAmb = mix(vec3(0.020, 0.036, 0.085), vec3(0.230, 0.340, 0.560), uDay);
-  vec3 col = albedo * (sun * ndl + skyAmb * (0.45 + 0.55 * n.y));
-  // light wrapping round the edges from the sun behind
-  float rim = pow(1.0 - max(dot(n, -rd), 0.0), 3.0) * max(dot(rd, uSunDir), 0.0);
-  col += sunColor() * rim * 0.9;
+  vec3 seaBounce = mix(vec3(0.006, 0.012, 0.030), vec3(0.040, 0.090, 0.150), uDay) * clamp(0.5 - 0.5 * n.y, 0.0, 1.0);
+  vec3 col = albedo * (sun * ndl * sh + (skyAmb * (0.45 + 0.55 * n.y) + seaBounce) * ao);
+  // light wrapping round only the edges that face the sun behind
+  vec2 sunH = normalize(uSunDir.xz);
+  float rim = pow(1.0 - max(dot(n, -rd), 0.0), 3.0) * max(dot(normalize(n.xz + 1e-4), sunH), 0.0);
+  col += sunColor() * rim * 0.55 * ao * smoothstep(-0.02, 0.04, uSunDir.y);
   return col;
 }
 
@@ -422,7 +495,7 @@ vec4 marchCloud(vec3 ro, vec3 rd, float tmax, float jitter) {
   }
   t1 = min(t1, t0 + 26.0);
   if (t1 <= t0) return vec4(0.0, 0.0, 0.0, 1.0);
-  const int N = 16;
+  int N = uCloudN;
   float dt = (t1 - t0) / float(N);
   float t = t0 + dt * jitter;
   float T = 1.0;
@@ -431,11 +504,13 @@ vec4 marchCloud(vec3 ro, vec3 rd, float tmax, float jitter) {
   vec3 amb = mix(vec3(0.030, 0.050, 0.110), vec3(0.420, 0.520, 0.700), uDay);
   float mu = max(dot(rd, uSunDir), 0.0);
   float phase = 0.55 + 1.6 * pow(mu, 6.0);                  // bright silver lining toward the sun
-  for (int i = 0; i < N; i++) {
+  for (int i = 0; i < 32; i++) {
+    if (i >= N) break;
     vec3 p = ro + rd * t;
     float d = cloudDensity(p);
     if (d > 0.001) {
-      float toSun = cloudDensity(p + uSunDir * 0.16) + cloudDensity(p + uSunDir * 0.42) * 0.6;
+      float toSun = 0.45;
+      if (uCloudLight > 0) toSun = cloudDensity(p + uSunDir * 0.16) + (uCloudLight > 1 ? cloudDensity(p + uSunDir * 0.42) * 0.6 : 0.25);
       float light = exp(-toSun * 1.7);
       float hgt = clamp((p.y - CB) / (CT - CB), 0.0, 1.0);
       vec3 c = sunL * light * phase + amb * (0.35 + 0.65 * hgt);
@@ -468,7 +543,7 @@ void main() {
   // what is the first solid thing along this ray?
   float tSea = rd.y < -1e-4 ? -ro.y / rd.y : -1.0;
   float tmax = tSea > 0.0 ? min(tSea, FAR) : FAR;
-  float tLand = marchTerrain(ro, rd, tmax, 5, 130, 0.5);
+  float tLand = marchTerrain(ro, rd, tmax, uOct, uSteps, 0.5);
   float tRock = marchRocks(ro, rd);
   float tHit = FAR;
   int what = 0;                                              // 0 sky, 1 land, 2 sea, 3 rocks, 4 title

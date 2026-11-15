@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { createQuad } from "../gl/quad";
+import { Governor, TIERS, detectDevice, readStored, tierIndex, writeStored } from "../gl/quality";
 import { DAWN_REAL_FRAG } from "../gl/dawnReal.frag";
 import { clamp01, mix, sectionProgress, smoothstep } from "../lib/scroll";
 import { SIGNUP_URL } from "../content/site";
@@ -61,14 +62,24 @@ const BEATS = [
   { id: "b3", in: [0.7, 0.75], out: [0.86, 0.91] },
 ];
 
-export default function DawnHeroReal() {
+// onTooSlow(reason) is called when this device cannot run the realistic scene; the page then
+// shows the drawn hero instead. Add ?hud to the address to see what quality was chosen,
+// ?tier=minimal|low|medium|high|ultra to pin one, or ?start=<tier> to choose where it starts.
+export default function DawnHeroReal({ onTooSlow }) {
   const sectionRef = useRef(null);
   const canvasRef = useRef(null);
   const beatRefs = useRef({});
   const cueRef = useRef(null);
+  const hudRef = useRef(null);
+  const tooSlowRef = useRef(onTooSlow);
   const [mode, setMode] = useState(() =>
     window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "still" : "gl",
   );
+  const [hudOn] = useState(() => new URLSearchParams(window.location.search).has("hud"));
+
+  useEffect(() => {
+    tooSlowRef.current = onTooSlow;
+  }, [onTooSlow]);
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -137,19 +148,136 @@ export default function DawnHeroReal() {
       if (cueRef.current) cueRef.current.style.opacity = (1 - smoothstep(0.01, 0.05, s)).toFixed(3);
     };
 
-    // Raymarching costs per pixel, so this version draws at about half resolution and lets the
-    // browser stretch it. The runner lowers it further if frames run long.
-    let quad = createQuad(canvas, DAWN_REAL_FRAG, {
+    // While nothing moves, weaker devices draw every other frame: the sea and the cloud drift
+    // slowly enough that nobody sees it, and the battery does.
+    let lastActive = performance.now();
+    let lastTarget = -1;
+    let skipFlip = false;
+    let throttled = false;
+    let idleThrottle = false;
+    let governor = null;
+    let device = null;
+    let quad = null;
+
+    const hud = hudRef.current;
+    let hudAt = 0;
+    const updateHud = () => {
+      const now = performance.now();
+      if (!governor || now - hudAt < 500) return;
+      hudAt = now;
+      const st = governor.stats;
+      const size = quad.getSize();
+      const info = {
+        tier: TIERS[governor.tier].name,
+        scale: Number(governor.scale.toFixed(2)),
+        width: size.width,
+        height: size.height,
+        fps: Math.round(st.fps),
+        gpuMs: st.gpu == null ? null : Number(st.gpu.toFixed(1)),
+        cap: governor.capMs ? Math.round(1000 / governor.capMs) : null,
+        timer: quad.hasTimer,
+        idle: throttled,
+        renderer: device ? device.renderer : "",
+      };
+      window.__heroQuality = info;
+      if (hud) {
+        hud.textContent =
+          `${info.tier} · ${info.width}×${info.height} (${Math.round(info.scale * 100)}%) · ${info.fps} fps` +
+          (info.gpuMs != null ? ` · gpu ${info.gpuMs} ms` : "") +
+          (info.cap ? ` · capped at ${info.cap} fps` : "") +
+          (info.idle ? " · idle" : "");
+      }
+    };
+
+    // Raymarching costs per pixel, so this scene draws below screen resolution and lets the
+    // browser stretch it. How far below, and how much detail, the governor decides.
+    quad = createQuad(canvas, DAWN_REAL_FRAG, {
       maxDpr: 1,
       initialScale: 0.5,
-      minScale: 0.3,
-      maxScale: 0.7,
-      onFrame: (time, dt) => apply(quad, time, dt),
+      adaptive: false,
+      timer: !params.has("notimer"),
+      shouldDraw: (now) => {
+        const t = sectionProgress(section);
+        if (Math.abs(t - lastTarget) > 1e-4) {
+          lastTarget = t;
+          lastActive = now;
+        }
+        throttled = idleThrottle && now - lastActive > 2000 && governor !== null && governor.settled();
+        if (!throttled) return true;
+        skipFlip = !skipFlip;
+        return skipFlip;
+      },
+      onFrame: (time, dt, info) => {
+        apply(quad, time, dt);
+        if (governor) {
+          if (throttled) governor.pause(400);
+          else governor.frame(info.rawDtMs, info.gpuMs);
+        }
+        updateHud();
+      },
     });
     if (!quad.ok) {
       queueMicrotask(() => setMode("fallback"));
       return undefined;
     }
+
+    // Pick a starting quality for this device, then let the governor refine it.
+    device = detectDevice(quad.gl);
+    const forcedTier = tierIndex(params.get("tier") || "");
+    const startTier = tierIndex(params.get("start") || "");
+    const heroForced = params.get("hero") === "real";
+    const stored = readStored();
+    const remembered = stored && !stored.fallback && stored.renderer === device.renderer ? stored : null;
+    if (device.software && forcedTier < 0 && !heroForced) {
+      // drawn by the CPU: this scene would crawl, the drawn one will not
+      writeStored({ renderer: device.renderer, fallback: true });
+      quad.destroy();
+      queueMicrotask(() => tooSlowRef.current && tooSlowRef.current("software"));
+      return undefined;
+    }
+    // phones are capped at medium: they would manage more for a minute, then heat up
+    const maxTier = forcedTier >= 0 ? forcedTier : device.mobile ? 2 : TIERS.length - 1;
+    let tier = forcedTier >= 0 ? forcedTier : startTier >= 0 ? startTier : remembered ? remembered.tier : Math.max(0, device.tier);
+    tier = Math.min(tier, maxTier);
+
+    const applyQuality = ({ tier: ti, scale }) => {
+      const t = TIERS[ti];
+      quad.seti("uSteps", t.steps);
+      quad.seti("uOct", t.oct);
+      quad.seti("uNOct", t.nOct);
+      quad.seti("uExact", t.exact);
+      quad.set("uGrow", t.grow);
+      quad.seti("uShadowN", t.shadow);
+      quad.seti("uReflN", t.refl);
+      quad.seti("uCloudN", t.cloud);
+      quad.seti("uCloudLight", t.cloudLight);
+      quad.seti("uHighCloud", t.highCloud);
+      quad.setScale(scale);
+      idleThrottle = device.mobile || ti <= 2;
+    };
+    const cssPixels = () => Math.max(1, canvas.clientWidth * canvas.clientHeight);
+    governor = new Governor({
+      tier,
+      scale: remembered && remembered.tier === tier && forcedTier < 0 && startTier < 0 ? remembered.scale : undefined,
+      maxTier,
+      cssPixels: cssPixels(),
+      timer: quad.hasTimer,
+      fixed: forcedTier >= 0 || reduce,
+      apply: (q) => {
+        applyQuality(q);
+        if (forcedTier < 0 && startTier < 0 && !reduce) writeStored({ renderer: device.renderer, tier: q.tier, scale: q.scale });
+      },
+      giveUp: () => {
+        if (heroForced) return;
+        writeStored({ renderer: device.renderer, fallback: true });
+        if (tooSlowRef.current) tooSlowRef.current("slow");
+      },
+    });
+    // a single still frame for reduced motion can afford full resolution
+    if (reduce) governor.scale = 1;
+    // ?scale=0.5 pins the resolution too (testing)
+    if (forcedTier >= 0 && params.has("scale")) governor.scale = Math.min(1, Math.max(0.1, parseFloat(params.get("scale")) || 0.5));
+    governor.commit();
     quad.set("uPageBg", 0.949, 0.973, 1.0);
     const blank = document.createElement("canvas");
     blank.width = blank.height = 2;
@@ -160,7 +288,7 @@ export default function DawnHeroReal() {
     quad.resize();
 
     const onResize = () => {
-      quad.resize();
+      governor.resize(cssPixels());
       if (reduce) quad.renderOnce();
     };
     const ro = new ResizeObserver(onResize);
@@ -169,6 +297,7 @@ export default function DawnHeroReal() {
     const onPointer = (e) => {
       tx = (e.clientX / window.innerWidth) * 2 - 1;
       ty = (e.clientY / window.innerHeight) * 2 - 1;
+      lastActive = performance.now();
     };
 
     let io;
@@ -176,15 +305,24 @@ export default function DawnHeroReal() {
       quad.renderOnce();
     } else {
       window.addEventListener("pointermove", onPointer, { passive: true });
-      io = new IntersectionObserver(([entry]) => (entry.isIntersecting ? quad.start() : quad.stop()), {
-        rootMargin: "80px",
-      });
+      io = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            governor.pause(800);
+            quad.start();
+          } else quad.stop();
+        },
+        { rootMargin: "80px" },
+      );
       io.observe(section);
     }
     const onVis = () => {
       if (reduce) return;
       if (document.hidden) quad.stop();
-      else if (section.getBoundingClientRect().bottom > 0) quad.start();
+      else if (section.getBoundingClientRect().bottom > 0) {
+        governor.pause(800);
+        quad.start();
+      }
     };
     document.addEventListener("visibilitychange", onVis);
 
@@ -270,6 +408,14 @@ export default function DawnHeroReal() {
         <Beat refFn={setBeat("b1")} lines={["First light reaches", "the mountains first."]} />
         <Beat refFn={setBeat("b2")} lines={["Then it reaches", "everyone below."]} />
         <Beat refFn={setBeat("b3")} lines={["We are the ones", "who climb to meet it."]} />
+
+        {hudOn && (
+          <div
+            ref={hudRef}
+            aria-hidden="true"
+            className="pointer-events-none fixed bottom-3 left-3 z-[80] rounded-lg bg-black/75 px-3 py-1.5 text-[12px] font-bold text-white"
+          />
+        )}
 
         <div
           ref={cueRef}
