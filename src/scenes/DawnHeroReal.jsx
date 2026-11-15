@@ -122,7 +122,7 @@ export default function DawnHeroReal() {
       quad.set("uIntro", intro * intro * (3 - 2 * intro));
       quad.set("uFrame", frameNo);
       // out at sea the morning is clear and the whole range shows; the cloud gathers as we climb
-      quad.set("uCover", mix(0.3, 1.0, smoothstep(0.1, 0.42, s)));
+      quad.set("uCover", smoothstep(0.08, 0.42, s));
       quad.set("uTitleA", 0);
 
       for (const b of BEATS) {

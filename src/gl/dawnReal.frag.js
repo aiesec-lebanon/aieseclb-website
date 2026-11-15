@@ -103,22 +103,32 @@ float terrain(vec2 p, int oct) {
 }
 
 // march the heightfield; returns distance or -1
-float marchTerrain(vec3 ro, vec3 rd, float tmax, int oct, int steps) {
+float marchTerrain(vec3 ro, vec3 rd, float tmax, int oct, int steps, float stepK) {
   float t = 0.02;
-  float lastD = 0.0, lastT = 0.0;
-  for (int i = 0; i < 110; i++) {
+  // out at sea there is nothing to hit before the coast, so start there
+  if (ro.z < -1.0 && rd.z > 1e-4) t = max(t, (-1.0 - ro.z) / rd.z);
+  if (t > tmax) return -1.0;                                   // the sea is nearer than the coast
+  float lastD = 0.0, lastT = t;
+  for (int i = 0; i < 140; i++) {
     if (i >= steps) break;
     vec3 p = ro + rd * t;
     if (p.y > 4.6 && rd.y > 0.0) return -1.0;                  // above every summit and climbing
     float d = p.y - terrain(p.xz, oct);
-    if (d < 0.0015 * t + 0.0008) {
-      // refine between the last two samples
-      float k = lastD / max(lastD - d, 1e-5);
-      return mix(lastT, t, clamp(k, 0.0, 1.0));
+    if (d < 0.0004 * t + 0.0006) {
+      // the ray is at or under the ground: close in on the surface by halving the interval,
+      // so far silhouettes come out as clean as near ones
+      float a = lastT, b = t;
+      for (int j = 0; j < 6; j++) {
+        float m = 0.5 * (a + b);
+        vec3 q = ro + rd * m;
+        if (q.y - terrain(q.xz, oct) < 0.0) b = m; else a = m;
+      }
+      return 0.5 * (a + b);
     }
     lastD = d;
     lastT = t;
-    t += max(d * 0.45, 0.004 * t + 0.004);
+    // steps lengthen with distance, or the far range would never be reached
+    t += max(d * stepK, 0.02 * t + 0.003);
     if (t > tmax) return -1.0;
   }
   return -1.0;
@@ -134,6 +144,17 @@ vec3 terrainNormal(vec2 p, float t) {
 
 float sunShadow(vec3 p) {
   if (uSunDir.y < -0.02) return 0.0;
+  // The sun is low and behind the range, so most shadows are thrown by ridges many kilometres
+  // away. Check the sun ray against the land at a few fixed distances inland first.
+  if (uSunDir.z > 0.05) {
+    for (int j = 0; j < 5; j++) {
+      float zz = 12.0 + float(j) * 3.7;
+      if (zz > p.z + 0.5) {
+        vec3 q = p + uSunDir * ((zz - p.z) / uSunDir.z);
+        if (q.y < terrain(q.xz, 3)) return 0.0;
+      }
+    }
+  }
   float res = 1.0;
   float t = 0.05;
   for (int i = 0; i < 22; i++) {
@@ -297,9 +318,11 @@ vec3 waterNormal(vec2 p, float t) {
 }
 
 // what a reflected ray sees: sky, high cloud, and the dark shape of the land
-vec3 reflection(vec3 p, vec3 rr) {
+vec3 reflection(vec3 p, vec3 rr, vec3 rm) {
   vec3 c = highCloud(p, rr, skyColor(rr, true));
-  float t = marchTerrain(p + vec3(0.0, 0.002, 0.0), rr, 60.0, 3, 34);
+  // the land is found along the plain mirror direction, barely ruffled, so its dark shape in the
+  // water holds still instead of breaking into specks
+  float t = marchTerrain(p + vec3(0.0, 0.002, 0.0), rm, 70.0, 3, 60, 0.9);
   if (t > 0.0) {
     vec3 q = p + rr * t;
     vec3 land = mix(vec3(0.012, 0.018, 0.030), vec3(0.10, 0.12, 0.13), uDay) * (0.7 + 0.6 * n2(q.xz * 2.0));
@@ -313,9 +336,13 @@ vec3 shadeSea(vec3 p, vec3 rd, float t) {
   vec3 rr = reflect(rd, n);
   rr.y = abs(rr.y) + 0.002;
   rr = normalize(rr);
+  // the mirror direction of a flat sea, with a quarter of the ripple: used to find the land
+  vec3 calm = reflect(rd, normalize(mix(vec3(0.0, 1.0, 0.0), n, 0.25)));
+  calm.y = abs(calm.y) + 0.002;
+  calm = normalize(calm);
   float fres = 0.02 + 0.98 * pow(1.0 - max(dot(-rd, n), 0.0), 5.0);
   vec3 deep = mix(vec3(0.004, 0.012, 0.028), vec3(0.010, 0.060, 0.120), uDay);
-  vec3 col = mix(deep, reflection(p, rr), fres);
+  vec3 col = mix(deep, reflection(p, rr, calm), fres);
   // the sun broken up on the waves
   float sp = pow(max(dot(rr, uSunDir), 0.0), 900.0) * 30.0 + pow(max(dot(rr, uSunDir), 0.0), 60.0) * 0.5;
   col += sunColor() * sp * fres * smoothstep(-0.03, 0.03, uSunDir.y);
@@ -441,7 +468,7 @@ void main() {
   // what is the first solid thing along this ray?
   float tSea = rd.y < -1e-4 ? -ro.y / rd.y : -1.0;
   float tmax = tSea > 0.0 ? min(tSea, FAR) : FAR;
-  float tLand = marchTerrain(ro, rd, tmax, 5, 96);
+  float tLand = marchTerrain(ro, rd, tmax, 5, 130, 0.5);
   float tRock = marchRocks(ro, rd);
   float tHit = FAR;
   int what = 0;                                              // 0 sky, 1 land, 2 sea, 3 rocks, 4 title
