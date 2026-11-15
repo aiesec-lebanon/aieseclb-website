@@ -1,14 +1,24 @@
 import { lazy, Suspense } from "react";
 import Reveal, { Lines } from "../components/Reveal";
 import Media from "../components/Scenic";
-import { hasGen } from "../lib/media";
+import World, { Frame, SceneryToggle } from "../components/World";
+import { headingProps } from "../components/worldType";
 import SampleNote from "../components/SampleNote";
+import { hasGen } from "../lib/media";
 import { EVENTS } from "../content/events";
 import { SIGNUP_URL } from "../content/site";
+import "@fontsource/instrument-serif/400.css";
+import "@fontsource/shantell-sans/700.css";
+import "@fontsource/shantell-sans/800.css";
+import "@fontsource-variable/figtree";
 
 const EventRing = lazy(() => import("../scenes/EventRing"));
 
+const NIGHT = "#030b1c";
+const photoOf = (e) => (hasGen(`${e.image}-2`) ? `${e.image}-2` : hasGen(e.image) || !e.stand ? e.image : e.stand);
+
 export default function Events() {
+  const last = EVENTS[EVENTS.length - 1].world;
   return (
     <>
       <section className="relative isolate overflow-clip bg-night text-white">
@@ -18,64 +28,69 @@ export default function Events() {
               <Lines text={["What we gather for."]} />
             </h1>
             <p className="fade text-lead mx-auto mt-4 max-w-[34rem] text-white/80" style={{ "--i": 2 }}>
-              The year has a rhythm. These are the days it is built around. Drag the ring, or use the arrows.
+              The year has a rhythm. These are the days it is built around. Drag the ring, or use the arrows, then
+              scroll down and walk into each one.
             </p>
           </Reveal>
         </div>
         <Suspense fallback={<div className="h-[62svh]" />}>
           <EventRing events={EVENTS} />
         </Suspense>
+        <SampleNote file="src/content/events.js" />
       </section>
 
-      <div className="bg-sky">
-        <SampleNote file="src/content/events.js" />
+      {/* One world per event: the page becomes the event as you reach it (components/World.jsx;
+          each event's world is in content/events.js) */}
+      <div className="relative">
+        {EVENTS.map((e, i) => {
+          const w = e.world;
+          const h = headingProps(w);
+          return (
+            <World
+              key={e.id}
+              id={e.id}
+              world={w}
+              from={i ? EVENTS[i - 1].world.bg : NIGHT}
+              label={e.name}
+              className="flex min-h-[150svh] items-center"
+            >
+              <div className="shell grid items-center gap-10 py-[34svh] md:grid-cols-12 md:gap-14">
+                <Reveal className={`md:col-span-5 ${i % 2 ? "md:order-2" : ""}`}>
+                  <p className="fade font-bold text-[var(--w-accent-ink)]">{e.kind}</p>
+                  <h2 className={`mt-3 ${h.className}`} style={h.style}>
+                    <Lines text={[e.name]} />
+                  </h2>
+                  <p className="fade text-lead mt-6" style={{ "--i": 2 }}>
+                    {e.line}
+                  </p>
+                  <p className="fade mt-5 font-bold text-[var(--w-soft)]" style={{ "--i": 3 }}>
+                    {e.where} · {e.when}
+                  </p>
+                </Reveal>
+                <div className="md:col-span-7">
+                  <div className="tilt-in [perspective:1600px]">
+                    <Frame world={w}>
+                      <Media
+                        name={photoOf(e)}
+                        alt={e.name}
+                        tone={e.tone}
+                        seed={400 + i * 9}
+                        sizes="(max-width: 768px) 92vw, 58vw"
+                        className="aspect-[16/10]"
+                      />
+                    </Frame>
+                  </div>
+                </div>
+              </div>
+            </World>
+          );
+        })}
+        <SceneryToggle />
       </div>
 
-      <section className="bg-sky py-24 md:py-36">
-        <div className="shell">
-          <Reveal>
-            <h2 className="display text-mega text-ink">
-              <Lines text={["The year,", "one gathering at a time."]} />
-            </h2>
-          </Reveal>
-          <div className="mt-14 md:mt-20">
-            {EVENTS.map((e, i) => (
-              <Reveal key={e.id}>
-                <article
-                  id={e.id}
-                  className="fade group grid gap-6 border-t border-ink/14 py-10 md:grid-cols-[1fr_1.1fr_0.9fr] md:items-center md:gap-12 md:py-14"
-                >
-                  <div>
-                    <p className="font-bold text-aiesec">{e.kind}</p>
-                    <h3 className="display mt-2 text-[clamp(2.2rem,4.2vw,4.2rem)] text-ink">{e.name}</h3>
-                  </div>
-                  <div>
-                    <p className="text-lead text-ink">{e.line}</p>
-                    <p className="mt-4 font-bold text-ink-soft">
-                      {e.where} · {e.when}
-                    </p>
-                  </div>
-                  <div className="overflow-clip rounded-[1.6rem]">
-                    <Media
-                      name={
-                        hasGen(`${e.image}-2`) ? `${e.image}-2` : hasGen(e.image) || !e.stand ? e.image : e.stand
-                      }
-                      alt={e.name}
-                      tone={e.tone}
-                      seed={400 + i * 9}
-                      className="aspect-[16/11]"
-                      imgClassName="transition-transform duration-[1.4s] ease-[var(--ease-out-expo)] group-hover:scale-[1.05]"
-                    />
-                  </div>
-                </article>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-aiesec py-24 text-white md:py-36">
-        <div className="shell flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
+      <section className="bg-aiesec text-white">
+        <div aria-hidden="true" className="h-[22svh]" style={{ background: `linear-gradient(${last.bg}, var(--color-aiesec))` }} />
+        <div className="shell flex flex-col gap-8 pb-24 pt-4 md:flex-row md:items-end md:justify-between md:pb-36">
           <Reveal>
             <h2 className="display text-mega max-w-[13ch]">
               <Lines text={["The next one", "has a seat for you."]} />

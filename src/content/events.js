@@ -7,10 +7,19 @@
 //
 // For each event: drop a photo in src/assets/gen/ named `<image>.jpg` (see README there).
 // Until it exists, `stand` names one of the photographs already there to stand in for it.
+//
+// `world` is the world the event becomes on the events page (see src/components/World.jsx):
+// its colours, its set (scenery), what is in the air (weather), the type of its heading (font)
+// and how its photograph is mounted (frame: plain, gold, polaroid, taped).
 
 export const EVENTS = [
   {
     id: "national-conference",
+    world: {
+      // a gala night: navy and gold, chandelier light, a serif for the occasion
+      scheme: "dark", bg: "#0b0e26", ink: "#fbf4e4", soft: "#cdc2a4", accent: "#ffc845", accentInk: "#ffd36b", line: "#2c2f52", card: "#141838",
+      scenery: "gala", weather: { kind: "bokeh", density: 1 }, font: "serif", frame: "gold",
+    },
     name: "National Conference",
     kind: "Conference",
     when: "Season to be confirmed",
@@ -23,6 +32,11 @@ export const EVENTS = [
   },
   {
     id: "youth-speak-forum",
+    world: {
+      // a stage: near-black, coral light, spotlights and haze
+      scheme: "dark", bg: "#150907", ink: "#fff2ec", soft: "#d8b2a5", accent: "#f85a40", accentInk: "#ff8f78", line: "#3b201a", card: "#24110d",
+      scenery: "stage", weather: { kind: "dust", density: 0.7 }, font: "site", frame: "plain",
+    },
     name: "Youth Speak Forum",
     kind: "Forum",
     when: "Season to be confirmed",
@@ -35,6 +49,11 @@ export const EVENTS = [
   },
   {
     id: "global-village",
+    world: {
+      // a market of the world: warm paper, bunting, steam from the tables
+      scheme: "light", bg: "#fcefdf", ink: "#2b1608", soft: "#6b4529", accent: "#f48924", accentInk: "#9c4a06", line: "#ecd3b4", card: "#fff8ee",
+      scenery: "village", weather: { kind: "steam", density: 0.8 }, font: "rounded", frame: "polaroid",
+    },
     name: "Global Village",
     kind: "Cultural night",
     when: "Season to be confirmed",
@@ -47,6 +66,11 @@ export const EVENTS = [
   },
   {
     id: "leadership-summit",
+    world: {
+      // the mountains in winter: pine dark, cold light, snow on the wind
+      scheme: "dark", bg: "#0b1d18", ink: "#eef5f1", soft: "#a7c1b6", accent: "#5fd39b", accentInk: "#84e2b4", line: "#23403a", card: "#10271f",
+      scenery: "mountain", weather: { kind: "snow", density: 1, wind: 0.8 }, font: "site", frame: "plain",
+    },
     name: "Leadership Development Days",
     kind: "Training",
     when: "Season to be confirmed",
@@ -59,6 +83,11 @@ export const EVENTS = [
   },
   {
     id: "open-day",
+    world: {
+      // a campus morning: sky, sun through the trees, leaves on the breeze
+      scheme: "light", bg: "#e8f2ff", ink: "#0a1a33", soft: "#3b5376", accent: "#037ef3", accentInk: "#0060bd", line: "#c6daf2", card: "#ffffff",
+      scenery: "campus", weather: { kind: "leaves", density: 0.6, wind: 0.4 }, font: "rounded", frame: "polaroid",
+    },
     name: "Recruitment Open Day",
     kind: "On campus",
     when: "Start of each semester",
@@ -71,6 +100,11 @@ export const EVENTS = [
   },
   {
     id: "impact-day",
+    world: {
+      // paint on the walls: raw plaster, colour flicked from the brushes
+      scheme: "light", bg: "#f3efe6", ink: "#13201e", soft: "#4a5955", accent: "#0cb9c1", accentInk: "#056a70", line: "#ddd6c7", card: "#fffdf6",
+      scenery: "paint", weather: { kind: "spray", density: 0.5 }, font: "marker", frame: "taped",
+    },
     name: "Impact Day",
     kind: "Community",
     when: "Season to be confirmed",

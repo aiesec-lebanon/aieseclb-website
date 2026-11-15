@@ -3,12 +3,21 @@ import Reveal, { Lines } from "../components/Reveal";
 import Media from "../components/Scenic";
 import MockScreen from "../components/MockScreen";
 import Arrow from "../components/Arrow";
-import SampleNote from "../components/SampleNote";
+import World, { Frame, SceneryToggle } from "../components/World";
+import { headingProps } from "../components/worldType";
 import { hasGen } from "../lib/media";
 import { PLATFORMS } from "../content/platforms";
 import { SIGNUP_URL } from "../content/site";
+import "@fontsource/instrument-serif/400.css";
+import "@fontsource/shantell-sans/700.css";
+import "@fontsource/shantell-sans/800.css";
+import "@fontsource-variable/figtree";
+import "@fontsource-variable/jetbrains-mono";
 
-// A browser window drawn in CSS, holding a screenshot (or a code-made stand-in until one is added).
+const NIGHT = "#030b1c";
+
+// A browser window drawn in CSS around one screen of a platform (or a drawn stand-in until the
+// picture is there).
 function Screen({ platform, seed, className = "", priority = false }) {
   return (
     <div
@@ -19,17 +28,18 @@ function Screen({ platform, seed, className = "", priority = false }) {
         <span className="h-2.5 w-2.5 rounded-full bg-white/22" />
         <span className="h-2.5 w-2.5 rounded-full bg-white/22" />
         <span className="ml-3 truncate rounded-full bg-white/8 px-4 py-1 text-[0.78rem] font-bold text-white/60">
-          {platform.url && platform.url.startsWith("http") ? platform.url.replace("https://", "") : "aieseclb.org"}
+          {platform.url && platform.url.startsWith("https://signup") ? "signup.aieseclb.org" : platform.name}
         </span>
       </div>
-      {hasGen(platform.image) ? (
+      {hasGen(platform.screen) ? (
         <Media
-          name={platform.image}
-          alt={`Screenshot of ${platform.name}`}
+          name={platform.screen}
+          alt={`${platform.name}, one of its screens`}
           tone={platform.tone}
           seed={seed}
           priority={priority}
           className="aspect-[16/10]"
+          imgClassName="object-top"
         />
       ) : (
         <div className="relative aspect-[16/10]">
@@ -40,11 +50,30 @@ function Screen({ platform, seed, className = "", priority = false }) {
   );
 }
 
+function OpenIt({ platform }) {
+  const cls =
+    "group inline-flex h-12 items-center gap-3 rounded-full bg-[var(--w-ink)] px-6 font-bold text-[var(--w-bg)] transition-[gap] duration-300 hover:gap-4";
+  const label = platform.cta || "Open it";
+  if (!platform.url) return null;
+  return platform.url.startsWith("http") ? (
+    <a href={platform.url} target="_blank" rel="noreferrer" className={cls}>
+      {label}
+      <Arrow />
+    </a>
+  ) : (
+    <Link to={platform.url} viewTransition className={cls}>
+      {label}
+      <Arrow />
+    </Link>
+  );
+}
+
 export default function Platforms() {
   const [first, second, third] = PLATFORMS;
+  const last = PLATFORMS[PLATFORMS.length - 1].world;
   return (
     <>
-      {/* Hero: screens rising out of first light */}
+      {/* Hero: screens of the platforms rising out of first light */}
       <section className="relative isolate overflow-clip bg-night text-white">
         <div className="shell relative z-10 pt-32 text-center md:pt-36">
           <Reveal className="is-in">
@@ -52,15 +81,14 @@ export default function Platforms() {
               <Lines text={["What we build", "after class."]} />
             </h1>
             <p className="fade text-lead mx-auto mt-5 max-w-[36rem] text-white/80" style={{ "--i": 3 }}>
-              AIESEC in Lebanon is run by volunteers. Its information management team writes the software that lets
-              it run like something much bigger.
+              AIESEC in Lebanon is run by volunteers, and some of them write software. Each of these is a world of its
+              own: scroll down and walk through them.
             </p>
           </Reveal>
         </div>
 
         <div className="relative mt-10 md:mt-14">
-          {/* the horizon: the edge of a sun the screens come up over. A hard bright limb, warm
-              light above it, blue light falling from it onto the screens. */}
+          {/* the horizon: the edge of a sun the screens come up over */}
           <div
             aria-hidden="true"
             className="arc-rise pointer-events-none absolute left-1/2 top-[9%] -z-10 aspect-square w-[170vw] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,#0a2a66_0%,#06215a_88%,#0b63d6_96.5%,#ffd27a_99.2%,#fff3cf_100%)] shadow-[0_-18px_70px_rgb(255_200_69/0.55),0_-60px_180px_rgb(3_126_243/0.55)] md:w-[124vw]"
@@ -73,76 +101,87 @@ export default function Platforms() {
               <Screen platform={first} seed={500} priority />
             </div>
             <div className="parallax col-span-3 hidden translate-y-6 md:block" style={{ "--py": "4.4rem" }}>
-              <Screen platform={third || second} seed={502} className="origin-bottom-left rotate-3" />
+              <Screen platform={third} seed={502} className="origin-bottom-left rotate-3" />
             </div>
           </div>
           <div aria-hidden="true" className="h-16 bg-[linear-gradient(180deg,transparent,var(--color-night))] md:h-28" />
         </div>
       </section>
 
-      <div className="bg-night">
-        <SampleNote file="src/content/platforms.js" />
+      {/* One world per platform, made from its own design (components/World.jsx; each world is
+          in content/platforms.js) */}
+      <div className="relative">
+        {PLATFORMS.map((p, i) => {
+          const w = p.world;
+          const h = headingProps(w);
+          return (
+            <World
+              key={p.id}
+              id={p.id}
+              world={w}
+              from={i ? PLATFORMS[i - 1].world.bg : NIGHT}
+              label={p.name}
+              className="flex min-h-[150svh] items-center"
+            >
+              <div className="shell grid items-center gap-10 py-[34svh] md:grid-cols-12 md:gap-14">
+                <Reveal className={`md:col-span-5 ${i % 2 ? "md:order-2" : ""}`}>
+                  <p className="fade font-bold text-[var(--w-accent-ink)]">{p.kind}</p>
+                  <h2 className={`mt-3 ${h.className}`} style={h.style}>
+                    <Lines text={[p.name]} />
+                  </h2>
+                  <p className="fade text-lead mt-6" style={{ "--i": 2 }}>
+                    {p.line}
+                  </p>
+                  <ul className="fade mt-8 space-y-3" style={{ "--i": 3 }}>
+                    {p.points.map((pt) => (
+                      <li key={pt} className="flex gap-3 border-t border-[var(--w-line)] pt-3">
+                        <span aria-hidden="true" className="mt-[0.55em] h-2 w-2 shrink-0 rounded-full bg-[var(--w-accent)]" />
+                        {pt}
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="fade mt-8 flex flex-wrap items-center gap-3" style={{ "--i": 4 }}>
+                    {p.stack.map((s) => (
+                      <span
+                        key={s}
+                        className="rounded-full border border-[var(--w-line)] px-4 py-1.5 text-[0.92rem] font-bold text-[var(--w-soft)]"
+                      >
+                        {s}
+                      </span>
+                    ))}
+                    <span className="ml-auto">
+                      <OpenIt platform={p} />
+                    </span>
+                  </div>
+                </Reveal>
+                <div className="md:col-span-7">
+                  <div className="tilt-in [perspective:1600px]">
+                    {hasGen(p.image) ? (
+                      <Frame world={w}>
+                        <Media
+                          name={p.image}
+                          alt={`${p.name} on a laptop and a phone`}
+                          tone={p.tone}
+                          seed={520 + i * 7}
+                          sizes="(max-width: 768px) 92vw, 58vw"
+                          className="aspect-[16/10]"
+                        />
+                      </Frame>
+                    ) : (
+                      <Screen platform={p} seed={520 + i * 7} />
+                    )}
+                  </div>
+                </div>
+              </div>
+            </World>
+          );
+        })}
+        <SceneryToggle />
       </div>
 
-      {PLATFORMS.map((p, i) => (
-        <section key={p.id} id={p.id} className={i % 2 ? "bg-night-800 text-white" : "bg-night text-white"}>
-          <div className="shell grid gap-10 py-20 md:grid-cols-12 md:items-center md:gap-12 md:py-32">
-            <Reveal className={`md:col-span-5 ${i % 2 ? "md:order-2" : ""}`}>
-              <p className="fade font-bold text-sun">{p.kind}</p>
-              <h2 className="display mt-3 text-[clamp(2.6rem,5.6vw,5.6rem)]">
-                <Lines text={[p.name]} />
-              </h2>
-              <p className="fade text-lead mt-6 text-white/85" style={{ "--i": 2 }}>
-                {p.line}
-              </p>
-              <ul className="fade mt-8 space-y-3" style={{ "--i": 3 }}>
-                {p.points.map((pt) => (
-                  <li key={pt} className="flex gap-3 border-t border-white/14 pt-3 text-white/85">
-                    <span aria-hidden="true" className="mt-[0.55em] h-2 w-2 shrink-0 rounded-full bg-aiesec" />
-                    {pt}
-                  </li>
-                ))}
-              </ul>
-              <div className="fade mt-8 flex flex-wrap items-center gap-3" style={{ "--i": 4 }}>
-                {p.stack.map((s) => (
-                  <span key={s} className="rounded-full border border-white/22 px-4 py-1.5 text-[0.92rem] font-bold text-white/80">
-                    {s}
-                  </span>
-                ))}
-                {p.url &&
-                  (p.url.startsWith("http") ? (
-                    <a
-                      href={p.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="group ml-auto inline-flex h-12 items-center gap-3 rounded-full bg-white px-6 font-bold text-ink transition-colors hover:bg-sun"
-                    >
-                      Open it
-                      <Arrow className="transition-transform duration-500 group-hover:translate-x-1.5" />
-                    </a>
-                  ) : (
-                    <Link
-                      to={p.url}
-                      viewTransition
-                      className="group ml-auto inline-flex h-12 items-center gap-3 rounded-full bg-white px-6 font-bold text-ink transition-colors hover:bg-sun"
-                    >
-                      Open it
-                      <Arrow className="transition-transform duration-500 group-hover:translate-x-1.5" />
-                    </Link>
-                  ))}
-              </div>
-            </Reveal>
-            <div className="md:col-span-7">
-              <div className="tilt-in [perspective:1600px]">
-                <Screen platform={p} seed={520 + i * 7} />
-              </div>
-            </div>
-          </div>
-        </section>
-      ))}
-
-      <section className="bg-aiesec py-24 text-white md:py-36">
-        <div className="shell grid gap-10 md:grid-cols-[1.3fr_1fr] md:items-end">
+      <section className="bg-aiesec text-white">
+        <div aria-hidden="true" className="h-[22svh]" style={{ background: `linear-gradient(${last.bg}, var(--color-aiesec))` }} />
+        <div className="shell grid gap-10 pb-24 pt-4 md:grid-cols-[1.3fr_1fr] md:items-end md:pb-36">
           <Reveal>
             <h2 className="display text-mega max-w-[13ch]">
               <Lines text={["You could be", "the one who", "builds the next."]} />
@@ -150,8 +189,8 @@ export default function Platforms() {
           </Reveal>
           <Reveal>
             <p className="fade text-lead text-white/90">
-              The team is students: developers, designers and people who just like making things work. If that is
-              you, there is room.
+              The people behind these are students: developers, designers and people who just like making things
+              work. If that is you, there is room.
             </p>
             <a
               href={SIGNUP_URL}

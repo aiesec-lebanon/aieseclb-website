@@ -2,7 +2,7 @@
 
 Drop images in this folder using the **exact file names** below. The site picks them up automatically (hot reload in dev, next build in production). Until a file exists, the site shows a code-made landscape in its place, so nothing is ever broken.
 
-- Format: `.jpg` (or `.webp`). Platform screenshots can be `.png`.
+- Format: `.jpg` (or `.webp`).
 - Size: at least 2000 px on the long side. Aspect ratios are listed per image; a little off is fine, images are cropped to fit.
 - Keep them under about 600 KB each (export at quality 80).
 - In the Nano Banana prompts, the last sentence about style is the same every time on purpose, so the whole site looks like one photographer shot it.
@@ -73,6 +73,16 @@ Generic prompt if you need a stand-in (change the first sentence per event):
 
 ## Platforms page
 
-Use **real screenshots**, not generated images (16:10, at least 1600 px wide):
+Nothing to generate here: the platform pictures are made from the platforms themselves, in the
+projects folder next to this website. The tools for it are in `cook/`, a local working folder that is not in the
+repository; ask whoever has it to rerun them when a platform changes.
 
-`platform-signup.png`, `platform-website.png`, and one per platform you add in `src/content/platforms.js` (the name is the entry's `image` field).
+1. `node cook/tools/capture.mjs ../<project> <port> <prefix> <routes> --phone <routes>` runs a platform
+   locally, cut off from its database, sign-in and APIs, and photographs its public pages.
+2. Pages behind a sign-in are rebuilt from the platform's own code and design system with demo data
+   in `cook/recreate/<platform>/` and photographed by the `shoot.mjs` there.
+3. `node cook/tools/compose.mjs` puts each platform on a laptop and a phone in its own world and writes
+   `originals/platform-<id>.png` and `originals/platform-<id>-screen.png`; `npm run images` does the rest.
+
+To add a platform: an entry in `src/content/platforms.js` (its `image` and `screen` names), a job in
+`cook/tools/compose.mjs`, and the two steps above.

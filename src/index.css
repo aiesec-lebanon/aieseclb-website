@@ -353,3 +353,201 @@ html.lenis body {
     transform: translateY(108%);
   }
 }
+
+/* ------------------------------------------------------------------
+   Worlds (components/World.jsx, Scenery.jsx): the events and platforms
+   pages as worlds you walk through
+   ------------------------------------------------------------------ */
+.world {
+  view-timeline: --world block;
+}
+/* the colour of the world behind running into this one, eased so there is no visible band */
+.world-seam {
+  background: linear-gradient(
+    var(--w-from) 0%,
+    color-mix(in oklab, var(--w-from) 82%, transparent) 22%,
+    color-mix(in oklab, var(--w-from) 45%, transparent) 50%,
+    color-mix(in oklab, var(--w-from) 14%, transparent) 78%,
+    transparent 100%
+  );
+}
+.world-fade {
+  background: linear-gradient(transparent, color-mix(in oklab, var(--w-bg) 60%, transparent) 60%, var(--w-bg));
+}
+/* paths drawn with a marker: hidden until drawn */
+.world .draw-on {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* depth: the set comes towards you as you walk through the scene */
+  @supports ((animation-timeline: view()) and (animation-range: entry)) {
+    .world [data-depth] {
+      animation: world-depth linear both;
+      animation-timeline: --world;
+      animation-range: cover 0% cover 100%;
+    }
+    .world .draw-on {
+      animation: draw-on linear both;
+      animation-timeline: --world;
+      animation-range: entry 30% contain 30%;
+    }
+  }
+  .world-set .anim-swing {
+    animation: world-swing 7s ease-in-out infinite alternate;
+  }
+  .world-set .anim-swing-late {
+    animation: world-swing 8.5s ease-in-out -4s infinite alternate-reverse;
+  }
+  .world-set .anim-fog {
+    animation: world-fog 14s ease-in-out infinite alternate;
+  }
+  .world-set .anim-sway {
+    animation: world-sway 6s ease-in-out infinite alternate;
+  }
+  .world-set .anim-twinkle {
+    animation: world-twinkle 2.4s ease-in-out infinite alternate;
+  }
+  .world-set .anim-dapple {
+    animation: world-dapple 11s ease-in-out infinite alternate;
+  }
+  .world-set .anim-rise {
+    animation: world-rise 6.5s ease-in-out infinite;
+  }
+  .world-set .anim-pulse {
+    stroke-dasharray: 0.18 0.82;
+    animation: world-pulse 3.2s linear infinite;
+  }
+  .world-set .anim-ticker {
+    animation: world-ticker 40s linear infinite;
+  }
+  .world-set .anim-float {
+    animation: world-float 7s ease-in-out infinite alternate;
+  }
+  .world-set .anim-float-late {
+    animation: world-float 8s ease-in-out -3s infinite alternate-reverse;
+  }
+  .world-set .anim-rows {
+    animation: world-rows 6s steps(9, end) infinite;
+  }
+  .world-set .anim-pop {
+    animation: world-pop 7s ease-out infinite;
+  }
+  .scenery-paused .world-set [class*="anim-"] {
+    animation-play-state: paused;
+  }
+}
+/* on a phone the text sits over the set, so the drawn parts of it step back */
+@media (max-width: 47.99rem) {
+  .world-set svg,
+  .world-set [data-depth],
+  .world-set .anim-rise {
+    opacity: 0.38;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scenery-toggle {
+    display: none;
+  }
+}
+@keyframes world-depth {
+  from {
+    translate: 0 calc(var(--depth, 1) * 7vh);
+    scale: calc(1 - var(--depth, 1) * 0.03);
+  }
+  to {
+    translate: 0 calc(var(--depth, 1) * -7vh);
+    scale: calc(1 + var(--depth, 1) * 0.05);
+  }
+}
+@keyframes draw-on {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes world-swing {
+  from {
+    rotate: -11deg;
+  }
+  to {
+    rotate: 9deg;
+  }
+}
+@keyframes world-fog {
+  to {
+    translate: 6% 0;
+  }
+}
+@keyframes world-sway {
+  from {
+    rotate: -0.6deg;
+  }
+  to {
+    rotate: 0.6deg;
+  }
+}
+@keyframes world-twinkle {
+  to {
+    opacity: 0.45;
+  }
+}
+@keyframes world-dapple {
+  to {
+    translate: 2.5% 1.5%;
+    scale: 1.04;
+  }
+}
+@keyframes world-rise {
+  0% {
+    translate: 0 1.5rem;
+    opacity: 0;
+  }
+  20%,
+  70% {
+    opacity: 1;
+  }
+  100% {
+    translate: 0 -4rem;
+    opacity: 0;
+  }
+}
+@keyframes world-pulse {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes world-ticker {
+  to {
+    translate: -33.333% 0;
+  }
+}
+@keyframes world-float {
+  to {
+    translate: 0 -1.2rem;
+  }
+}
+@keyframes world-rows {
+  to {
+    translate: 0 252px;
+  }
+}
+@keyframes world-pop {
+  0%,
+  40% {
+    scale: 0;
+  }
+  48% {
+    scale: 1.2;
+  }
+  54%,
+  100% {
+    scale: 1;
+  }
+}

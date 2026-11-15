@@ -107,6 +107,70 @@
     1611,
     806
   ],
+  "platform-forms": [
+    2000,
+    1000
+  ],
+  "platform-forms-screen": [
+    1600,
+    1000
+  ],
+  "platform-learn-git": [
+    2000,
+    1000
+  ],
+  "platform-learn-git-screen": [
+    1600,
+    1000
+  ],
+  "platform-member-portal": [
+    2000,
+    1000
+  ],
+  "platform-member-portal-screen": [
+    1600,
+    1000
+  ],
+  "platform-partner-portal": [
+    2000,
+    1000
+  ],
+  "platform-partner-portal-screen": [
+    1600,
+    1000
+  ],
+  "platform-pulse": [
+    2000,
+    1000
+  ],
+  "platform-pulse-screen": [
+    1600,
+    1000
+  ],
+  "platform-signup": [
+    2000,
+    1000
+  ],
+  "platform-signup-screen": [
+    1600,
+    1000
+  ],
+  "platform-website": [
+    2000,
+    1000
+  ],
+  "platform-website-screen": [
+    1440,
+    1000
+  ],
+  "platform-xp": [
+    2000,
+    1000
+  ],
+  "platform-xp-screen": [
+    1600,
+    1000
+  ],
   "platforms-cover": [
     2000,
     1000
