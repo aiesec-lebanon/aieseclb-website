@@ -1,0 +1,74 @@
+{
+  "day-batroun": [
+    1493,
+    747
+  ],
+  "day-beirut-night": [
+    1493,
+    747
+  ],
+  "day-cedars": [
+    2000,
+    1000
+  ],
+  "day-mezze": [
+    2000,
+    1000
+  ],
+  "day-raouche": [
+    2000,
+    1000
+  ],
+  "day-snow": [
+    1493,
+    747
+  ],
+  "door-incoming": [
+    1611,
+    806
+  ],
+  "door-local": [
+    1611,
+    806
+  ],
+  "events-cover": [
+    2000,
+    1000
+  ],
+  "lebanon-baalbek": [
+    2000,
+    1000
+  ],
+  "lebanon-byblos": [
+    2000,
+    1000
+  ],
+  "lebanon-cedars": [
+    1611,
+    806
+  ],
+  "lebanon-hero": [
+    2400,
+    1000
+  ],
+  "lebanon-raouche": [
+    2000,
+    1000
+  ],
+  "platforms-cover": [
+    2000,
+    1000
+  ],
+  "program-talent": [
+    1611,
+    806
+  ],
+  "program-teacher": [
+    1611,
+    806
+  ],
+  "program-volunteer": [
+    1611,
+    806
+  ]
+}

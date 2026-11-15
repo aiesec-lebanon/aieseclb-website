@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { gen } from "../lib/media";
+import { genImage } from "../lib/media";
 
 // Code-made landscape used wherever a generated photograph has not been added yet: a sky, a sun
 // and a few ridges, all derived from a seed so every placeholder is different but related.
@@ -75,13 +75,24 @@ export function Scenic({ seed = 1, tone = "dawn", className = "" }) {
 }
 
 // <Media name="lebanon-cedars" alt="..." /> shows src/assets/gen/lebanon-cedars.* when it exists.
-export default function Media({ name, alt = "", seed = 1, tone = "dawn", className = "", imgClassName = "", priority = false }) {
-  const url = gen(name);
+export default function Media({
+  name,
+  alt = "",
+  seed = 1,
+  tone = "dawn",
+  className = "",
+  imgClassName = "",
+  priority = false,
+  sizes = "(max-width: 768px) 100vw, 50vw",
+}) {
+  const img = genImage(name);
   return (
-    <div className={`relative overflow-clip bg-night-800 ${className}`} data-media={name} data-filled={url ? "true" : "false"}>
-      {url ? (
+    <div className={`relative overflow-clip bg-night-800 ${className}`} data-media={name} data-filled={img ? "true" : "false"}>
+      {img ? (
         <img
-          src={url}
+          src={img.src}
+          srcSet={img.srcSet}
+          sizes={img.srcSet ? sizes : undefined}
           alt={alt}
           loading={priority ? "eager" : "lazy"}
           fetchPriority={priority ? "high" : "auto"}
