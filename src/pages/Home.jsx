@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import heroImage from "../assets/images/landing_page_bg.png";
 import logo from "../assets/images/aiesec_logo.png";
 import logoBlue from "../assets/images/aiesec_logo_blue.png";
+import logoWhite from "../assets/images/aiesec_logo_white.png";
 import manImage from "../assets/images/aiesec_man.png";
 import raoucheImage from "../assets/images/raouche.png";
 import lauLogo from "../assets/images/lau_logo.png";
@@ -180,7 +181,9 @@ const Page = () => {
         {/* Navbar */}
         <header className="w-full overflow-visible relative z-50">
           <div className="mx-auto max-w-[1440px] h-[72px] md:h-[80px] px-4 md:px-8 flex items-center justify-between overflow-visible">
-            <img src={manImage} alt="AIESEC logo" className="h-[40px] md:h-[55px] w-auto" />
+            <a href="/" aria-label="Home" className="inline-block">
+              <img src={logoWhite} alt="AIESEC" className="h-[40px] md:h-[40px] w-auto" />
+            </a>
 
             {/* Hamburger (Mobile) */}
             <button
