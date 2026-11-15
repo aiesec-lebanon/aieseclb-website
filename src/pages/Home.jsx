@@ -2,7 +2,7 @@ import { lazy, Suspense, useState } from "react";
 import { Link } from "react-router-dom";
 import DawnHero from "../scenes/DawnHero";
 import DawnHeroReal from "../scenes/DawnHeroReal";
-import { readStored } from "../gl/quality";
+import { clearFallback, readStored } from "../gl/quality";
 import Reveal, { Lines } from "../components/Reveal";
 import Counter from "../components/Counter";
 import Media from "../components/Scenic";
@@ -368,15 +368,37 @@ function Company() {
 // ?hero=graphic or ?hero=real in the address picks one by hand.
 function initialHero() {
   const asked = new URLSearchParams(window.location.search).get("hero");
-  if (asked === "graphic" || asked === "real") return asked;
+  if (asked === "real") {
+    clearFallback();
+    return { kind: "real", why: null };
+  }
+  if (asked === "graphic") return { kind: "graphic", why: null };
   const stored = readStored();
-  return stored && stored.fallback ? "graphic" : "real";
+  return stored && stored.fallback ? { kind: "graphic", why: "remembered" } : { kind: "real", why: null };
 }
 
 function Hero() {
-  const [kind, setKind] = useState(initialHero);
-  if (kind === "graphic") return <DawnHero />;
-  return <DawnHeroReal onTooSlow={() => setKind("graphic")} />;
+  const [state, setState] = useState(initialHero);
+  return (
+    <>
+      {state.kind === "graphic" ? (
+        <DawnHero />
+      ) : (
+        <DawnHeroReal onTooSlow={(reason) => setState({ kind: "graphic", why: reason })} />
+      )}
+      {/* while developing, say out loud when and why the drawn hero stands in */}
+      {import.meta.env.DEV && state.why && (
+        <p className="fixed bottom-3 left-3 z-[80] max-w-[26rem] rounded-xl bg-black/80 px-4 py-3 text-[13px] font-bold text-white">
+          Showing the drawn hero: this browser was judged too slow for the realistic one (
+          {state.why === "remembered" ? "remembered from an earlier visit" : state.why}). Open{" "}
+          <a className="underline" href="/?hero=real">
+            /?hero=real
+          </a>{" "}
+          to try again. This note only appears in development.
+        </p>
+      )}
+    </>
+  );
 }
 
 export default function Home() {

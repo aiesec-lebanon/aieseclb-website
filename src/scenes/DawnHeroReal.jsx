@@ -270,7 +270,7 @@ export default function DawnHeroReal({ onTooSlow }) {
       quad.seti("uCloudLight", t.cloudLight);
       quad.seti("uHighCloud", t.highCloud);
       quad.setScale(scale);
-      idleThrottle = device.mobile || ti <= 2;
+      idleThrottle = !params.has("nothrottle") && (device.mobile || ti <= 2);
     };
     const cssPixels = () => Math.max(1, canvas.clientWidth * canvas.clientHeight);
     governor = new Governor({

@@ -144,22 +144,37 @@ float marchTerrain(vec3 ro, vec3 rd, float tmax, int oct, int steps, float stepK
     // Steps lengthen with distance, or the far range would never be reached. Far off, where
     // crests are seen edge-on, they shorten again while the ray skims the ground.
     float far = smoothstep(10.0, 20.0, t);
-    float stepLen = max(d * stepK, uGrow * t * mix(1.0, clamp(d / 0.25, 0.15, 1.0), far) + 0.002);
-    // a long step close to the ground could carry the ray clean over a thin crest: look at the
-    // middle of it too
+    float stepLen = max(d * stepK, uGrow * t * mix(1.0, clamp(d / 0.4, 0.04, 1.0), far) + 0.002);
+    // a long step close to the ground could carry the ray clean over a thin crest: look inside
+    // it too, at a third and two thirds of the way
     if (d < 0.3 && stepLen > 3.0 * d) {
-      float tm = t + 0.5 * stepLen;
-      vec3 m = ro + rd * tm;
-      if (m.y - terrain(m.xz, oct) < 0.0) return refineHit(ro, rd, t, tm, oct);
+      float ta = t + stepLen * 0.333;
+      vec3 ma = ro + rd * ta;
+      if (ma.y - terrain(ma.xz, oct) < 0.0) return refineHit(ro, rd, t, ta, oct);
+      float tb = t + stepLen * 0.667;
+      vec3 mb = ro + rd * tb;
+      if (mb.y - terrain(mb.xz, oct) < 0.0) return refineHit(ro, rd, ta, tb, oct);
     }
     lastD = d;
     lastT = t;
     t += stepLen;
     if (t > tmax) return -1.0;
   }
-  // out of steps while still skimming the land: call it land, rather than let the sea far beyond
-  // show through as bright patches
-  return lastD < 0.35 ? lastT : -1.0;
+  // Out of fine steps (a ray that skimmed a crest uses many): carry on in long strides, so it
+  // still finds the land behind instead of showing a thread of sky along the ridge.
+  for (int i = 0; i < 24; i++) {
+    vec3 p = ro + rd * t;
+    if (p.y > 4.6 && rd.y > 0.0) return -1.0;
+    float d = p.y - terrain(p.xz, oct);
+    if (d < 0.0) return refineHit(ro, rd, lastT, t, oct);
+    lastD = d;
+    lastT = t;
+    t += max(d * stepK, uGrow * t + 0.003);
+    if (t > tmax) return -1.0;
+  }
+  // Still nothing while skimming the land on the way down: call it land, rather than let the sea
+  // far beyond show through as bright patches. A ray on its way up past a summit is sky.
+  return (lastD < 0.35 && rd.y < 0.0) ? lastT : -1.0;
 }
 
 vec3 terrainNormal(vec2 p, float t) {
@@ -512,7 +527,10 @@ vec3 shadeRocks(vec3 p, vec3 rd) {
 
 // ---------- cloud ----------
 float cloudDensity(vec3 p) {
-  float hgt = (p.y - CB) / (CT - CB);
+  // the base and the top of the layer rise and fall, so distant banks are not flat slabs
+  float base = CB + 0.22 * (n2(p.xz * 0.08 + 13.0) - 0.5);
+  float top = CT + 0.34 * (n2(p.xz * 0.06 + 29.0) - 0.5);
+  float hgt = (p.y - base) / (top - base);
   float prof = smoothstep(0.0, 0.22, hgt) * (1.0 - smoothstep(0.50, 1.0, hgt));
   vec2 q = p.xz + vec2(uTime * 0.006, 0.0);
   float n = n2(q * 0.20) * 0.55 + n2(q * 0.55 + 5.0) * 0.28 + n2g(q * 1.5 + p.y * 2.0) * 0.17;
@@ -525,10 +543,10 @@ vec4 marchCloud(vec3 ro, vec3 rd, float tmax, float jitter) {
   // returns scattered light in rgb and transmittance in a
   float t0, t1;
   if (abs(rd.y) < 1e-4) {
-    if (ro.y < CB || ro.y > CT) return vec4(0.0, 0.0, 0.0, 1.0);
+    if (ro.y < CB - 0.12 || ro.y > CT + 0.18) return vec4(0.0, 0.0, 0.0, 1.0);
     t0 = 0.0; t1 = 18.0;
   } else {
-    float ta = (CB - ro.y) / rd.y, tb = (CT - ro.y) / rd.y;
+    float ta = (CB - 0.12 - ro.y) / rd.y, tb = (CT + 0.18 - ro.y) / rd.y;
     t0 = max(min(ta, tb), 0.0);
     t1 = min(max(ta, tb), tmax);
   }

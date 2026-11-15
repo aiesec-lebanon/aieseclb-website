@@ -61,11 +61,16 @@ export function readStored() {
     if (!s || typeof s !== "object") return null;
     const age = Date.now() - (s.at || 0);
     if (age > 30 * DAY) return null;
-    if (s.fallback && age > 14 * DAY) return null; // try the realistic scene again after two weeks
+    if (s.fallback && age > 1 * DAY) return null; // a slow verdict is retried the next day
     return s;
   } catch {
     return null;
   }
+}
+// forget a slow verdict (the address asked for the realistic scene by name)
+export function clearFallback() {
+  const s = readStored();
+  if (s && s.fallback) writeStored({ renderer: s.renderer });
 }
 export function writeStored(value) {
   try {
@@ -237,8 +242,11 @@ export class Governor {
       this.tier--;
       this.scale = this.range().base;
     } else {
-      this.floor++;
-      if (this.floor >= 4 && over > 1.5 && this.giveUpFn) this.giveUpFn();
+      // Only a sustained, clear failure gives up: about four seconds below roughly 37 frames a
+      // second at the very lightest setting, and never while the page is still starting.
+      // (A dev server reloading the scene, or a busy moment, must not count.)
+      this.floor = over > 1.6 ? this.floor + 1 : 0;
+      if (this.floor >= 8 && performance.now() - this.bornAt > 8000 && this.giveUpFn) this.giveUpFn();
       return;
     }
     this.downCheck = { avg, prev, windows: 2 };

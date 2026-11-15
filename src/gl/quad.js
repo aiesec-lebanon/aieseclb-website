@@ -177,8 +177,8 @@ export function createQuad(
   };
 
   const textures = [];
-  // Upload a canvas or image as a texture bound to a fixed unit (0 to 5; 6 and 7 are taken by
-  // the accumulation pass).
+  // Upload a canvas or image as a texture bound to a fixed unit (0 to 4; 5 is scratch for
+  // render targets, 6 and 7 are taken by the accumulation pass).
   // tiling: a repeating lookup table (noise), sampled without mipmaps and without flipping.
   const texture = (name, source, unit, { tiling = false } = {}) => {
     let tex = textures[unit];
@@ -215,6 +215,10 @@ export function createQuad(
   let frameIndex = 0;
   const makeTarget = (w, h, hdr, filter) => {
     const t = gl.createTexture();
+    // Unit 5 is kept free for this. Binding on whatever unit happened to be active could put
+    // the new target where the scene expects one of its own textures: the scene then reads the
+    // image it is drawing into, the GPU refuses, and the canvas stays black.
+    gl.activeTexture(gl.TEXTURE5);
     gl.bindTexture(gl.TEXTURE_2D, t);
     if (hdr) gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA16F, w, h, 0, gl.RGBA, gl.HALF_FLOAT, null);
     else gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
