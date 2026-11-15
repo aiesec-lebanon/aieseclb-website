@@ -96,8 +96,6 @@ export default function DawnHeroReal({ onTooSlow }) {
     const params = new URLSearchParams(window.location.search);
     const forced = params.has("s") ? clamp01(parseFloat(params.get("s"))) : null;
 
-    // the camera of the last frame: while it holds still, frames are blended into a sharp image
-    const prevCam = new Float32Array(10);
     const apply = (quad, time, dt) => {
       const target = forced ?? (reduce ? 0 : sectionProgress(section));
       s = dt === 0 ? target : s + (target - s) * (1 - Math.exp(-dt * 6));
@@ -128,13 +126,13 @@ export default function DawnHeroReal({ onTooSlow }) {
       const dirZ = Math.cos(az) * Math.cos(pitch);
 
       const focal = mix(4.2, 2.5, smoothstep(0.08, 0.5, s));
-      const now = [cam.x, cam.y, cam.z, dirX, dirY, dirZ, focal, s, intro, 0];
-      let moved = false;
-      for (let i = 0; i < now.length; i++) {
-        if (Math.abs(now[i] - prevCam[i]) > 1e-6) moved = true;
-        prevCam[i] = now[i];
+      // hand the camera to the runner, which carries the sharp image along as it moves
+      if (quad.setCamera) {
+        const rl = Math.hypot(dirZ, dirX) || 1;
+        const rt = [dirZ / rl, 0, -dirX / rl];
+        const up = [dirY * rt[2], dirZ * rt[0] - dirX * rt[2], -dirY * rt[0]];
+        quad.setCamera([cam.x, cam.y, cam.z], [dirX, dirY, dirZ], rt, up, focal);
       }
-      if (moved && quad.resetHistory) quad.resetHistory();
 
       quad.set("uCamPos", cam.x, cam.y, cam.z);
       quad.set("uCamTar", cam.x + dirX, cam.y + dirY, cam.z + dirZ);
@@ -213,6 +211,7 @@ export default function DawnHeroReal({ onTooSlow }) {
       adaptive: false,
       timer: !params.has("notimer"),
       accumulate: !params.has("noaccum"),
+      reproject: !params.has("noreproj"),
       shouldDraw: (now) => {
         const t = sectionProgress(section);
         if (Math.abs(t - lastTarget) > 1e-4) {

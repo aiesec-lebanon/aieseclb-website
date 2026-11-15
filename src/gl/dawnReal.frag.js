@@ -9,7 +9,7 @@
 
 export const DAWN_REAL_FRAG = `#version 300 es
 precision highp float;
-out vec4 fragColor;
+out vec4 fragColor;   // alpha carries the distance along the ray, so the sharp image can follow the camera
 
 uniform vec2  uRes;
 uniform float uTime;
@@ -652,6 +652,7 @@ void main() {
   col = mix(col, uPageBg, uWash);
   col *= uIntro;
   col += (hash12(frag + fract(uTime) * 61.0) - 0.5) / 255.0 * 2.4;   // grain, and it hides banding
-  fragColor = vec4(col, 1.0);
+  float dist = what == 0 ? 6.0e4 : tHit;
+  fragColor = vec4(col, clamp(log2(1.0 + dist * 8.0) / 18.873, 0.0, 1.0));
 }
 `;
