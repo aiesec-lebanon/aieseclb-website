@@ -6,7 +6,9 @@
 // team has actually built, then delete the `sample` flag.
 //
 // For each platform: drop a real screenshot in src/assets/gen/ named `<image>.png` or `.jpg`
-// (16:10, at least 1600 px wide). Real screenshots, not generated ones.
+// (16:10, at least 1600 px wide). Real screenshots, not generated ones. Until a screenshot
+// exists the page draws a generic interface instead; `mock` picks which one:
+// form | site | dashboard | board | calendar.
 
 export const PLATFORMS = [
   {
@@ -18,6 +20,7 @@ export const PLATFORMS = [
     points: ["One form for every programme", "Straight into the team's pipeline", "Works on a phone, because that is where people are"],
     stack: ["Web"],
     image: "platform-signup",
+    mock: "form",
     tone: "day",
     sample: false,
   },
@@ -30,6 +33,7 @@ export const PLATFORMS = [
     points: ["React and Vite", "A real-time dawn rendered in a single shader", "Fast on a phone, usable without motion"],
     stack: ["React", "Vite", "WebGL"],
     image: "platform-website",
+    mock: "site",
     tone: "dawn",
     sample: false,
   },
@@ -42,6 +46,7 @@ export const PLATFORMS = [
     points: ["Sample point one", "Sample point two", "Sample point three"],
     stack: ["Sample"],
     image: "platform-member-hub",
+    mock: "dashboard",
     tone: "night",
     sample: true,
   },
@@ -54,6 +59,7 @@ export const PLATFORMS = [
     points: ["Sample point one", "Sample point two", "Sample point three"],
     stack: ["Sample"],
     image: "platform-exchange-tracker",
+    mock: "board",
     tone: "teal",
     sample: true,
   },
@@ -66,6 +72,7 @@ export const PLATFORMS = [
     points: ["Sample point one", "Sample point two", "Sample point three"],
     stack: ["Sample"],
     image: "platform-events-desk",
+    mock: "calendar",
     tone: "ember",
     sample: true,
   },

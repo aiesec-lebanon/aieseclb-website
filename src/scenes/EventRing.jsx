@@ -181,9 +181,11 @@ export default function EventRing({ events }) {
     const ring = new Group();
     scene.add(ring);
 
-    const COUNT = Math.max(12, events.length * 2);
-    const R = 3.1;
-    const HGT = 2.5;
+    // A wide, shallow arc: a big cylinder of which only the front sixth is ever in frame, so
+    // about seven posters sit across the screen and bend away at the sides.
+    const COUNT = Math.max(24, events.length * 4);
+    const R = 7.2;
+    const HGT = 2.6;
     const stepAngle = (Math.PI * 2) / COUNT;
     const span = stepAngle * 0.9;
     const arc = R * span;
@@ -223,7 +225,6 @@ export default function EventRing({ events }) {
       textures.forEach((t) => (t.anisotropy = maxAniso));
       panels.forEach((p, i) => {
         p.mat.uniforms.uMap.value = textures[i % events.length];
-        p.mesh.visible = true;
       });
       panels.textures = textures;
     });
@@ -236,12 +237,12 @@ export default function EventRing({ events }) {
       renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
       renderer.setSize(width, height, false);
       camera.aspect = width / height;
-      // keep about three and a half panels across on any screen
-      const wantHalfWidth = arc * (camera.aspect > 1 ? 2.35 : 1.0);
       const tanHalf = Math.tan((camera.fov * Math.PI) / 360);
-      const dist = Math.max(wantHalfWidth / (tanHalf * camera.aspect), (HGT * 0.56) / tanHalf);
-      camera.position.set(0, 0.18, R + dist);
-      camera.lookAt(0, 0, R * 0.55);
+      // far enough that the front poster, which steps forward and grows, has air above and below;
+      // on a narrow screen, far enough that it is not wider than the screen
+      const dist = Math.max((HGT * 0.76) / tanHalf, (arc * 0.62) / (tanHalf * camera.aspect));
+      camera.position.set(0, 0.06, R + dist);
+      camera.lookAt(0, 0.0, R);
       camera.updateProjectionMatrix();
     };
     resize();
@@ -267,7 +268,7 @@ export default function EventRing({ events }) {
       if (!dragging) return;
       const dx = e.clientX - lastX;
       lastX = e.clientX;
-      const perPanel = Math.max(120, width / (camera.aspect > 1 ? 5.2 : 2.2));
+      const perPanel = Math.max(120, width / (camera.aspect > 1 ? 6.4 : 1.6));
       target -= dx / perPanel;
       vel = -dx / perPanel;
     };
@@ -305,6 +306,13 @@ export default function EventRing({ events }) {
         p.mat.uniforms.uCam.value.copy(camera.position);
         const lit = i === front ? 1 : 0;
         p.mat.uniforms.uLit.value += (lit - p.mat.uniforms.uLit.value) * (reduce ? 1 : 0.12);
+        // the poster facing us steps forward: largest and nearest, its neighbours a little less
+        let away = Math.abs(i - (((pos % COUNT) + COUNT) % COUNT));
+        away = Math.min(away, COUNT - away);
+        const lift = 1 + 0.07 * Math.exp(-away * away * 1.4);
+        p.mesh.scale.set(lift, lift, lift);
+        // the far side of the cylinder is never shown
+        p.mesh.visible = Boolean(p.mat.uniforms.uMap.value) && away < COUNT * 0.24;
       });
       const idx = front % events.length;
       if (idx !== lastActive) {
@@ -356,8 +364,8 @@ export default function EventRing({ events }) {
 
   return (
     <div ref={wrapRef} className="relative">
-      <div ref={mountRef} className="relative h-[62svh] min-h-[26rem]" />
-      <div className="shell relative z-10 -mt-6 flex flex-col items-center gap-5 pb-12 text-center md:flex-row md:items-end md:justify-between md:text-left">
+      <div ref={mountRef} className="relative h-[52svh] min-h-[22rem]" />
+      <div className="shell relative z-10 flex flex-col items-center gap-5 pb-10 pt-2 text-center md:flex-row md:items-end md:justify-between md:text-left">
         <div aria-live="polite" className="min-h-[5.5rem] md:max-w-[34rem]">
           <p className="display text-[clamp(1.8rem,3vw,2.8rem)]">{current.name}</p>
           <p className="mt-2 text-white/75">{current.line}</p>

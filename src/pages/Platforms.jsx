@@ -1,8 +1,10 @@
 import { Link } from "react-router-dom";
 import Reveal, { Lines } from "../components/Reveal";
 import Media from "../components/Scenic";
+import MockScreen from "../components/MockScreen";
 import Arrow from "../components/Arrow";
 import SampleNote from "../components/SampleNote";
+import { hasGen } from "../lib/media";
 import { PLATFORMS } from "../content/platforms";
 import { SIGNUP_URL } from "../content/site";
 
@@ -20,14 +22,20 @@ function Screen({ platform, seed, className = "", priority = false }) {
           {platform.url && platform.url.startsWith("http") ? platform.url.replace("https://", "") : "aieseclb.org"}
         </span>
       </div>
-      <Media
-        name={platform.image}
-        alt={`Screenshot of ${platform.name}`}
-        tone={platform.tone}
-        seed={seed}
-        priority={priority}
-        className="aspect-[16/10]"
-      />
+      {hasGen(platform.image) ? (
+        <Media
+          name={platform.image}
+          alt={`Screenshot of ${platform.name}`}
+          tone={platform.tone}
+          seed={seed}
+          priority={priority}
+          className="aspect-[16/10]"
+        />
+      ) : (
+        <div className="relative aspect-[16/10]">
+          <MockScreen kind={platform.mock} seed={seed} label={`Illustration of the ${platform.name} interface`} />
+        </div>
+      )}
     </div>
   );
 }
@@ -38,7 +46,7 @@ export default function Platforms() {
     <>
       {/* Hero: screens rising out of first light */}
       <section className="relative isolate overflow-clip bg-night text-white">
-        <div className="shell relative z-10 pt-36 text-center md:pt-44">
+        <div className="shell relative z-10 pt-32 text-center md:pt-36">
           <Reveal className="is-in">
             <h1 id="page-title" tabIndex={-1} className="display text-mega mx-auto max-w-[12ch] outline-none">
               <Lines text={["What we build", "after class."]} />
@@ -50,20 +58,21 @@ export default function Platforms() {
           </Reveal>
         </div>
 
-        <div className="relative mt-16 md:mt-24">
-          {/* the horizon: an arc of light the screens come up over */}
+        <div className="relative mt-10 md:mt-14">
+          {/* the horizon: the edge of a sun the screens come up over. A hard bright limb, warm
+              light above it, blue light falling from it onto the screens. */}
           <div
             aria-hidden="true"
-            className="arc-rise pointer-events-none absolute left-1/2 top-[18%] -z-10 aspect-square w-[150vw] -translate-x-1/2 rounded-full border-t-[3px] border-sun/90 bg-[radial-gradient(ellipse_60%_26%_at_50%_0%,rgb(255_200_69/0.34),rgb(3_126_243/0.20)_45%,transparent_72%)] md:w-[118vw]"
+            className="arc-rise pointer-events-none absolute left-1/2 top-[9%] -z-10 aspect-square w-[170vw] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,#0a2a66_0%,#06215a_88%,#0b63d6_96.5%,#ffd27a_99.2%,#fff3cf_100%)] shadow-[0_-18px_70px_rgb(255_200_69/0.55),0_-60px_180px_rgb(3_126_243/0.55)] md:w-[124vw]"
           />
-          <div className="shell relative grid grid-cols-12 items-end gap-3 pb-0 md:gap-6">
-            <div className="parallax col-span-3 hidden translate-y-10 md:block" style={{ "--py": "3.2rem" }}>
+          <div className="shell relative grid grid-cols-12 items-end gap-3 pb-0 md:gap-5">
+            <div className="parallax col-span-3 hidden translate-y-6 md:block" style={{ "--py": "3.2rem" }}>
               <Screen platform={second} seed={501} className="origin-bottom-right -rotate-3" />
             </div>
             <div className="screen-rise col-span-12 md:col-span-6">
               <Screen platform={first} seed={500} priority />
             </div>
-            <div className="parallax col-span-3 hidden translate-y-10 md:block" style={{ "--py": "4.4rem" }}>
+            <div className="parallax col-span-3 hidden translate-y-6 md:block" style={{ "--py": "4.4rem" }}>
               <Screen platform={third || second} seed={502} className="origin-bottom-left rotate-3" />
             </div>
           </div>

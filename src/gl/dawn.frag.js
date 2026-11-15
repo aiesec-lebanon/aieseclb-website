@@ -341,7 +341,7 @@ const float ZR = 2.5;
 // returns coverage; edge receives how close this point is to the lit side (0..1)
 float rockMask(float wx, float wy, float px, out float edge) {
   // the big rock: steep sides, a sloping table top, the arch low on its seaward end
-  float x = wx + 0.98;
+  float x = wx - 0.12;
   float w = 0.25;
   float side = 1.0 - pow(abs(x) / w, 7.0);
   float top = (0.33 + 0.06 * x / w) * side + 0.014 * (vnoise1(wx * 23.0) - 0.5) + 0.02 * (vnoise1(wx * 7.0) - 0.5);
@@ -349,7 +349,7 @@ float rockMask(float wx, float wy, float px, out float edge) {
   vec2 a = vec2((x - 0.105) / 0.052, wy / 0.115);
   float arch = smoothstep(1.0 - px * 14.0, 1.0 + px * 14.0, dot(a, a));
   // the small rock beside it
-  float x2 = wx + 1.50;
+  float x2 = wx + 0.40;
   float top2 = 0.150 * (1.0 - pow(abs(x2) / 0.085, 3.0)) + 0.010 * (vnoise1(wx * 37.0) - 0.5);
   float body2 = smoothstep(-px, px, top2 - wy) * step(abs(x2), 0.085);
   float e1 = max(smoothstep(0.55, 1.0, x / w), smoothstep(0.84, 1.0, wy / max(top, 0.01)) * 0.7);
@@ -357,15 +357,15 @@ float rockMask(float wx, float wy, float px, out float edge) {
   edge = body * arch > body2 ? e1 : e2;
   return max(body * arch, body2);
 }
-bool rockBox(float wx, float wy) { return wy < 0.42 && wy > -0.01 && wx > -1.70 && wx < -0.66; }
+bool rockBox(float wx, float wy) { return wy < 0.42 && wy > -0.01 && wx > -0.60 && wx < 0.44; }
 
 vec3 rockColor(float wx, float wy, vec2 k, float edge) {
   float tex = vnoise2(vec2(wx * 14.0, wy * 30.0));
-  vec3 c = tod(vec3(0.007, 0.022, 0.060), vec3(0.020, 0.070, 0.170), vec3(0.300, 0.400, 0.560));
+  vec3 c = tod(vec3(0.003, 0.010, 0.030), vec3(0.016, 0.055, 0.140), vec3(0.300, 0.400, 0.560));
   c *= 0.80 + 0.40 * tex;
   c *= 0.93 + 0.07 * sin(wy * 170.0 + vnoise1(wx * 9.0) * 5.0);   // strata
   // the side toward the sun picks up the sky
-  c += hazeColor(k.x) * edge * 0.30;
+  c += hazeColor(k.x) * edge * 0.50;
   return c;
 }
 
@@ -398,6 +398,22 @@ vec3 scene(float ox, float oy, vec2 k, float stretch, bool reflected) {
       if (dzt > 0.5) {
         vec2 w = vec2(ox + k.x * dzt, oy + k.y * dzt);
         vec2 uv = (w - uTitleRect.xy) / (uTitleRect.zw - uTitleRect.xy);
+        // a bank of mist drifts just in front of it and takes the feet of the letters, so the
+        // words are plainly inside the landscape and not laid over it
+        if (uv.x > -0.15 && uv.x < 1.15 && uv.y > -0.25 && uv.y < 0.42) {
+          float mx = w.x * 0.19 + uTime * 0.012;
+          float top = 0.05 + 0.15 * (puffs(mx) * 0.62 + puffs(mx * 2.6 + 3.0) * 0.38);
+          float mist = smoothstep(top + 0.05, top - 0.08, uv.y) * smoothstep(-0.25, -0.05, uv.y);
+          mist *= smoothstep(-0.15, 0.05, uv.x) * (1.0 - smoothstep(0.95, 1.15, uv.x)) * uTitleA;
+          if (mist > 0.0) {
+            float sn = exp(-pow((k.x - uSun.x) / 0.5, 2.0));
+            vec3 mc = mix(cloudShade(), cloudLit(), 0.62 + 0.3 * smoothstep(top - 0.10, top, uv.y)) + sunTint() * sn * glowAmount() * 0.16;
+            mc = mix(mc, hazeColor(k.x), airAt(dzt) * 0.6);
+            float ma = mist * 0.90;
+            acc += (1.0 - alpha) * ma * mc;
+            alpha += (1.0 - alpha) * ma;
+          }
+        }
         if (uv.x > 0.0 && uv.x < 1.0 && uv.y > 0.0 && uv.y < 1.0) {
           float lod = max(0.0, log2(2048.0 * dzt / (uRes.y * 0.5 * F) / (uTitleRect.z - uTitleRect.x)));
           float a = textureLod(uTitle, uv, lod).r * uTitleA;
