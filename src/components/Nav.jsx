@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import logoWhite from "../assets/images/aiesec_logo_white.png";
 import { NAV, SIGNUP_URL } from "../content/site";
 
@@ -7,7 +7,11 @@ export default function Nav() {
   const [open, setOpen] = useState(false);
   const [compact, setCompact] = useState(false);
   const [hidden, setHidden] = useState(false);
+  // the nav takes the scheme of whatever is under it: sections say data-scheme="light" when
+  // they are light (the worlds on the events and platforms pages, for one)
+  const [light, setLight] = useState(false);
   const lastY = useRef(0);
+  const { pathname } = useLocation();
 
   useEffect(() => {
     const onScroll = () => {
@@ -17,11 +21,27 @@ export default function Nav() {
       setHidden(y > 500 && y > lastY.current + 4);
       if (y < lastY.current - 4 || y < 500) setHidden(false);
       lastY.current = y;
+      probe();
+    };
+    const probe = () => {
+      let scheme = "dark";
+      for (const el of document.elementsFromPoint(window.innerWidth / 2, 40)) {
+        if (el.closest("header")) continue;
+        const owner = el.closest("[data-scheme]");
+        if (owner) scheme = owner.dataset.scheme;
+        break;
+      }
+      setLight(scheme === "light");
     };
     onScroll();
+    // a new page mounts after the route changes (and lazily): look again once it is there
+    const later = [120, 600].map((ms) => setTimeout(probe, ms));
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+    return () => {
+      later.forEach(clearTimeout);
+      window.removeEventListener("scroll", onScroll);
+    };
+  }, [pathname]);
 
   useEffect(() => {
     document.documentElement.style.overflow = open ? "hidden" : "";
@@ -49,15 +69,27 @@ export default function Nav() {
       >
         <div className="shell pt-4 md:pt-5">
           <div
-            className={`flex items-center justify-between rounded-full border border-white/12 pl-5 pr-2 transition-[background-color,height,box-shadow] duration-500 md:pl-7 ${
+            className={`flex items-center justify-between rounded-full border pl-5 pr-2 transition-[background-color,border-color,height,box-shadow] duration-500 md:pl-7 ${
+              light ? "border-ink/10" : "border-white/12"
+            } ${
               compact
-                ? "h-14 bg-night/72 shadow-[0_10px_40px_rgb(3_11_28/0.28)] backdrop-blur-xl"
-                : "h-16 bg-night/28 backdrop-blur-md"
+                ? `h-14 shadow-[0_10px_40px_rgb(3_11_28/0.28)] backdrop-blur-xl ${light ? "bg-white/82" : "bg-night/72"}`
+                : `h-16 backdrop-blur-md ${light ? "bg-white/50" : "bg-night/28"}`
             }`}
           >
             <Link to="/" viewTransition aria-label="AIESEC in Lebanon, home" className="flex items-center gap-3">
-              <img src={logoWhite} alt="AIESEC" className="h-[1.35rem] w-auto md:h-6" />
-              <span className="hidden border-l border-white/25 pl-3 text-[0.95rem] font-bold text-white/90 sm:block">
+              {/* the logo as a mask, so it can be white over dark worlds and AIESEC blue over light ones */}
+              <span
+                role="img"
+                aria-label="AIESEC"
+                className={`block aspect-[1265/259] h-[1.35rem] transition-colors duration-500 md:h-6 ${light ? "bg-aiesec" : "bg-white"}`}
+                style={{ mask: `url(${logoWhite}) center / contain no-repeat`, WebkitMask: `url(${logoWhite}) center / contain no-repeat` }}
+              />
+              <span
+                className={`hidden border-l pl-3 text-[0.95rem] font-bold transition-colors duration-500 sm:block ${
+                  light ? "border-ink/20 text-ink/85" : "border-white/25 text-white/90"
+                }`}
+              >
                 in Lebanon
               </span>
             </Link>
@@ -70,7 +102,13 @@ export default function Nav() {
                   viewTransition
                   className={({ isActive }) =>
                     `rounded-full px-4 py-2 text-[0.98rem] font-bold transition-colors duration-300 ${
-                      isActive ? "bg-white/16 text-white" : "text-white/78 hover:bg-white/10 hover:text-white"
+                      light
+                        ? isActive
+                          ? "bg-ink/8 text-ink"
+                          : "text-ink/75 hover:bg-ink/6 hover:text-ink"
+                        : isActive
+                          ? "bg-white/16 text-white"
+                          : "text-white/78 hover:bg-white/10 hover:text-white"
                     }`
                   }
                 >
@@ -90,7 +128,9 @@ export default function Nav() {
               </a>
               <button
                 type="button"
-                className="grid h-11 w-11 place-items-center rounded-full bg-white/10 text-white md:hidden"
+                className={`grid h-11 w-11 place-items-center rounded-full transition-colors duration-500 md:hidden ${
+                  light && !open ? "bg-ink/8 text-ink" : "bg-white/10 text-white"
+                }`}
                 aria-expanded={open}
                 aria-controls="mobile-menu"
                 aria-label={open ? "Close menu" : "Open menu"}
