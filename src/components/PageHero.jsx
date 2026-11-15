@@ -12,6 +12,7 @@ export default function PageHero({ title, lead, image, alt = "", tone = "dawn", 
         tone={tone}
         seed={seed}
         priority
+        sizes="100vw"
         className="!absolute inset-0 -z-20"
         imgClassName="hero-settle"
       />

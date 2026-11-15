@@ -31,3 +31,6 @@ cook/
 
 # Cook run working state (reference clips, stills, ledger)
 cook/
+
+# Full-size originals of generated photographs (web versions are made by npm run images)
+src/assets/gen/originals/

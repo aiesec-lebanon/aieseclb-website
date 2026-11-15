@@ -13,7 +13,7 @@ import {
   Vector3,
   WebGLRenderer,
 } from "three";
-import { gen } from "../lib/media";
+import { genSmall } from "../lib/media";
 import Arrow from "../components/Arrow";
 
 const TONES = {
@@ -44,7 +44,7 @@ async function makePoster(event, index) {
   c.width = W;
   c.height = H;
   const ctx = c.getContext("2d");
-  const url = gen(event.image);
+  const url = genSmall(event.image);
   const img = url ? await loadImage(url) : null;
   if (img) {
     const s = Math.max(W / img.width, H / img.height);

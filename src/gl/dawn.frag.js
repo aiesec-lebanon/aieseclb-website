@@ -338,32 +338,56 @@ float cedars(int i, float wx, float wy, float z, float B, float A, float f, floa
 
 // The Pigeon Rocks of Raouche stand in the water close to the camera.
 const float ZR = 2.5;
+// Seen from the sea: the slender spire on the left, and on the right the big rock, about as tall
+// as it is wide, with its arch on the side that faces the spire. Proportions follow photographs.
 // returns coverage; edge receives how close this point is to the lit side (0..1)
 float rockMask(float wx, float wy, float px, out float edge) {
-  // the big rock: steep sides, a sloping table top, the arch low on its seaward end
-  float x = wx - 0.12;
-  float w = 0.25;
-  float side = 1.0 - pow(abs(x) / w, 7.0);
-  float top = (0.33 + 0.06 * x / w) * side + 0.014 * (vnoise1(wx * 23.0) - 0.5) + 0.02 * (vnoise1(wx * 7.0) - 0.5);
-  float body = smoothstep(-px, px, top - wy) * step(abs(x), w);
-  vec2 a = vec2((x - 0.105) / 0.052, wy / 0.115);
-  float arch = smoothstep(1.0 - px * 14.0, 1.0 + px * 14.0, dot(a, a));
-  // the small rock beside it
-  float x2 = wx + 0.40;
-  float top2 = 0.150 * (1.0 - pow(abs(x2) / 0.085, 3.0)) + 0.010 * (vnoise1(wx * 37.0) - 0.5);
-  float body2 = smoothstep(-px, px, top2 - wy) * step(abs(x2), 0.085);
-  float e1 = max(smoothstep(0.55, 1.0, x / w), smoothstep(0.84, 1.0, wy / max(top, 0.01)) * 0.7);
-  float e2 = max(smoothstep(0.45, 1.0, x2 / 0.085), smoothstep(0.80, 1.0, wy / max(top2, 0.01)) * 0.7);
-  edge = body * arch > body2 ? e1 : e2;
-  return max(body * arch, body2);
+  // the big rock
+  const float H = 0.38;
+  float u = wx - 0.10;
+  float yn = clamp(wy / H, 0.0, 1.0);
+  float sideN = u > 0.0 ? 1.0 : 0.0;
+  float hw = 0.20 * (1.0 + 0.06 * (1.0 - yn) + 0.045 * sin(yn * 3.1416))
+           - 0.012 * exp(-pow((wy - 0.012) / 0.012, 2.0))            // the notch the waves cut
+           + 0.007 * (vnoise1(wy * 38.0 + sideN * 9.0) - 0.5);       // eroded walls
+  float top = H * (0.85 + 0.15 * smoothstep(-0.15, 0.10, u))
+            - H * 0.15 * pow(clamp(abs(u - 0.03) / 0.21, 0.0, 1.0), 3.2) // a domed, rounded crown
+            + 0.010 * vnoise1(u * 55.0) + 0.006 * vnoise1(u * 140.0); // scrub on top
+  float big = smoothstep(-px, px, hw - abs(u)) * smoothstep(-px, px, top - wy);
+  // the arch: straight legs and a round head, a little ragged
+  float ax = u + 0.074 + 0.005 * (vnoise1(wy * 45.0) - 0.5);
+  float aw = 0.054, ah = 0.182, ar = aw * 1.1;
+  float f = length(vec2(ax / aw, max(wy - (ah - ar), 0.0) / ar)) - 1.0;
+  big *= smoothstep(-px, px, f * aw);
+
+  // the spire, leaning a little toward its neighbour
+  const float HS = 0.335;
+  float v = wx + 0.265;
+  float ys = clamp(wy / HS, 0.0, 1.0);
+  float lean = 0.026 * ys * ys;
+  float vs = v - lean;
+  float hs = 0.088 * (1.0 - 0.44 * pow(ys, 1.7))
+           - 0.008 * exp(-pow((wy - 0.010) / 0.010, 2.0))
+           + 0.006 * (vnoise1(wy * 42.0 + (vs > 0.0 ? 4.0 : 0.0)) - 0.5);
+  float topS = HS * (1.0 - 0.55 * pow(clamp(abs(vs) / 0.06, 0.0, 1.0), 2.0)) + 0.008 * vnoise1(v * 70.0);
+  float spire = smoothstep(-px, px, hs - abs(vs)) * smoothstep(-px, px, topS - wy);
+
+  // the sun is to the right: right-hand edges and tops catch it
+  float e1 = max(smoothstep(0.86, 1.0, u / max(hw, 0.01)), smoothstep(0.94, 1.0, wy / max(top, 0.01)) * 0.6);
+  float e2 = max(smoothstep(0.78, 1.0, vs / max(hs, 0.01)), smoothstep(0.92, 1.0, wy / max(topS, 0.01)) * 0.6);
+  float flick = 0.6 + 0.4 * vnoise1(wy * 60.0);                     // light catches the ledges, not a smooth band
+  e1 *= flick;
+  e2 *= flick;
+  edge = big > spire ? e1 : e2;
+  return max(big, spire);
 }
-bool rockBox(float wx, float wy) { return wy < 0.42 && wy > -0.01 && wx > -0.60 && wx < 0.44; }
+bool rockBox(float wx, float wy) { return wy < 0.42 && wy > -0.01 && wx > -0.38 && wx < 0.33; }
 
 vec3 rockColor(float wx, float wy, vec2 k, float edge) {
   float tex = vnoise2(vec2(wx * 14.0, wy * 30.0));
   vec3 c = tod(vec3(0.003, 0.010, 0.030), vec3(0.016, 0.055, 0.140), vec3(0.300, 0.400, 0.560));
   c *= 0.80 + 0.40 * tex;
-  c *= 0.93 + 0.07 * sin(wy * 170.0 + vnoise1(wx * 9.0) * 5.0);   // strata
+  c *= 0.90 + 0.10 * sin(wy * 210.0 + vnoise1(wx * 9.0) * 5.0);   // strata of the limestone
   // the side toward the sun picks up the sky
   c += hazeColor(k.x) * edge * 0.50;
   return c;
