@@ -21,3 +21,7 @@ export function headingProps(world) {
   const font = world.font || "site";
   return { className: HEADING[font] || HEADING.site, style: { fontFamily: FONTS[font] } };
 }
+
+// How much larger than its frame an event's photograph is drawn, so the frame shows its middle and
+// the rest carries on behind it (Backdrop.jsx).
+export const BACKDROP_CROP = 1.55;

@@ -22,9 +22,11 @@ import { setSceneryPaused, useSceneryPaused } from "./sceneryPause";
 //   weather     { kind, density, wind } in the air, optional (Weather.jsx)
 //   font        the type of its headings: a key of FONTS (worldType.js)
 //   frame       how its picture hangs: plain, gold, polaroid, taped, window
+// A scene can also pass a backdrop (Backdrop.jsx: its photograph continued behind it, in 3D),
+// drawn under the set.
 
 
-export default function World({ world, from, id, label, className = "", children }) {
+export default function World({ world, from, id, label, backdrop = null, className = "", children }) {
   const ref = useRef(null);
   const [live, setLive] = useState(false);
   useEffect(() => {
@@ -55,6 +57,7 @@ export default function World({ world, from, id, label, className = "", children
       {/* the window onto this world's set */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 overflow-clip">
         <div className={`world-set sticky top-0 h-[100lvh] overflow-clip ${live ? "is-live" : ""}`}>
+          {live ? backdrop : null}
           {live ? <Scenery name={world.scenery} world={world} /> : null}
           {world.weather && <Weather {...world.weather} live={live} />}
         </div>

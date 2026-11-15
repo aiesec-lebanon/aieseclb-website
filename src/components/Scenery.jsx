@@ -150,10 +150,9 @@ function Mountain({ world }) {
   );
 }
 
-// Recruitment Open Day: a campus morning. Sun through the trees, leaf shadows moving.
-function Campus({ world }) {
-  const rnd = seeded(31);
-  const crowns = Array.from({ length: 16 }, (_, i) => ({ x: i * 110 + rnd() * 50, y: 880 + rnd() * 60, r: 90 + rnd() * 70 }));
+// Recruitment Open Day: a campus morning. Sun through the trees, leaf shadows moving (the
+// photograph carries the campus itself).
+function Campus() {
   return (
     <>
       <div className="absolute inset-0" style={{ background: "radial-gradient(34% 34% at 90% 4%, rgb(255 232 160 / 0.7), transparent 72%)" }} />
@@ -164,13 +163,6 @@ function Campus({ world }) {
             "radial-gradient(9% 7% at 20% 30%, rgb(255 255 255 / 0.5), transparent), radial-gradient(7% 6% at 34% 22%, rgb(255 255 255 / 0.4), transparent), radial-gradient(10% 8% at 72% 40%, rgb(255 255 255 / 0.45), transparent), radial-gradient(6% 5% at 84% 64%, rgb(255 255 255 / 0.4), transparent), radial-gradient(8% 6% at 12% 72%, rgb(255 255 255 / 0.35), transparent)",
         }}
       />
-      <Svg anchor="xMidYMax">
-        <g data-depth="" style={{ "--depth": 0.9 }} fill={mixHex(world.bg, "#3f9a63", 0.2)}>
-          {crowns.map((c) => (
-            <circle key={c.x} cx={c.x} cy={c.y} r={c.r} />
-          ))}
-        </g>
-      </Svg>
     </>
   );
 }

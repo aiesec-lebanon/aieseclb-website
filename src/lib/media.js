@@ -17,6 +17,12 @@ for (const [path, url] of Object.entries(files)) {
   else full[name] = url;
 }
 
+// depth maps for the photographs shown in 3D (cook/tools/depth.mjs): src/assets/depth/<name>.png
+const depthFiles = import.meta.glob("../assets/depth/*.png", { eager: true, query: "?url", import: "default" });
+const depth = {};
+for (const [path, url] of Object.entries(depthFiles)) depth[path.split("/").pop().replace(/.png$/, "")] = url;
+export const genDepth = (name) => depth[name] || null;
+
 export const gen = (name) => full[name] || null;
 export const genSmall = (name) => small[name] || full[name] || null;
 export const hasGen = (name) => Boolean(full[name]);
