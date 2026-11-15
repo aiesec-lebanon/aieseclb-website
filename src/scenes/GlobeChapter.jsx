@@ -161,11 +161,17 @@ varying vec3 vN; varying vec3 vP; varying vec2 vUv;
 void main() {
   vec3 N = normalize(vN);
   vec3 V = normalize(uCam - vP);
-  float lit = smoothstep(-0.45, 0.80, dot(N, normalize(uLight)));
-  vec3 ocean = mix(vec3(0.006, 0.060, 0.200), vec3(0.012, 0.250, 0.640), lit);
+  float sunSide = dot(N, normalize(uLight));
+  float lit = smoothstep(-0.25, 0.55, sunSide);
+  vec3 ocean = mix(vec3(0.004, 0.030, 0.110), vec3(0.012, 0.250, 0.640), lit);
   vec4 t = texture2D(uMap, vUv);
-  vec3 land = t.rgb * mix(0.55, 1.0, lit);
+  vec3 land = t.rgb * mix(0.22, 1.0, lit);
   vec3 col = mix(ocean, land, t.a * 0.96);
+  // on the night side the land is dark, and its towns are lit
+  float night = 1.0 - smoothstep(-0.12, 0.22, sunSide);
+  vec2 g = floor(vUv * vec2(1100.0, 550.0));
+  float h = fract(sin(dot(g, vec2(12.9898, 78.233))) * 43758.5453);
+  col += vec3(1.0, 0.74, 0.34) * step(0.982, h) * t.a * night * 1.3;
   float fres = pow(1.0 - max(dot(N, V), 0.0), 2.4);
   col += vec3(0.40, 0.70, 1.00) * fres * 0.34;
   gl_FragColor = vec4(col, 1.0);

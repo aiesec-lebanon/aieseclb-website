@@ -42,22 +42,23 @@ export default function Lebanon() {
         {ONE_DAY.map((s, i) => (
           <article
             key={s.time}
-            className={`flex w-[84vw] shrink-0 gap-6 px-4 md:w-[62vw] md:gap-10 md:px-8 ${i % 2 ? "flex-col-reverse md:flex-row-reverse md:items-end" : "flex-col md:flex-row md:items-start"}`}
+            className={`flex w-[86vw] shrink-0 flex-col gap-6 px-4 md:w-[72vw] md:flex-row md:gap-12 md:px-[2.5vw] ${i % 2 ? "md:items-end md:pb-[6svh]" : "md:items-start md:pt-[6svh]"}`}
           >
-            <div className="overflow-clip rounded-[1.8rem] md:w-[58%]">
+            <div className="overflow-clip rounded-[1.8rem] md:w-[64%]">
               <Media
                 name={s.image}
                 alt={s.alt}
                 tone={s.tone}
                 seed={100 + i * 13}
-                className={i % 2 ? "aspect-[4/5] md:aspect-[3/4]" : "aspect-[16/11] md:aspect-[4/3]"}
+                sizes="(max-width: 768px) 90vw, 52vw"
+                className={`md:aspect-auto ${i % 2 ? "aspect-[4/5] md:h-[70svh]" : "aspect-[16/11] md:h-[64svh]"}`}
               />
             </div>
-            <div className="md:w-[42%] md:py-6">
-              <p className="display text-[clamp(2.6rem,5.4vw,5.6rem)] text-sun">{s.time}</p>
+            <div className="md:w-[36%]">
+              <p className="display text-[clamp(3rem,6.4vw,7rem)] text-sun">{s.time}</p>
               <p className="mt-1 font-bold text-white/72">{s.place}</p>
-              <h3 className="display-wide mt-6 text-[clamp(1.35rem,2.1vw,2rem)] leading-[1.12]">{s.title}</h3>
-              <p className="mt-4 text-white/78">{s.body}</p>
+              <h3 className="display-wide mt-6 text-[clamp(1.45rem,2.3vw,2.25rem)] leading-[1.1]">{s.title}</h3>
+              <p className="text-lead mt-4 text-white/82">{s.body}</p>
             </div>
           </article>
         ))}
