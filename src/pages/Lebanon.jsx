@@ -65,7 +65,7 @@ export default function Lebanon() {
         <div className="w-[10vw] shrink-0" />
       </HorizontalStory>
 
-      <section className="bg-sky py-24 md:py-40">
+      <section data-shot="places" className="bg-sky py-24 md:py-40">
         <div className="shell">
           <Reveal className="grid gap-8 md:grid-cols-2 md:items-end">
             <h2 className="display text-mega text-ink">
