@@ -44,7 +44,7 @@ async function makePoster(event, index) {
   c.width = W;
   c.height = H;
   const ctx = c.getContext("2d");
-  const url = genSmall(event.image);
+  const url = genSmall(event.image) || (event.stand ? genSmall(event.stand) : null);
   const img = url ? await loadImage(url) : null;
   if (img) {
     const s = Math.max(W / img.width, H / img.height);
@@ -133,7 +133,7 @@ void main() {
 }`;
 
 const FRAG = `
-uniform sampler2D uMap; uniform vec3 uCam; uniform float uAspect; uniform float uLit;
+uniform sampler2D uMap; uniform vec3 uCam; uniform float uAspect; uniform float uLit; uniform float uMirror;
 varying vec2 vUv; varying vec3 vN; varying vec3 vP;
 void main() {
   // rounded corners, measured in the panel's own proportions
@@ -148,6 +148,11 @@ void main() {
   vec3 col = texture2D(uMap, vUv).rgb;
   // panels dim as they turn away, the one in front is fully lit
   col *= mix(0.10, 1.0, pow(face, 2.2)) * mix(0.62, 1.0, uLit);
+  // the reflection on the floor: the poster's lower part, fading away from the floor line
+  if (uMirror > 0.5) {
+    a *= 0.30 * smoothstep(0.42, 0.0, vUv.y);
+    col *= 0.75;
+  }
   gl_FragColor = vec4(col, a);
   #include <colorspace_fragment>
 }`;
@@ -202,15 +207,25 @@ export default function EventRing({ events }) {
           uCam: { value: new Vector3() },
           uAspect: { value: arc / HGT },
           uLit: { value: 0 },
+          uMirror: { value: 0 },
         },
         transparent: true,
         side: DoubleSide,
       });
-      const mesh = new Mesh(geo, mat);
-      mesh.rotation.y = i * stepAngle;
-      mesh.visible = false;
-      ring.add(mesh);
-      panels.push({ mesh, mat });
+      // the same poster again, upside down under the floor line, as its reflection
+      const reflMat = mat.clone();
+      reflMat.uniforms.uMirror.value = 1;
+      reflMat.depthWrite = false;
+      const holder = new Group();
+      holder.rotation.y = i * stepAngle;
+      const panel = new Mesh(geo, mat);
+      const refl = new Mesh(geo, reflMat);
+      refl.scale.y = -1;
+      refl.position.y = -HGT - 0.05;
+      holder.add(panel, refl);
+      holder.visible = false;
+      ring.add(holder);
+      panels.push({ mesh: holder, mat, reflMat });
     }
     Promise.all([
       document.fonts.load('800 condensed 60px "Archivo Variable"').catch(() => {}),
@@ -225,6 +240,7 @@ export default function EventRing({ events }) {
       textures.forEach((t) => (t.anisotropy = maxAniso));
       panels.forEach((p, i) => {
         p.mat.uniforms.uMap.value = textures[i % events.length];
+        p.reflMat.uniforms.uMap.value = textures[i % events.length];
       });
       panels.textures = textures;
     });
@@ -240,9 +256,10 @@ export default function EventRing({ events }) {
       const tanHalf = Math.tan((camera.fov * Math.PI) / 360);
       // far enough that the front poster, which steps forward and grows, has air above and below;
       // on a narrow screen, far enough that it is not wider than the screen
-      const dist = Math.max((HGT * 0.76) / tanHalf, (arc * 0.62) / (tanHalf * camera.aspect));
+      // the posters fill the upper part of the frame, with their reflection on the floor below
+      const dist = Math.max((HGT * 0.5 + 0.62) / tanHalf, (arc * 0.62) / (tanHalf * camera.aspect));
       camera.position.set(0, 0.06, R + dist);
-      camera.lookAt(0, 0.0, R);
+      camera.lookAt(0, -0.42, R);
       camera.updateProjectionMatrix();
     };
     resize();
@@ -346,7 +363,10 @@ export default function EventRing({ events }) {
       el.removeEventListener("pointermove", onMove);
       el.removeEventListener("pointerup", onUp);
       el.removeEventListener("pointercancel", onUp);
-      panels.forEach((p) => p.mat.dispose());
+      panels.forEach((p) => {
+        p.mat.dispose();
+        p.reflMat.dispose();
+      });
       (panels.textures || []).forEach((t) => t.dispose());
       geo.dispose();
       renderer.dispose();

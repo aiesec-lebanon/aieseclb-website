@@ -63,6 +63,8 @@ Use **real photographs** of your events if you have them: they will always beat 
 
 If you rename or replace the events in `src/content/events.js`, the file name is whatever you put in each entry's `image` field.
 
+Until an event's own photograph exists, the page borrows one of the photographs above as a stand-in (the `stand` field of each event). Replace them with real photographs of your events: they will always be better.
+
 Generic prompt if you need a stand-in (change the first sentence per event):
 
 > Young conference delegates in their twenties from many countries in a large hall, cheering with arms raised, blue and warm stage lighting, candid, portrait orientation. Photorealistic editorial travel photography, shot on a full-frame camera, natural light, rich but true colour, deep clean blues and warm golden highlights, slight film grain, no text, no logos, no watermark, no border.
