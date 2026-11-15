@@ -57,7 +57,9 @@ export default function Events() {
                   </div>
                   <div className="overflow-clip rounded-[1.6rem]">
                     <Media
-                      name={hasGen(e.image) || !e.stand ? e.image : e.stand}
+                      name={
+                        hasGen(`${e.image}-2`) ? `${e.image}-2` : hasGen(e.image) || !e.stand ? e.image : e.stand
+                      }
                       alt={e.name}
                       tone={e.tone}
                       seed={400 + i * 9}

@@ -31,6 +31,22 @@
     1611,
     806
   ],
+  "event-national-conference": [
+    1153,
+    576
+  ],
+  "event-national-conference-2": [
+    2000,
+    1000
+  ],
+  "event-youth-speak-forum": [
+    1153,
+    576
+  ],
+  "event-youth-speak-forum-2": [
+    2000,
+    1000
+  ],
   "events-cover": [
     2000,
     1000
@@ -60,6 +76,10 @@
     1000
   ],
   "place-baalbek": [
+    1611,
+    806
+  ],
+  "place-beiteddine": [
     1611,
     806
   ],
