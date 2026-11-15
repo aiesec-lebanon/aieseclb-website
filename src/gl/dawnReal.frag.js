@@ -366,8 +366,9 @@ vec3 shadeLand(vec3 p, vec3 rd, float t) {
   return col;
 }
 
-float waves(vec2 q, float tm, vec3 w) {
-  return w.x * n2(q + vec2(tm, tm * 0.6)) + 0.5 * w.y * n2(q * 2.7 - vec2(tm * 0.8, tm)) + 0.25 * w.z * n2g(q * 6.1 + tm);
+float waves(vec2 q, float tm, vec4 w) {
+  return w.x * n2(q + vec2(tm, tm * 0.6)) + 0.5 * w.y * n2(q * 2.7 - vec2(tm * 0.8, tm)) + 0.25 * w.z * n2g(q * 6.1 + tm)
+       + 0.11 * w.w * n2(q * 14.3 + vec2(tm * 1.6, -tm * 1.2));
 }
 vec3 waterNormal(vec2 p, float t) {
   // a long swell and two trains of smaller waves. Each train fades out once it is finer than a
@@ -375,7 +376,8 @@ vec3 waterNormal(vec2 p, float t) {
   // water turns smooth and bright instead of breaking into dashes.
   float amp = 1.0 / (1.0 + t * 0.35);
   float strip = t * t / max(uCamPos.y, 0.01) / (uRes.y * 0.5 * uFocal);
-  vec3 w = vec3(smoothstep(0.20, 0.07, strip), smoothstep(0.074, 0.026, strip), smoothstep(0.033, 0.012, strip));
+  vec4 w = vec4(smoothstep(0.20, 0.07, strip), smoothstep(0.074, 0.026, strip), smoothstep(0.033, 0.012, strip),
+                smoothstep(0.014, 0.005, strip));   // the finest ripples, only close to the camera
   vec2 q = p * 5.0;
   float tm = uTime * 0.35;
   vec2 e = vec2(0.03, 0.0);
@@ -385,6 +387,7 @@ vec3 waterNormal(vec2 p, float t) {
 }
 
 float marchRocks(vec3 ro, vec3 rd);   // defined further down, with the rocks
+float marchLedge(vec3 ro, vec3 rd);
 
 // what a reflected ray sees: sky, high cloud, and the dark shape of the land
 vec3 reflection(vec3 p, vec3 rr, vec3 rm) {
@@ -405,6 +408,7 @@ vec3 reflection(vec3 p, vec3 rr, vec3 rm) {
   }
   // the rocks stand in their own reflection
   float tr = marchRocks(p + vec3(0.0, 0.0005, 0.0), rm);
+  if (tr < 0.0) tr = marchLedge(p + vec3(0.0, 0.0005, 0.0), rm);
   if (tr > 0.0) c = mix(vec3(0.006, 0.014, 0.034), vec3(0.18, 0.20, 0.23), uDay);
   return c;
 }
@@ -483,6 +487,44 @@ float sdSpire(vec3 q) {
 float sdRocks(vec3 p) {
   return min(sdBigRock(p - ROCK_B), sdSpire(p - ROCK_S)) + rockNoise(p - ROCK_B);
 }
+
+// A low ledge of weathered limestone a few hundred metres off the bow, in the lower left of the
+// opening view: a near, dark mass that gives the scene its scale. It slides away as the flight starts.
+const vec3 LEDGE = vec3(0.644, 0.0, -5.218);
+float sdEllipsoid(vec3 q, vec3 r) {
+  float k0 = length(q / r);
+  float k1 = length(q / (r * r));
+  return k0 * (k0 - 1.0) / k1;
+}
+float sdLedge(vec3 p) {
+  vec3 q = p - LEDGE;
+  float shelf = sdEllipsoid(q, vec3(0.070, 0.024, 0.046));
+  shelf = max(shelf, q.y - 0.015 - 0.005 * n2(q.xz * 120.0));                // a broken, flattened top
+  float boulder = sdEllipsoid(q - vec3(0.062, 0.0, -0.018), vec3(0.022, 0.019, 0.020));
+  float d = min(shelf, boulder);
+  // pits, cracks and beds of the stone
+  d += (n2(vec2(q.x * 260.0 + q.z * 170.0, q.y * 300.0)) - 0.5) * 0.0020
+     + (n2g(vec2(q.z * 610.0 - q.x * 420.0, q.y * 700.0)) - 0.5) * 0.0007
+     + sin(q.y * 2600.0 + 4.0 * n2(q.xz * 90.0)) * 0.00016;
+  return d;
+}
+float marchLedge(vec3 ro, vec3 rd) {
+  vec3 c = LEDGE + vec3(0.012, 0.004, -0.004);
+  vec3 oc = ro - c;
+  float b = dot(oc, rd);
+  float h = b * b - dot(oc, oc) + 0.0081;
+  if (h < 0.0) return -1.0;
+  float tEnd = -b + sqrt(h);
+  float t = max(-b - sqrt(h), 0.0);
+  for (int i = 0; i < 56; i++) {
+    float d = sdLedge(ro + rd * t);
+    if (d < max(0.00015, t * 0.0004)) return t;
+    t += d * 0.7;
+    if (t > tEnd) break;
+  }
+  return -1.0;
+}
+float sdStone(vec3 p) { return min(sdRocks(p), sdLedge(p)); }
 float marchRocks(vec3 ro, vec3 rd) {
   // bounding sphere first: almost every pixel stops here
   vec3 c = vec3(0.2985, 0.035, -4.41);
@@ -502,7 +544,7 @@ float marchRocks(vec3 ro, vec3 rd) {
 }
 vec3 shadeRocks(vec3 p, vec3 rd) {
   vec2 e = vec2(0.0009, 0.0);
-  vec3 n = normalize(vec3(sdRocks(p + e.xyy) - sdRocks(p - e.xyy), sdRocks(p + e.yxy) - sdRocks(p - e.yxy), sdRocks(p + e.yyx) - sdRocks(p - e.yyx)));
+  vec3 n = normalize(vec3(sdStone(p + e.xyy) - sdStone(p - e.xyy), sdStone(p + e.yxy) - sdStone(p - e.yxy), sdStone(p + e.yyx) - sdStone(p - e.yyx)));
   vec3 q = p - ROCK_B;
   // pale limestone in beds, dark and wet where the sea reaches, scrub on the tops
   float beds = 0.86 + 0.14 * sin(p.y * 1150.0 + 6.0 * n2(vec2(q.x * 140.0 + q.z * 97.0, q.y * 30.0)));
@@ -511,7 +553,7 @@ vec3 shadeRocks(vec3 p, vec3 rd) {
   float scrub = smoothstep(0.55, 0.8, n.y) * smoothstep(0.050, 0.058, p.y);
   albedo = mix(albedo, vec3(0.09, 0.11, 0.05), scrub);
   // darker in hollows and inside the arch
-  float ao = clamp(0.4 + 0.6 * sdRocks(p + n * 0.003) / 0.003, 0.0, 1.0);
+  float ao = clamp(0.4 + 0.6 * sdStone(p + n * 0.003) / 0.003, 0.0, 1.0);
   float ndl = max(dot(n, uSunDir), 0.0);
   float sh = ndl > 0.0 ? sunShadow(p + n * 0.002) : 0.0;
   vec3 sun = sunColor() * 5.5 * smoothstep(-0.02, 0.05, uSunDir.y);
@@ -602,6 +644,8 @@ void main() {
   float tmax = tSea > 0.0 ? min(tSea, FAR) : FAR;
   float tLand = marchTerrain(ro, rd, tmax, uOct, uSteps, 0.5);
   float tRock = marchRocks(ro, rd);
+  float tLedge = marchLedge(ro, rd);
+  if (tLedge > 0.0 && (tRock < 0.0 || tLedge < tRock)) tRock = tLedge;
   float tHit = FAR;
   int what = 0;                                              // 0 sky, 1 land, 2 sea, 3 rocks, 4 title
   if (tLand > 0.0) { tHit = tLand; what = 1; }
