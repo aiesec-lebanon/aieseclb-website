@@ -2,7 +2,8 @@
 //
 //   npm run images
 //
-// For every new or oversized image in that folder it writes:
+// New photographs can be dropped either in src/assets/gen/ or straight into
+// src/assets/gen/originals/. For every new or oversized image it writes:
 //   <name>.jpg      at most 2000 px on its long side (2400 for the full-bleed page heroes)
 //   <name>-sm.jpg   at most 1000 px, for phones and small cards
 // and moves the original into src/assets/gen/originals/ (ignored by git), so nothing is lost.
@@ -62,6 +63,35 @@ for (const file of readdirSync(DIR)) {
   console.log(
     `${name}: ${(statSync(keep).size / 1024).toFixed(0)} KB original -> ${(full.size / 1024).toFixed(0)} KB (${full.width}x${full.height}) + ${(small.size / 1024).toFixed(0)} KB small`,
   );
+}
+
+// photographs dropped straight into originals/ that have no web version yet
+for (const file of readdirSync(ORIG)) {
+  const ext = extname(file).toLowerCase();
+  if (!EXTS.has(ext)) continue;
+  const name = basename(file, extname(file));
+  if (existsSync(join(DIR, `${name}.jpg`)) && existsSync(join(DIR, `${name}-sm.jpg`))) continue;
+  const keep = join(ORIG, file);
+  try {
+    const max = WIDE.has(name) ? 2400 : 2000;
+    const quality = name.startsWith("platform-") ? 88 : 80;
+    const full = await sharp(keep)
+      .rotate()
+      .resize({ width: max, height: max, fit: "inside", withoutEnlargement: true })
+      .jpeg({ quality, progressive: true, mozjpeg: true })
+      .toFile(join(DIR, `${name}.jpg`));
+    const small = await sharp(keep)
+      .rotate()
+      .resize({ width: 1000, height: 1000, fit: "inside", withoutEnlargement: true })
+      .jpeg({ quality: quality - 4, progressive: true, mozjpeg: true })
+      .toFile(join(DIR, `${name}-sm.jpg`));
+    sizes[name] = [full.width, small.width];
+    done++;
+    console.log(`${name}: from originals/ -> ${(full.size / 1024).toFixed(0)} KB (${full.width}x${full.height}) + ${(small.size / 1024).toFixed(0)} KB small`);
+  } catch (err) {
+    // most often a file still being copied in: it will be picked up next time
+    console.warn(`${name}: skipped for now (${err.message})`);
+  }
 }
 
 // forget entries whose image has been removed
