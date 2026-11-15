@@ -63,6 +63,8 @@ Use **real photographs** of your events if you have them: they will always beat 
 
 If you rename or replace the events in `src/content/events.js`, the file name is whatever you put in each entry's `image` field.
 
+Optionally add a landscape version named `<image>-2.jpg` (for example `event-national-conference-2.jpg`, ratio 16:11): the list on the Events page then uses it, while the ring keeps the portrait one.
+
 Until an event's own photograph exists, the page borrows one of the photographs above as a stand-in (the `stand` field of each event). Replace them with real photographs of your events: they will always be better.
 
 Generic prompt if you need a stand-in (change the first sentence per event):
