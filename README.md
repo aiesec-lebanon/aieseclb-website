@@ -1,16 +1,35 @@
-# React + Vite
+# AIESEC in Lebanon website
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The public site of AIESEC in Lebanon: a cinematic, scroll-driven site about hope, about going on exchange from Lebanon, and about coming to Lebanon.
 
-Currently, two official plugins are available:
+## Run it
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+```bash
+npm install
+npm run dev      # http://localhost:5173
+npm run build    # production build in dist/
+npm run lint
+```
 
-## React Compiler
+## Where things are
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+| Path | What it holds |
+|---|---|
+| `src/pages/` | One file per page: Home, Lebanon, Exchange, Events, Platforms |
+| `src/scenes/` | The WebGL scenes: the dawn flight on the home page, the globe, the ring of event posters |
+| `src/gl/` | The dawn shader and the small WebGL runner it uses (no three.js on first load) |
+| `src/components/` | Shared pieces: navigation, footer, reveals, media with fallbacks |
+| `src/content/` | All copy and data. **Edit text, events and platforms here.** |
+| `src/assets/gen/` | Photographs. See the README in that folder for file names and prompts |
 
-## Expanding the ESLint configuration
+## Content that still needs you
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- `src/content/events.js` and `src/content/platforms.js` contain entries marked `sample: true`. They are placeholders. Replace them with real events and platforms before going live. A yellow note appears on those pages in development to remind you.
+- `src/assets/gen/` is empty until photographs are added. Every image has a code-made stand-in, so the site works without them.
+
+## Notes for whoever maintains this
+
+- The home page hero is one fragment shader (`src/gl/dawn.frag.js`). The scroll position drives a camera through it. Append `?s=0.4` to the URL to freeze it at 40% of the flight while you work on it.
+- three.js is only loaded when the globe or the events ring is about to come into view.
+- People who ask their system for reduced motion get still frames and ordinary scrolling.
+- The site is a single-page app with client-side routes. The host must serve `index.html` for unknown paths.

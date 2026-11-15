@@ -1,608 +1,381 @@
-import React, { useEffect, useRef, useState } from "react";
-import heroImage from "../assets/images/landing_page_bg.png";
-import logo from "../assets/images/aiesec_logo.png";
-import logoBlue from "../assets/images/aiesec_logo_blue.png";
-import logoWhite from "../assets/images/aiesec_logo_white.png";
-import manImage from "../assets/images/aiesec_man.png";
-import raoucheImage from "../assets/images/raouche.png";
-import lauLogo from "../assets/images/lau_logo.png";
-import aubLogo from "../assets/images/aub_logo.png";
-import uniPicImage from "../assets/images/uni_pic.png";
-import earthLogo from "../assets/images/earth_logo.png";
-import teacherLogo from "../assets/images/teacher_logo.png";
-import capLogo from "../assets/images/cap_logo.png";
-import mapImage from "../assets/images/map.png";
-import bubbleImage from "../assets/images/bubble.png";
-import dhlLogo from "../assets/images/DHL_logo.png";
-import electroluxLogo from "../assets/images/Electrolux_logo.png";
-import schneiderLogo from "../assets/images/Shneider_logo.png";
-import tcsLogo from "../assets/images/tcs_logo.png";
-import terrawindLogo from "../assets/images/terrawind_logo.png";
-import lorealLogo from "../assets/images/loreal_logo.png";
-import henkelLogo from "../assets/images/Henkel_logo.png";
-import pwcLogo from "../assets/images/pwc_logo.png";
-import slbLogo from "../assets/images/slb_logo.png";
-import person1 from "../assets/images/person1.png";
-import person2 from "../assets/images/person2.png";
-import person3 from "../assets/images/person3.png";
-import fbLogo from "../assets/images/fb_logo.png";
-import igLogo from "../assets/images/ig_logo.png";
-import linkedinLogo from "../assets/images/linkedin_logo.png";
-import ytLogo from "../assets/images/yt_logo.png";
+import { lazy, Suspense } from "react";
+import { Link } from "react-router-dom";
+import DawnHero from "../scenes/DawnHero";
+import Reveal, { Lines } from "../components/Reveal";
+import Counter from "../components/Counter";
+import Media from "../components/Scenic";
+import LogoMarquee from "../components/LogoMarquee";
+import Arrow from "../components/Arrow";
+import LazyMount from "../components/LazyMount";
+import { PROGRAMS, SIGNUP_URL, STATS, UNIVERSITIES } from "../content/site";
 
-const clamp01 = (n) => Math.max(0, Math.min(1, n));
+const GlobeChapter = lazy(() => import("../scenes/GlobeChapter"));
 
-const Page = () => {
-  const partnerLogos = [
-    { src: dhlLogo, alt: "DHL" },
-    { src: electroluxLogo, alt: "Electrolux" },
-    { src: schneiderLogo, alt: "Schneider Electric" },
-    { src: tcsLogo, alt: "TCS" },
-    { src: terrawindLogo, alt: "Terrawind" },
-    { src: lorealLogo, alt: "L'Oréal" },
-    { src: henkelLogo, alt: "Henkel" },
-    { src: pwcLogo, alt: "PwC" },
-    { src: slbLogo, alt: "SLB" },
+const logos = import.meta.glob("../assets/images/*_logo.png", { eager: true, query: "?url", import: "default" });
+const logoUrl = (file) => logos[`../assets/images/${file}`];
+
+const MANIFEST =
+  "AIESEC is a global organisation run entirely by youth, for youth. Since 1948 it has helped young people find the leader in themselves through real experiences abroad. In Lebanon, that work has had a home in Beirut since 2011.";
+
+function Manifest() {
+  const words = MANIFEST.split(" ");
+  return (
+    <section data-shot="manifest" className="bg-sky pb-24 pt-28 md:pb-36 md:pt-44">
+      <div className="shell">
+        <p className="display ink-fill max-w-[30ch] text-[clamp(2.2rem,6.1vw,6.2rem)] leading-[0.98] text-ink">
+          {words.map((w, i) => (
+            <span key={i} style={{ "--i": i, "--step": `${46 / words.length}%` }}>
+              {w}{" "}
+            </span>
+          ))}
+        </p>
+
+        <Reveal className="mt-20 grid grid-cols-2 gap-x-6 gap-y-12 border-t border-ink/14 pt-10 md:mt-28 lg:grid-cols-4">
+          {STATS.map((s, i) => (
+            <div key={s.label} className="fade" style={{ "--i": i }}>
+              <div className="display text-[clamp(2.4rem,5.2vw,5rem)] text-aiesec">
+                <Counter value={s.value} suffix={s.suffix} />
+              </div>
+              <div className="mt-2 max-w-[12rem] text-[1.05rem] font-bold text-ink-soft">{s.label}</div>
+            </div>
+          ))}
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+function Doors() {
+  const doors = [
+    {
+      who: "I live in Lebanon",
+      line: ["Go out into", "the world."],
+      body: "Volunteer, intern or teach in another country, and come home with more than you left with. Or stay, join a team, and send others.",
+      cta: "Find your experience",
+      to: "/exchange",
+      image: "door-local",
+      alt: "Young people from Lebanon setting out on an exchange",
+      tone: "night",
+      seed: 3,
+    },
+    {
+      who: "I am coming to Lebanon",
+      line: ["Let Lebanon", "take you in."],
+      body: "Mountains you can see from the sea, cities older than writing, and people who will feed you before they ask your name.",
+      cta: "See what is waiting",
+      to: "/lebanon",
+      image: "door-incoming",
+      alt: "A visitor looking out over the Lebanese coast",
+      tone: "day",
+      seed: 8,
+    },
   ];
+  return (
+    <section data-shot="doors" className="bg-sky pb-28 pt-24 md:pb-40 md:pt-36">
+      <div className="shell">
+        <Reveal>
+          <h2 className="display text-mega text-ink">
+            <Lines text={["Two ways in."]} />
+          </h2>
+        </Reveal>
+        <div className="mt-12 grid gap-5 md:mt-16 md:grid-cols-2">
+          {doors.map((d, i) => (
+            <Reveal key={d.who} delay={i * 120}>
+              <Link
+                to={d.to}
+                viewTransition
+                className="fade group relative block overflow-clip rounded-[2rem] bg-night text-white md:rounded-[2.6rem]"
+              >
+                <Media
+                  name={d.image}
+                  alt={d.alt}
+                  tone={d.tone}
+                  seed={d.seed}
+                  className="aspect-[4/5] md:aspect-[5/6]"
+                  imgClassName="transition-transform duration-[1.4s] ease-[var(--ease-out-expo)] group-hover:scale-[1.06] group-focus-visible:scale-[1.06]"
+                />
+                <div className="absolute inset-0 bg-[linear-gradient(180deg,rgb(3_11_28/0.05)_30%,rgb(3_11_28/0.82)_100%)]" />
+                <div className="absolute inset-x-0 bottom-0 p-7 md:p-11">
+                  <p className="text-[1.05rem] font-bold text-sun">{d.who}</p>
+                  <h3 className="display mt-3 text-[clamp(2.4rem,4.6vw,4.6rem)]">
+                    {d.line.map((l) => (
+                      <span key={l} className="block">
+                        {l}
+                      </span>
+                    ))}
+                  </h3>
+                  <p className="mt-5 max-w-[26rem] text-white/82">{d.body}</p>
+                  <span className="mt-7 inline-flex items-center gap-3 text-[1.08rem] font-bold">
+                    {d.cta}
+                    <Arrow className="transition-transform duration-500 ease-[var(--ease-out-expo)] group-hover:translate-x-1.5" />
+                  </span>
+                </div>
+              </Link>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
 
-  const testimonials = [
+function LebanonTeaser() {
+  const facts = [
+    { n: "10,452", unit: "km²", label: "of country, about a third the size of Belgium" },
+    { n: "225", unit: "km", label: "of Mediterranean coast" },
+    { n: "3,088", unit: "m", label: "at Qurnat as Sawda, the highest point in the Levant" },
+  ];
+  return (
+    <section data-shot="lebanon" className="relative overflow-clip bg-night py-28 text-white md:py-44">
+      <div className="shell">
+        <Reveal>
+          <h2 className="display text-mega max-w-[15ch]">
+            <Lines text={["Small enough to cross", "in a morning.", "Deep enough for a lifetime."]} />
+          </h2>
+        </Reveal>
+
+        <div className="mt-16 grid gap-5 md:mt-24 md:grid-cols-12 md:gap-6">
+          <div className="md:col-span-5 md:pt-24">
+            <div className="overflow-clip rounded-[1.6rem]">
+              <Media
+                name="lebanon-cedars"
+                alt="Ancient cedars in the snow above Bsharri"
+                tone="cedar"
+                seed={11}
+                className="unveil aspect-[4/5]"
+                imgClassName="zoom-out"
+              />
+            </div>
+            <p className="mt-4 text-white/70">The Cedars of God, Bsharri</p>
+          </div>
+          <div className="md:col-span-7">
+            <div className="overflow-clip rounded-[1.6rem]">
+              <Media
+                name="lebanon-byblos"
+                alt="The old harbour of Byblos at golden hour"
+                tone="dawn"
+                seed={5}
+                className="unveil aspect-[16/11]"
+                imgClassName="zoom-out"
+              />
+            </div>
+            <p className="mt-4 text-white/70">Byblos, lived in for some seven thousand years</p>
+            <div className="mt-10 grid gap-5 sm:grid-cols-2 md:mt-14 md:gap-6">
+              <div className="parallax" style={{ "--py": "2.2rem" }}>
+                <div className="overflow-clip rounded-[1.6rem]">
+                  <Media name="lebanon-baalbek" alt="The Roman temples of Baalbek" tone="tangerine" seed={21} className="aspect-square" />
+                </div>
+                <p className="mt-4 text-white/70">Baalbek</p>
+              </div>
+              <div className="parallax" style={{ "--py": "-1.6rem" }}>
+                <div className="overflow-clip rounded-[1.6rem]">
+                  <Media name="lebanon-raouche" alt="The Pigeon Rocks of Raouché, Beirut" tone="night" seed={30} className="aspect-square" />
+                </div>
+                <p className="mt-4 text-white/70">Raouché, Beirut</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <Reveal className="mt-20 grid gap-10 border-t border-white/14 pt-10 md:mt-28 md:grid-cols-[repeat(3,1fr)_auto] md:items-end">
+          {facts.map((f, i) => (
+            <div key={f.n} className="fade" style={{ "--i": i }}>
+              <div className="display text-[clamp(2.6rem,5vw,4.8rem)]">
+                {f.n}
+                <span className="ml-1.5 text-[0.42em] text-sun">{f.unit}</span>
+              </div>
+              <div className="mt-2 max-w-[15rem] text-white/72">{f.label}</div>
+            </div>
+          ))}
+          <Link
+            to="/lebanon"
+            viewTransition
+            className="fade group inline-flex h-14 items-center gap-3 rounded-full bg-sun px-8 text-lg font-bold text-ink transition-colors duration-300 hover:bg-white"
+            style={{ "--i": 3 }}
+          >
+            Discover Lebanon
+            <Arrow className="transition-transform duration-500 group-hover:translate-x-1.5" />
+          </Link>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+const PROGRAM_BG = { ember: "bg-ember", teal: "bg-teal", tangerine: "bg-tangerine" };
+
+function Programs() {
+  return (
+    <section data-shot="programs" className="bg-sky py-28 md:py-44">
+      <div className="shell">
+        <Reveal className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+          <h2 className="display text-mega text-ink">
+            <Lines text={["Three ways to go."]} />
+          </h2>
+          <p className="fade text-lead max-w-[27rem] text-ink-soft" style={{ "--i": 2 }}>
+            Every AIESEC exchange is a real job to do, in a place you have never lived, with people you have not met yet.
+          </p>
+        </Reveal>
+
+        <div className="mt-14 md:mt-20">
+          {PROGRAMS.map((p, i) => (
+            <article
+              key={p.id}
+              className={`sticky mb-6 grid overflow-clip rounded-[2rem] text-white shadow-[0_-18px_50px_rgb(11_27_51/0.16)] md:grid-cols-2 md:rounded-[2.6rem] ${PROGRAM_BG[p.color]}`}
+              style={{ top: `calc(5.5rem + ${i * 1.4}rem)` }}
+            >
+              <div className="flex flex-col justify-between gap-12 p-8 md:p-14">
+                <p className="text-[1.05rem] font-bold text-white/90">{p.name}</p>
+                <div>
+                  <h3 className="display text-[clamp(3.6rem,8.8vw,9rem)]">{p.verb}.</h3>
+                  <p className="display-wide mt-5 text-[clamp(1.25rem,2vw,1.75rem)]">{p.line}</p>
+                  <p className="mt-4 max-w-[30rem] text-white/90">{p.body}</p>
+                  <Link
+                    to={`/exchange#${p.id}`}
+                    viewTransition
+                    className="group mt-8 inline-flex h-13 items-center gap-3 rounded-full bg-white px-7 font-bold text-ink transition-colors duration-300 hover:bg-night hover:text-white"
+                  >
+                    How it works
+                    <Arrow className="transition-transform duration-500 group-hover:translate-x-1.5" />
+                  </Link>
+                </div>
+              </div>
+              <Media
+                name={p.image}
+                alt={`${p.name}: young people on exchange`}
+                tone={p.color}
+                seed={40 + i * 7}
+                className="min-h-[18rem] md:min-h-[34rem]"
+              />
+            </article>
+          ))}
+        </div>
+
+        <Reveal className="mt-10 flex flex-col items-start gap-5 rounded-[2rem] bg-aiesec p-8 text-white md:flex-row md:items-center md:justify-between md:rounded-[2.6rem] md:p-14">
+          <div>
+            <p className="fade text-[1.05rem] font-bold text-white/90">Membership</p>
+            <h3 className="display fade mt-3 text-[clamp(2.2rem,4.4vw,4.2rem)]" style={{ "--i": 1 }}>
+              Or stay, and lead the people who go.
+            </h3>
+          </div>
+          <a
+            href={SIGNUP_URL}
+            className="fade inline-flex h-14 shrink-0 items-center rounded-full bg-sun px-8 text-lg font-bold text-ink transition-colors duration-300 hover:bg-white"
+            style={{ "--i": 2 }}
+          >
+            Join AIESEC in Lebanon
+          </a>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+function Showcases() {
+  const items = [
     {
-      quote: "A terrific piece of praise",
-      name: "Sarah Johnson",
-      role: "Global Volunteer",
-      avatar: person1,
+      to: "/events",
+      title: ["What we", "gather for."],
+      body: "Conferences, forums and cultural nights: the moments the year is built around.",
+      cta: "See the events",
+      image: "events-cover",
+      alt: "Delegates at an AIESEC in Lebanon conference",
+      tone: "ember",
+      seed: 61,
     },
     {
-      quote: "A fantastic bit of feedback",
-      name: "Michael Chen",
-      role: "Global Talent",
-      avatar: person2,
-    },
-    {
-      quote: "A genuinely glowing review",
-      name: "Emma Williams",
-      role: "Global Teacher",
-      avatar: person3,
+      to: "/platforms",
+      title: ["What we", "build."],
+      body: "The tools our information management team has made so that a volunteer organisation can run like a serious one.",
+      cta: "See the platforms",
+      image: "platforms-cover",
+      alt: "Screens of platforms built by AIESEC in Lebanon",
+      tone: "night",
+      seed: 77,
     },
   ];
+  return (
+    <section data-shot="showcases" className="bg-aiesec py-28 text-white md:py-40">
+      <div className="shell grid gap-5 md:grid-cols-2">
+        {items.map((it, i) => (
+          <Reveal key={it.to} delay={i * 120}>
+            <Link to={it.to} viewTransition className="fade group block">
+              <div className="overflow-clip rounded-[2rem] md:rounded-[2.6rem]">
+                <Media
+                  name={it.image}
+                  alt={it.alt}
+                  tone={it.tone}
+                  seed={it.seed}
+                  className="aspect-[16/11]"
+                  imgClassName="transition-transform duration-[1.4s] ease-[var(--ease-out-expo)] group-hover:scale-[1.05]"
+                />
+              </div>
+              <h2 className="display mt-8 text-[clamp(2.6rem,5.4vw,5.4rem)]">
+                {it.title.map((l) => (
+                  <span key={l} className="block">
+                    {l}
+                  </span>
+                ))}
+              </h2>
+              <p className="mt-5 max-w-[28rem] text-white/88">{it.body}</p>
+              <span className="mt-6 inline-flex items-center gap-3 text-[1.08rem] font-bold">
+                {it.cta}
+                <Arrow className="transition-transform duration-500 group-hover:translate-x-1.5" />
+              </span>
+            </Link>
+          </Reveal>
+        ))}
+      </div>
+    </section>
+  );
+}
 
-  // Mobile nav
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [mobileManX, setMobileManX] = useState(-100);
+function Company() {
+  return (
+    <section data-shot="company" className="bg-white py-28 md:py-40">
+      <div className="shell">
+        <Reveal className="grid gap-10 md:grid-cols-2 md:items-end">
+          <h2 className="display text-mega text-ink">
+            <Lines text={["In good", "company."]} />
+          </h2>
+          <p className="fade text-lead max-w-[30rem] text-ink-soft md:justify-self-end" style={{ "--i": 2 }}>
+            We work out of two universities in Beirut, and with companies around the world that open their doors to
+            young people.
+          </p>
+        </Reveal>
 
-  // ===== Scroll scene (desktop only) =====
-  const sceneRef = useRef(null);
-  const [smoothProgress, setSmoothProgress] = useState(0);
-  const targetRef = useRef(0);
-  const smoothRef = useRef(0);
-  const rafRef = useRef(null);
+        <Reveal className="mt-14 grid gap-5 sm:grid-cols-2 md:mt-20">
+          {UNIVERSITIES.map((u, i) => (
+            <div
+              key={u.short}
+              className={`fade grid h-48 place-items-center rounded-[2rem] p-8 md:h-64 ${u.dark ? "bg-[#6b1b47]" : "bg-sky"}`}
+              style={{ "--i": i }}
+            >
+              <img src={logoUrl(u.logo)} alt={u.name} loading="lazy" className="max-h-full w-auto max-w-[78%] object-contain" />
+            </div>
+          ))}
+        </Reveal>
+      </div>
+      <LogoMarquee className="mt-16 md:mt-24" />
+    </section>
+  );
+}
 
-  useEffect(() => {
-    const updateProgressFromScroll = () => {
-      if (window.innerWidth >= 768) {
-        // Desktop scroll logic
-
-        const el = sceneRef.current;
-        if (!el) return;
-
-        const rect = el.getBoundingClientRect();
-        const vh = window.innerHeight;
-
-        const preRoll = vh * 1.0;
-        const total = rect.height - vh + preRoll;
-        const scrolled = -rect.top + preRoll;
-
-        const p = total > 0 ? scrolled / total : 0;
-        targetRef.current = clamp01(p);
-      } else {
-        // Mobile scroll logic - move man from left to center based on scroll
-        const scrollY = window.scrollY;
-        const maxScroll = 1200; // Adjust based on when you want movement to complete
-        const progress = Math.min(scrollY / maxScroll, 1);
-        const startOffset = -100; // Start from left edge
-        const endOffset = 0; // End at center
-        setMobileManX(startOffset + (endOffset - startOffset) * progress);
-      }
-    };
-
-    const animate = () => {
-      const factor = 0.07;
-      const current = smoothRef.current;
-      const target = targetRef.current;
-      const next = current + (target - current) * factor;
-
-      smoothRef.current = next;
-      setSmoothProgress(next);
-      rafRef.current = requestAnimationFrame(animate);
-    };
-
-    updateProgressFromScroll();
-    window.addEventListener("scroll", updateProgressFromScroll, { passive: true });
-    window.addEventListener("resize", updateProgressFromScroll);
-    rafRef.current = requestAnimationFrame(animate);
-
-    return () => {
-      window.removeEventListener("scroll", updateProgressFromScroll);
-      window.removeEventListener("resize", updateProgressFromScroll);
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    };
-  }, []);
-
-  const startX = 80;
-  const endX = 900;
-  const manProgress = clamp01(smoothProgress / 0.6);
-  const manX = startX + (endX - startX) * manProgress;
-
-  const textReveal = clamp01((smoothProgress - 0.1) / 0.4);
-  const textOpacity = textReveal;
-  const textTranslateY = 18 * (1 - textReveal);
-
+export default function Home() {
   return (
     <>
-      <style>{`
-        @keyframes circularOrbit {
-          from {
-            transform: rotate(0deg);
-          }
-          to {
-            transform: rotate(360deg);
-          }
-        }
-
-        @keyframes counterRotate {
-          from {
-            transform: rotate(0deg);
-          }
-          to {
-            transform: rotate(-360deg);
-          }
-        }
-
-        .orbit-container {
-          animation: circularOrbit 12s linear infinite;
-        }
-
-        .orbit-icon {
-          animation: counterRotate 12s linear infinite;
-        }
-
-        @media (min-width: 768px) {
-          .orbit-container:hover {
-            animation-play-state: paused;
-          }
-          .orbit-container:hover .orbit-icon {
-            animation-play-state: paused;
-          }
-        }
-      `}</style>
-      <div className="bg-[#edf6ff] w-full min-h-screen font-lato overflow-x-hidden">
-      {/* HERO AREA */}
-      <section className="w-full bg-[#037ef3]">
-        {/* Navbar */}
-        <header className="w-full overflow-visible relative z-50">
-          <div className="mx-auto max-w-[1440px] h-[72px] md:h-[80px] px-4 md:px-8 flex items-center justify-between overflow-visible">
-            <a href="/" aria-label="Home" className="inline-block">
-              <img src={logoWhite} alt="AIESEC" className="h-[40px] md:h-[40px] w-auto" />
-            </a>
-
-            {/* Hamburger (Mobile) */}
-            <button
-              className="md:hidden text-white p-2"
-              onClick={() => setMenuOpen((v) => !v)}
-              aria-label="Open menu"
-              aria-expanded={menuOpen}
-            >
-              <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-
-            {/* Desktop nav */}
-            <nav className="hidden md:flex items-center gap-3 text-white text-[20px] leading-[32px]">
-              <a
-                href="#"
-                className="px-5 py-2 rounded-lg transition-all duration-300 ease-out hover:-translate-y-1 hover:bg-white/20 hover:shadow-[0_10px_25px_rgba(0,0,0,0.25)]"
-              >
-                Home
-              </a>
-              <a
-                href="#partners"
-                className="px-5 py-2 rounded-lg transition-all duration-300 ease-out hover:-translate-y-1 hover:bg-white/20 hover:shadow-[0_10px_25px_rgba(0,0,0,0.25)]"
-              >
-                Partners
-              </a>
-              <a
-                href="https://signup.aieseclb.org"
-                className="px-5 py-2 rounded-lg transition-all duration-300 ease-out hover:-translate-y-1 hover:bg-white hover:text-[#000000] hover:shadow-[0_12px_30px_rgba(0,0,0,0.35)]"
-              >
-                Sign up
-              </a>
-            </nav>
-          </div>
-
-          {/* Mobile dropdown */}
-          <div className={`md:hidden px-4 pb-4 transition-all duration-200 ${menuOpen ? "block" : "hidden"}`}>
-            <div className="rounded-2xl bg-white/10 backdrop-blur border border-white/20 p-3">
-              <a
-                href="#"
-                className="block rounded-xl px-4 py-3 text-white text-lg hover:bg-white/15"
-                onClick={() => setMenuOpen(false)}
-              >
-                Home
-              </a>
-              <a
-                href="#partners"
-                className="block rounded-xl px-4 py-3 text-white text-lg hover:bg-white/15"
-                onClick={() => setMenuOpen(false)}
-              >
-                Partners
-              </a>
-              <a
-                href="https://signup.aieseclb.org"
-                className="block rounded-xl px-4 py-3 text-white text-lg hover:bg-white/15"
-                onClick={() => setMenuOpen(false)}
-              >
-                Sign up
-              </a>
-            </div>
-          </div>
-        </header>
-
-        {/* HERO */}
-        <section className="relative w-full bg-[#037ef3] overflow-hidden py-8 sm:py-12 md:py-32">
-          <div className="mx-auto max-w-[1440px] px-4 md:px-8">
-            <div className="flex flex-col md:flex-row md:items-center gap-6 md:gap-12">
-              {/* LEFT TEXT */}
-              <div className="z-10 w-full md:max-w-[1100px] text-center md:text-left">
-                {/* Bigger title ONLY on mobile */}
-                <h1 className="font-handwriting text-[#ffc845] text-[78px] leading-[1.02] sm:text-6xl md:text-8xl lg:text-[185px] md:leading-[1.0] drop-shadow-[4px_4px_0_rgba(0,0,0,0.3)] md:drop-shadow-[6px_6px_0_rgba(0,0,0,0.3)]">
-                  Turn potential
-                  <br />
-                  <span className="inline-block">into impact</span>
-                </h1>
-
-                <p className="mt-4 md:mt-8 text-white text-left text-base sm:text-lg md:text-[22px] leading-7 md:leading-8 max-w-[320px] md:max-w-[520px] ml-10 md:ml-0">
-                  Volunteer. Intern. Teach. Go global with AIESEC in Lebanon and build your leadership potential through exchanges in 110+ countries.
-                </p>
-
-                {/* CTA on mobile */}
-                <div className="mt-6 md:hidden flex justify-center mb-0">
-                  <a
-                    href="https://signup.aieseclb.org"
-                    className="inline-flex items-center justify-center bg-[#ffc845] text-black font-semibold rounded-full px-10 py-4 shadow-[0_10px_25px_rgba(0,0,0,0.25)] active:scale-[0.98]"
-                  >
-                    Sign up
-                  </a>
-                </div>
-              </div>
-
-              {/* mobile image*/}
-              <div className="md:hidden w-full -mt-8">
-                <div className="relative h-[450px] w-[450px] -translate-x-[30px] overflow-hidden">
-
-                  <img
-                    src={heroImage}
-                    alt="AIESEC youth"
-                    className="absolute left-1/2 top-1/2 max-w-none"
-                            style={{
-                              width: "170%",
-                              transform: "translate(-65%, -50%)",
-                            }}
-                  />
-                </div>
-              </div>
-
-              {/* ✅ DESKTOP IMAGE ONLY (ORIGINAL desktop – untouched) */}
-              <div className="hidden md:flex w-full md:absolute md:-bottom-12 md:-right-2 justify-center md:justify-end">
-                <img
-                  src={heroImage}
-                  alt="AIESEC youth"
-                  className="w-full max-w-[420px] sm:max-w-[520px] md:w-[1200px] md:max-w-none object-contain"
-                />
-              </div>
-            </div>
-          </div>
-        </section>
-      </section>
-
-      {/* Mobile simple version */}
-      <section className="md:hidden py-16">
-        <div className="mx-auto max-w-[1440px] px-4">
-          <h2 className="font-handwriting text-black text-6xl drop-shadow pb-2">What is AIESEC?</h2>
-          <p className="mt-2 text-[#828282] text-base leading-7">
-            AIESEC is a global organization entirely run by youth, for youth. Founded in 1948, 
-            it serves as a platform for young people to explore and develop their leadership potential through practical,
-            hands-on experiences such as internships and volunteering opportunities in challenging environments. 
-            Present in over 100 countries and territories, AIESEC activates youth leadership to strive for peace
-            and the fulfillment of humankind's potential. 
-            <br />
-            <br />
-            Today, the organization brings together 40,000+ members worldwide,
-            collaborates with 5,000+ partner organizations, delivers 30,000+ global experiences every year,
-            and is supported by a strong network of 1,000,000+ alumni across the globe.
-          </p>
-          <div className="mt-0 flex justify-center overflow-visible">
-            <img 
-              src={manImage} 
-              alt="Walking man" 
-              className="w-[200px] h-auto" 
-              style={{ transform: `translateX(${mobileManX}px)`, transition: 'transform 0.1s cubic-bezier(0, 0, 0, 1)' }}
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* Desktop animated scroll scene */}
-      <section ref={sceneRef} className="hidden md:block relative h-[200vh] bg-[#edf6ff]">
-        <div className="sticky top-0 h-screen flex items-center">
-          <div className="mx-auto max-w-[1440px] w-full px-8">
-            <div className="relative w-full h-[520px] rounded-[40px] bg-[#edf6ff] overflow-visible">
-              <div
-                className="absolute left-0 top-[-20px] max-w-[900px]"
-                style={{
-                  opacity: textOpacity,
-                  transform: `translate3d(0, ${textTranslateY}px, 0)`,
-                  transition: "opacity 450ms ease, transform 450ms ease",
-                }}
-              >
-                <h2 className="font-handwriting text-black text-[160px]">What is AIESEC?</h2>
-                <p className="mt--5 max-w-3xl text-[#828282] text-l leading-6">
-                  AIESEC is a global organization entirely run by youth, for youth. Founded in 1948, 
-                  it serves as a platform for young people to explore and develop their leadership potential through practical,
-                  hands-on experiences such as internships and volunteering opportunities in challenging environments. 
-                  Present in over 100 countries and territories, AIESEC activates youth leadership to strive for peace
-                  and the fulfillment of humankind's potential. 
-                  <br />
-                  <br />
-                  Today, the organization brings together 40,000+ members worldwide,
-                  collaborates with 5,000+ partner organizations, delivers 30,000+ global experiences every year,
-                  and is supported by a strong network of 1,000,000+ alumni across the globe.
-                </p>
-              </div>
-
-              <img
-                src={manImage}
-                alt="Walking man"
-                className="absolute bottom-24 w-[400px] h-auto select-none pointer-events-none"
-                style={{
-                  transform: `translate3d(${manX}px, 0, 0)`,
-                  willChange: "transform",
-                }}
-              />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Our story */}
-      <section className="pt-4 pb-24 md:pb-22 md:-mt-[1080px] relative z-10">
-        <div className="mx-auto max-w-[1440px] px-4 md:px-8">
-          <div className="flex flex-col lg:flex-row items-center lg:items-center gap-0 lg:gap-20">
-            <div className="w-full lg:w-1/2 flex-shrink-0 flex justify-end lg:justify-start overflow-visible order-2 lg:order-1 -mt-19 lg:mt-0">
-              <img src={raoucheImage} alt="Raouche, Beirut" className="w-full max-w-[300px] lg:max-w-[900px] h-auto object-contain" />
-            </div>
-
-            <div className="w-full lg:w-1/2 lg:-ml-8 order-1 lg:order-2">
-              <h2 className="font-handwriting text-black text-5xl sm:text-6xl lg:text-7xl xl:text-8xl drop-shadow leading-none">
-                Our story in Lebanon
-              </h2>
-
-              <p className="mt-4 md:mt-8 text-[#828282] text-base sm:text-xl md:text-xl leading-7 sm:leading-9 max-w-[540px]">
-                Founded in 2011 in Beirut, AIESEC in Lebanon delivers its impact through local activities 
-                and international engagement.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Story description */}
-      <section className="pt-4 pb-24 md:pb-22 md:-mt-[180px] relative z-10">
-        <div className="mx-auto max-w-[1440px] px-4 md:px-8">
-          <div className="mx-auto max-w-[820px]">
-            <p className="text-[#828282] text-base sm:text-lg md:text-xl leading-7 sm:leading-8 text-justify">
-              AIESEC in Lebanon was established with the vision of empowering young people to become
-              proactive leaders who can positively impact their communities and the wider world.
-              Through a strong network of local chapters, the organization creates opportunities
-              for youth to develop leadership skills in real-world contexts.
-            </p>
-
-            <p className="mt-6 text-[#828282] text-base sm:text-lg md:text-xl leading-7 sm:leading-8 text-justify">
-              By connecting Lebanese youth with international experiences and fostering partnerships
-              with educational institutions and organizations, AIESEC in Lebanon plays a key role in
-              promoting cross-cultural understanding, global citizenship, and sustainable development.
-            </p>
-          </div>
-        </div>
-      </section>
-
-
-      {/* Universities */}
-      <section className="pt-0 pb-20 md:pb-24 -mt-10 md:-mt-0">
-        <div className="mx-auto max-w-[1440px] px-4 md:px-8">
-          <h2 className="font-handwriting text-black text-5xl sm:text-6xl lg:text-7xl xl:text-8xl drop-shadow text-center">
-            Universities
-          </h2>
-
-          <div className="mt-6 mx-auto max-w-[1020px] relative">
-            <div className="relative bg-[#cfe7ff] border-[3px] border-[#0b63ff] rounded-[32px] md:rounded-[48px] p-6 md:p-0 md:h-[360px] flex items-center justify-center shadow-lg">
-              <img
-                src={uniPicImage}
-                alt="Universities decorative"
-                className="hidden md:block absolute right-[-60px] top-[-165px] w-[410px] h-auto pointer-events-none select-none"
-              />
-
-              <div className="flex flex-col md:flex-row gap-6 md:gap-14 items-stretch md:items-center justify-center z-10 w-full">
-                <div className="bg-white rounded-[22px] w-full md:w-[440px] h-[160px] md:h-[200px] flex items-center justify-center">
-                  <img src={lauLogo} alt="LAU Logo" className="max-h-[140px] md:max-h-[200px] w-auto object-contain" />
-                </div>
-
-                <div className="bg-[#6B1B47] rounded-[22px] w-full md:w-[440px] h-[160px] md:h-[200px] flex items-center justify-center">
-                  <img src={aubLogo} alt="AUB Logo" className="max-h-[150px] md:max-h-[220px] w-auto object-contain" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Explore opportunities */}
-      <section className="pt-4 pb-24 md:pb-22 md:-mt-0 relative z-10">
-        <div className="mx-auto max-w-[1440px] px-4 md:px-8">
-          <h2 className="mt-4 md:mt-8 font-handwriting text-black text-5xl sm:text-7xl md:text-9xl drop-shadow text-center">
-            Explore our opportunities
-          </h2>
-
-          <div className="mt-10 md:mt-12 grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-12 items-center">
-            <div className="md:-translate-y-12">
-              <p className="text-[#828282] text-base sm:text-lg md:text-xl leading-7 sm:leading-8 text-justify">
-                Discover the experiences AIESEC offers: volunteer abroad through Global Volunteer, build your career
-                with Global Talent, or teach and inspire through Global Teacher.
-              </p>
-
-              <button
-                type="button"
-                className="mt-12 md:mt-10 inline-flex items-center gap-1 md:gap-4 bg-[#037ef3] rounded-[18px] md:rounded-[20px] px-3 py-3 sm:px-6 sm:py-4 md:px-8 text-white text-base sm:text-xl md:text-3xl transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
-                onClick={() => window.location.href = 'https://signup.aieseclb.org'}
-              >
-                <span>View all Programs</span>
-                <span className="text-xl md:text-2xl">→</span>
-              </button>
-            </div>
-
-            <div className="flex justify-center items-center -mt-32 md:mt-0 md:translate-y-0 translate-x-24 md:-translate-x-6">
-              <div className="relative w-40 h-40 sm:w-56 sm:h-56 md:w-96 md:h-96 orbit-container">
-                {/* Top icon */}
-                <img
-                  src={earthLogo}
-                  alt="Global Volunteer"
-                  className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-16 sm:w-24 sm:h-24 md:w-40 md:h-40 object-contain orbit-icon"
-                />
-                {/* Bottom-left icon */}
-                <img
-                  src={capLogo}
-                  alt="Global Talent"
-                  className="absolute bottom-0 left-0 w-16 h-16 sm:w-24 sm:h-24 md:w-40 md:h-40 object-contain orbit-icon"
-                />
-                {/* Bottom-right icon */}
-                <img
-                  src={teacherLogo}
-                  alt="Global Teacher"
-                  className="absolute bottom-0 right-0 w-16 h-16 sm:w-24 sm:h-24 md:w-40 md:h-40 object-contain orbit-icon"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Partners */}
-      <section id="partners" className="pt-4 pb-24 md:pb-22 md:-mt-0 relative z-10">
-        <div className="mx-auto max-w-[1440px] px-4 md:px-8">
-          <div className="relative mt-8 md:mt-12">
-            <div className="absolute inset-0 opacity-80 translate-y-4 pointer-events-none select-none">
-              <img src={mapImage} alt="World map" className="w-full h-full object-contain object-top" />
-            </div>
-
-            <h2 className="relative z-10 font-handwriting text-black text-5xl sm:text-7xl md:text-9xl drop-shadow text-center">
-              Our Global Partners
-            </h2>
-
-            <div className="relative z-10 mt-10 md:mt-12 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-4 md:gap-6">
-              {partnerLogos.map((lg, idx) => (
-                <div
-                  key={`${lg.alt}-${idx}`}
-                  className={`bg-white rounded-[18px] md:rounded-[22px] px-4 md:px-8 py-4 md:py-5 flex items-center justify-center shadow-sm ${
-                    idx === partnerLogos.length - 1 ? 'col-span-2 sm:col-span-1 justify-self-center w-full max-w-[calc(50%-0.5rem)] sm:max-w-none' : ''
-                  }`}
-                >
-                  <img 
-                    src={lg.src} 
-                    alt={lg.alt} 
-                    className={`w-full max-h-[60px] md:max-h-[80px] object-contain ${
-                      lg.alt === 'DHL' ? 'max-w-[140px] md:max-w-[200px]' : 'max-w-[180px] md:max-w-[240px]'
-                    }`} 
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/*
-      <section className="pt-4 pb-24 md:pb-22 md:-mt-0 relative z-10">
-        <div className="mx-auto max-w-[1440px] px-4 md:px-8">
-          <div className="flex items-center justify-center gap-4">
-            <div className="relative">
-              <img src={bubbleImage} alt="Chat bubble" className="w-14 h-14 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain" />
-              <svg className="absolute -top-1 -right-1 w-5 h-5 sm:w-6 sm:h-6" viewBox="0 0 24 24" fill="none">
-                <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" fill="#FFC845" />
-              </svg>
-            </div>
-            <h2 className="font-handwriting text-black text-5xl sm:text-7xl md:text-9xl drop-shadow">Testimonials</h2>
-          </div>
-
-          <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-            {testimonials.map((t, idx) => (
-              <div key={`${idx}-${t.name}`} className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8">
-                <p className="text-lg sm:text-xl md:text-2xl font-medium text-black">"{t.quote}"</p>
-                <div className="mt-6 md:mt-8 flex items-center gap-3">
-                  <img src={t.avatar} alt={t.name} className="w-12 h-12 md:w-14 md:h-14 rounded-full object-cover" />
-                  <div>
-                    <div className="text-black font-medium">{t.name}</div>
-                    <div className="text-[#828282] text-sm">{t.role}</div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-      */}
-
-      {/* Footer */}
-      <footer className="relative overflow-hidden bg-gradient-to-br from-[#e9f4ff] via-white to-[#fff3d6] py-12">
-        <div className="pointer-events-none absolute -left-20 -top-24 h-56 w-56 rounded-full bg-[#bfe0ff] opacity-40 blur-2xl" />
-        <div className="pointer-events-none absolute -right-24 -bottom-20 h-64 w-64 rounded-full bg-[#ffe6a6] opacity-40 blur-2xl" />
-        <div className="mx-auto max-w-[1440px] px-4 md:px-8">
-          <div className="flex flex-col gap-8 rounded-[28px] border border-white/70 bg-white/70 p-6 backdrop-blur md:flex-row md:items-center md:justify-between md:p-8">
-            <div className="flex items-center gap-5">
-              <div className="rounded-2xl bg-white/90 p-3 shadow-[0_8px_24px_rgba(3,126,243,0.18)]">
-                <img src={logoBlue} alt="AIESEC logo" className="h-[70px] md:h-[84px] w-auto" />
-              </div>
-              <div>
-                <div className="text-xl md:text-2xl font-semibold text-[#0b63ff]">AIESEC in Lebanon</div>
-                <div className="text-sm md:text-base text-[#3c4a60]">Activate your potential. Create global impact.</div>
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <a
-                href="https://www.instagram.com/aiesecinleb?igsh=ZjV4aXY4cXg5ZnY="
-                className="rounded-full bg-white p-2 shadow-[0_6px_18px_rgba(0,0,0,0.08)] transition-all hover:-translate-y-0.5 hover:shadow-[0_10px_24px_rgba(0,0,0,0.12)]"
-              >
-                <img src={igLogo} alt="Instagram" className="w-9 h-9 md:w-10 md:h-10 object-contain" />
-              </a>
-              <a
-                href="https://www.linkedin.com/company/aiesec-in-lebanon/"
-                className="rounded-full bg-white p-2 shadow-[0_6px_18px_rgba(0,0,0,0.08)] transition-all hover:-translate-y-0.5 hover:shadow-[0_10px_24px_rgba(0,0,0,0.12)]"
-              >
-                <img src={linkedinLogo} alt="LinkedIn" className="w-9 h-9 md:w-10 md:h-10 object-contain" />
-              </a>
-              <a
-                href="https://youtube.com/@aiesecinleb?si=tW57RuN_mlIxiVsi"
-                className="rounded-full bg-white p-2 shadow-[0_6px_18px_rgba(0,0,0,0.08)] transition-all hover:-translate-y-0.5 hover:shadow-[0_10px_24px_rgba(0,0,0,0.12)]"
-              >
-                <img src={ytLogo} alt="YouTube" className="w-9 h-9 md:w-10 md:h-10 object-contain" />
-              </a>
-            </div>
-          </div>
-          <div className="mt-6 text-center text-xs md:text-sm text-[#5b6b84]">© 2026 AIESEC in Lebanon. All rights reserved.</div>
-        </div>
-      </footer>
-    </div>
+      <DawnHero />
+      <Manifest />
+      <LazyMount minHeight="100svh" className="bg-aiesec" data-shot="globe">
+        <Suspense fallback={<div className="h-svh bg-aiesec" />}>
+          <GlobeChapter />
+        </Suspense>
+      </LazyMount>
+      <Doors />
+      <LebanonTeaser />
+      <Programs />
+      <Showcases />
+      <Company />
     </>
   );
-};
-
-export default Page;
+}

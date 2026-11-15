@@ -1,0 +1,74 @@
+# Generated photographs
+
+Drop images in this folder using the **exact file names** below. The site picks them up automatically (hot reload in dev, next build in production). Until a file exists, the site shows a code-made landscape in its place, so nothing is ever broken.
+
+- Format: `.jpg` (or `.webp`). Platform screenshots can be `.png`.
+- Size: at least 2000 px on the long side. Aspect ratios are listed per image; a little off is fine, images are cropped to fit.
+- Keep them under about 600 KB each (export at quality 80).
+- In the Nano Banana prompts, the last sentence about style is the same every time on purpose, so the whole site looks like one photographer shot it.
+
+Shared style line (already included in every prompt below):
+
+> Photorealistic editorial travel photography, shot on a full-frame camera, natural light, rich but true colour, deep clean blues and warm golden highlights, slight film grain, no text, no logos, no watermark, no border.
+
+---
+
+## Home page
+
+| File name | Ratio | Prompt |
+|---|---|---|
+| `door-local.jpg` | 4:5 | Three Lebanese university students in their early twenties, two women and one man, casual modern clothes, walking toward a bright airport departure hall at sunrise with backpacks, seen from slightly behind and to the side, laughing, warm low sun flaring through tall windows, shallow depth of field. Photorealistic editorial travel photography, shot on a full-frame camera, natural light, rich but true colour, deep clean blues and warm golden highlights, slight film grain, no text, no logos, no watermark, no border. |
+| `door-incoming.jpg` | 4:5 | A young international traveller in their twenties with a small backpack standing on the Beirut seaside Corniche railing at golden hour, looking out at the Mediterranean and the Pigeon Rocks of Raouché, seen from behind, palm trees, locals walking past softly out of focus. Photorealistic editorial travel photography, shot on a full-frame camera, natural light, rich but true colour, deep clean blues and warm golden highlights, slight film grain, no text, no logos, no watermark, no border. |
+| `lebanon-cedars.jpg` | 4:5 | Ancient cedars of Lebanon in the Cedars of God forest above Bsharri in winter, wide flat layered branches heavy with fresh snow, first golden sunlight raking across the trunks, deep blue shadow on the snow, mountain ridge behind. Photorealistic editorial travel photography, shot on a full-frame camera, natural light, rich but true colour, deep clean blues and warm golden highlights, slight film grain, no text, no logos, no watermark, no border. |
+| `lebanon-byblos.jpg` | 16:11 | The old stone harbour of Byblos, Lebanon at golden hour, small wooden fishing boats on calm turquoise water, the medieval harbour tower and old stone houses, warm light, a few people on the quay, Mediterranean sea beyond. Photorealistic editorial travel photography, shot on a full-frame camera, natural light, rich but true colour, deep clean blues and warm golden highlights, slight film grain, no text, no logos, no watermark, no border. |
+| `lebanon-baalbek.jpg` | 1:1 | The six towering Roman columns of the Temple of Jupiter at Baalbek, Lebanon, seen from below against a deep blue sky at late afternoon, warm sunlight on honey-coloured stone, one small human figure for scale. Photorealistic editorial travel photography, shot on a full-frame camera, natural light, rich but true colour, deep clean blues and warm golden highlights, slight film grain, no text, no logos, no watermark, no border. |
+| `lebanon-raouche.jpg` | 1:1 | The Pigeon Rocks of Raouché off the coast of Beirut at blue hour just after sunset, the large rock with its natural arch, calm dark blue sea, last orange light on the horizon, city lights beginning to glow on the cliff. Photorealistic editorial travel photography, shot on a full-frame camera, natural light, rich but true colour, deep clean blues and warm golden highlights, slight film grain, no text, no logos, no watermark, no border. |
+| `program-volunteer.jpg` | 4:5 | A diverse group of young volunteers in their twenties from different countries painting a bright mural on a school wall with local children, paint on their hands, genuine laughter, sunny day, candid documentary moment. Photorealistic editorial travel photography, shot on a full-frame camera, natural light, rich but true colour, deep clean blues and warm golden highlights, slight film grain, no text, no logos, no watermark, no border. |
+| `program-talent.jpg` | 4:5 | A young professional in their twenties presenting an idea at a whiteboard to a small international team in a bright modern startup office, large windows, laptops on a wooden table, colleagues engaged and smiling, candid. Photorealistic editorial travel photography, shot on a full-frame camera, natural light, rich but true colour, deep clean blues and warm golden highlights, slight film grain, no text, no logos, no watermark, no border. |
+| `program-teacher.jpg` | 4:5 | A young teacher in their twenties kneeling beside a desk helping two schoolchildren with a workbook in a sunlit classroom, colourful drawings on the wall, warm and attentive, candid documentary moment. Photorealistic editorial travel photography, shot on a full-frame camera, natural light, rich but true colour, deep clean blues and warm golden highlights, slight film grain, no text, no logos, no watermark, no border. |
+| `events-cover.jpg` | 16:11 | A large hall full of young conference delegates in their twenties on their feet cheering, arms raised, blue stage light and warm spotlights, seen from the side of the crowd, energy and joy, shallow depth of field. Photorealistic editorial travel photography, shot on a full-frame camera, natural light, rich but true colour, deep clean blues and warm golden highlights, slight film grain, no text, no logos, no watermark, no border. |
+| `platforms-cover.jpg` | 16:11 | Three university students working late together around laptops in a dim room, faces lit blue by their screens, one pointing at code on a monitor, coffee cups, focused and happy, warm desk lamp in the background. Photorealistic editorial travel photography, shot on a full-frame camera, natural light, rich but true colour, deep clean blues and warm golden highlights, slight film grain, no text, no logos, no watermark, no border. |
+
+## Discover Lebanon page
+
+| File name | Ratio | Prompt |
+|---|---|---|
+| `lebanon-hero.jpg` | 16:9 | Sweeping aerial view of the Lebanese coast seen from the mountains at early morning: snow-capped peaks of Mount Lebanon in the foreground, green terraced slopes and stone villages with red roofs below, the city and the deep blue Mediterranean far beneath under a thin layer of morning mist, clear sky. Photorealistic editorial travel photography, shot on a full-frame camera, natural light, rich but true colour, deep clean blues and warm golden highlights, slight film grain, no text, no logos, no watermark, no border. |
+| `day-cedars.jpg` | 4:3 | First light of sunrise on ancient cedars of Lebanon above Bsharri, snow on the ground, long blue shadows, the Qadisha Valley filled with mist below, a single hiker small in the frame. Photorealistic editorial travel photography, shot on a full-frame camera, natural light, rich but true colour, deep clean blues and warm golden highlights, slight film grain, no text, no logos, no watermark, no border. |
+| `day-snow.jpg` | 3:4 | A skier carving down a wide snowy slope high on Mount Lebanon on a bright clear morning, powder spray, and far below in the distance the blue Mediterranean Sea visible on the horizon. Photorealistic editorial travel photography, shot on a full-frame camera, natural light, rich but true colour, deep clean blues and warm golden highlights, slight film grain, no text, no logos, no watermark, no border. |
+| `day-mezze.jpg` | 4:3 | A long wooden table under vine shade covered with Lebanese mezze: hummus with olive oil, tabbouleh, kibbeh, stuffed vine leaves, labneh, fresh flatbread, olives, hands reaching in to share, seen from above at an angle, dappled midday light. Photorealistic editorial travel photography, shot on a full-frame camera, natural light, rich but true colour, deep clean blues and warm golden highlights, slight film grain, no text, no logos, no watermark, no border. |
+| `day-batroun.jpg` | 3:4 | Crystal clear turquoise water against the ancient Phoenician stone sea wall of Batroun, Lebanon, a few young people swimming and sitting on the rocks, bright afternoon sun, sparkling sea. Photorealistic editorial travel photography, shot on a full-frame camera, natural light, rich but true colour, deep clean blues and warm golden highlights, slight film grain, no text, no logos, no watermark, no border. |
+| `day-raouche.jpg` | 4:3 | Sunset behind the Pigeon Rocks of Raouché seen from the Beirut Corniche, the sun touching the sea exactly beside the rock arch, silhouettes of people leaning on the railing, sky glowing orange into deep blue. Photorealistic editorial travel photography, shot on a full-frame camera, natural light, rich but true colour, deep clean blues and warm golden highlights, slight film grain, no text, no logos, no watermark, no border. |
+| `day-beirut-night.jpg` | 3:4 | A lively narrow street with old stone stairs in Beirut at night, strings of warm lights overhead, small bars and cafes with young people sitting outside talking and laughing, old Lebanese houses with arched windows, deep blue night sky. Photorealistic editorial travel photography, shot on a full-frame camera, natural light, rich but true colour, deep clean blues and warm golden highlights, slight film grain, no text, no logos, no watermark, no border. |
+| `place-byblos.jpg` | 4:5 | The Crusader castle of Byblos, Lebanon above the ancient ruins, wildflowers in the foreground, the Mediterranean behind, soft morning light. Photorealistic editorial travel photography, shot on a full-frame camera, natural light, rich but true colour, deep clean blues and warm golden highlights, slight film grain, no text, no logos, no watermark, no border. |
+| `place-baalbek.jpg` | 4:5 | The Temple of Bacchus at Baalbek, Lebanon, its tall intact colonnade and carved stone doorway, late afternoon golden light, a visitor small in the frame for scale. Photorealistic editorial travel photography, shot on a full-frame camera, natural light, rich but true colour, deep clean blues and warm golden highlights, slight film grain, no text, no logos, no watermark, no border. |
+| `place-jeita.jpg` | 4:5 | Inside the Jeita Grotto in Lebanon, vast limestone cavern with stalactites and stalagmites softly lit, a small boat on the still emerald underground river, reflections in the water. Photorealistic editorial travel photography, shot on a full-frame camera, natural light, rich but true colour, deep clean blues and warm golden highlights, slight film grain, no text, no logos, no watermark, no border. |
+| `place-qadisha.jpg` | 4:5 | The deep Qadisha Valley in northern Lebanon, an old stone monastery built into the cliff face, green terraces, morning mist rising from the gorge, sunlight catching the far wall. Photorealistic editorial travel photography, shot on a full-frame camera, natural light, rich but true colour, deep clean blues and warm golden highlights, slight film grain, no text, no logos, no watermark, no border. |
+| `place-tyre.jpg` | 4:5 | Roman columns of the ancient ruins of Tyre, Lebanon standing beside the bright blue Mediterranean, clear sunny day, long colonnaded road leading toward the sea. Photorealistic editorial travel photography, shot on a full-frame camera, natural light, rich but true colour, deep clean blues and warm golden highlights, slight film grain, no text, no logos, no watermark, no border. |
+| `place-sidon.jpg` | 4:5 | The Sidon Sea Castle in Lebanon on its small island joined to the shore by a stone causeway, fishing boats in the foreground, calm sea, warm early evening light. Photorealistic editorial travel photography, shot on a full-frame camera, natural light, rich but true colour, deep clean blues and warm golden highlights, slight film grain, no text, no logos, no watermark, no border. |
+| `place-tripoli.jpg` | 4:5 | A vaulted stone alley in the old souk of Tripoli, Lebanon, shafts of sunlight through the roof, a sweet shop with trays of baklava and knafeh, shopkeepers and passers-by softly blurred. Photorealistic editorial travel photography, shot on a full-frame camera, natural light, rich but true colour, deep clean blues and warm golden highlights, slight film grain, no text, no logos, no watermark, no border. |
+| `place-beiteddine.jpg` | 4:5 | The inner courtyard of Beiteddine Palace in the Chouf mountains of Lebanon, arcades with slender columns, a marble fountain, cypress trees and green hills beyond, soft morning light. Photorealistic editorial travel photography, shot on a full-frame camera, natural light, rich but true colour, deep clean blues and warm golden highlights, slight film grain, no text, no logos, no watermark, no border. |
+
+## Exchange page
+
+| File name | Ratio | Prompt |
+|---|---|---|
+| `exchange-hero.jpg` | 16:9 | A young traveller in their twenties with a backpack standing at a huge airport window at sunrise watching a plane take off, silhouette against a sky going from deep blue to gold, wide composition with empty space on the left. Photorealistic editorial travel photography, shot on a full-frame camera, natural light, rich but true colour, deep clean blues and warm golden highlights, slight film grain, no text, no logos, no watermark, no border. |
+
+## Events page
+
+Use **real photographs** of your events if you have them: they will always beat generated ones. File names (ratio 4:7, portrait, they are used as tall posters and as 16:11 crops):
+
+`event-national-conference.jpg`, `event-youth-speak-forum.jpg`, `event-global-village.jpg`, `event-leadership-days.jpg`, `event-open-day.jpg`, `event-impact-day.jpg`
+
+If you rename or replace the events in `src/content/events.js`, the file name is whatever you put in each entry's `image` field.
+
+Generic prompt if you need a stand-in (change the first sentence per event):
+
+> Young conference delegates in their twenties from many countries in a large hall, cheering with arms raised, blue and warm stage lighting, candid, portrait orientation. Photorealistic editorial travel photography, shot on a full-frame camera, natural light, rich but true colour, deep clean blues and warm golden highlights, slight film grain, no text, no logos, no watermark, no border.
+
+## Platforms page
+
+Use **real screenshots**, not generated images (16:10, at least 1600 px wide):
+
+`platform-signup.png`, `platform-website.png`, and one per platform you add in `src/content/platforms.js` (the name is the entry's `image` field).
