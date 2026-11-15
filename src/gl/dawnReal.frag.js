@@ -24,6 +24,8 @@ uniform vec3  uPageBg;
 uniform float uIntro;
 uniform float uFrame;
 uniform float uCover;      // how much of the low cloud has formed, 0..1
+uniform float uExposure;   // the camera opens up in the shaded valley, as a real one would
+uniform vec2  uJitter;     // sub-pixel shift for this frame (the runner blends frames into a sharp image)
 
 // Quality. Chosen per device and adjusted while it runs: see src/gl/quality.js.
 uniform int   uSteps;      // terrain march steps
@@ -107,11 +109,23 @@ float terrain(vec2 p, int oct) {
   float big = n2x(p * 0.03 + 11.0);
   // the range runs the whole length of the coast: every stretch of it is high, some higher
   float h = e * (0.85 + 2.7 * r * (0.78 + 0.42 * big));
-  h += smoothstep(0.0, 1.5, zc) * 0.025;                       // the coastal plain stands a little above the sea
+  h += smoothstep(-0.25, 0.45, zc) * 0.05;   // the coast stands up out of the sea: low cliffs, then the plain                       // the coastal plain stands a little above the sea
   float g = exp(-pow((p.x - valleyX(p.y)) / (0.55 + 0.035 * max(p.y, 0.0)), 2.0));
-  h = mix(h, min(h, valleyFloor(zc) + 0.14 * (r - 0.4)), g);
-  h -= smoothstep(0.25, -2.5, zc) * 0.5;                       // the sea bed falls away
+  // the valley floor never dips under the sea, or its mouth would flood into a lagoon
+  h = mix(h, min(h, max(valleyFloor(zc) + 0.14 * (r - 0.4), 0.035)), g);
+  h -= smoothstep(-0.25, -2.5, zc) * 0.5;                       // the sea bed falls away
   return h;
+}
+
+// the exact crossing between a point above the ground (a) and one below it (b), by halving.
+// Stopping at "close enough" instead snaps hits to step positions, which draws bands.
+float refineHit(vec3 ro, vec3 rd, float a, float b, int oct) {
+  for (int j = 0; j < 7; j++) {
+    float m = 0.5 * (a + b);
+    vec3 q = ro + rd * m;
+    if (q.y - terrain(q.xz, oct) < 0.0) b = m; else a = m;
+  }
+  return 0.5 * (a + b);
 }
 
 // march the heightfield; returns distance or -1
@@ -120,30 +134,32 @@ float marchTerrain(vec3 ro, vec3 rd, float tmax, int oct, int steps, float stepK
   // out at sea there is nothing to hit before the coast, so start there
   if (ro.z < -1.0 && rd.z > 1e-4) t = max(t, (-1.0 - ro.z) / rd.z);
   if (t > tmax) return -1.0;                                   // the sea is nearer than the coast
-  float lastD = 0.0, lastT = t;
+  float lastD = 1.0, lastT = t;
   for (int i = 0; i < 200; i++) {
     if (i >= steps) break;
     vec3 p = ro + rd * t;
     if (p.y > 4.6 && rd.y > 0.0) return -1.0;                  // above every summit and climbing
     float d = p.y - terrain(p.xz, oct);
-    if (d < 0.0004 * t + 0.0006) {
-      // the ray is at or under the ground: close in on the surface by halving the interval,
-      // so far silhouettes come out as clean as near ones
-      float a = lastT, b = t;
-      for (int j = 0; j < 6; j++) {
-        float m = 0.5 * (a + b);
-        vec3 q = ro + rd * m;
-        if (q.y - terrain(q.xz, oct) < 0.0) b = m; else a = m;
-      }
-      return 0.5 * (a + b);
+    if (d < 0.0) return refineHit(ro, rd, lastT, t, oct);
+    // Steps lengthen with distance, or the far range would never be reached. Far off, where
+    // crests are seen edge-on, they shorten again while the ray skims the ground.
+    float far = smoothstep(10.0, 20.0, t);
+    float stepLen = max(d * stepK, uGrow * t * mix(1.0, clamp(d / 0.25, 0.15, 1.0), far) + 0.002);
+    // a long step close to the ground could carry the ray clean over a thin crest: look at the
+    // middle of it too
+    if (d < 0.3 && stepLen > 3.0 * d) {
+      float tm = t + 0.5 * stepLen;
+      vec3 m = ro + rd * tm;
+      if (m.y - terrain(m.xz, oct) < 0.0) return refineHit(ro, rd, t, tm, oct);
     }
     lastD = d;
     lastT = t;
-    // steps lengthen with distance, or the far range would never be reached
-    t += max(d * stepK, uGrow * t + 0.003);
+    t += stepLen;
     if (t > tmax) return -1.0;
   }
-  return -1.0;
+  // out of steps while still skimming the land: call it land, rather than let the sea far beyond
+  // show through as bright patches
+  return lastD < 0.35 ? lastT : -1.0;
 }
 
 vec3 terrainNormal(vec2 p, float t) {
@@ -282,6 +298,24 @@ vec3 shadeLand(vec3 p, vec3 rd, float t) {
   vec3 albedo = mix(mix(soil, rock, smoothstep(0.16, 0.42, slope + nB * 0.15)), forest, woods);
   // the coastal plain: pale, built on
   albedo = mix(albedo, vec3(0.180, 0.170, 0.160), (1.0 - smoothstep(0.02, 0.09, alt)) * 0.7);
+  // villages: pale stone houses and red tile roofs gathered on the gentler slopes, in the same
+  // places whose lights are on before dawn
+  float vil = smoothstep(0.60, 0.80, n2(p.xz * 0.55 + 31.0)) * (1.0 - smoothstep(0.28, 0.44, slope))
+            * (1.0 - smoothstep(1.3, 1.6, alt)) * smoothstep(0.03, 0.10, alt);
+  if (vil > 0.0) {
+    vec2 g = p.xz * 70.0;
+    vec2 id = floor(g);
+    float hh = hash12(id);
+    vec2 f = fract(g) - 0.5;
+    float house = step(0.45, hh) * step(max(abs(f.x), abs(f.y)), 0.28 + 0.12 * hash12(id + 3.0));
+    vec3 stone = vec3(0.60, 0.56, 0.48), roof = vec3(0.44, 0.15, 0.09);
+    vec3 hc = hh > 0.80 ? roof : stone;
+    // once a house is smaller than a pixel, show the village as its average tone instead of sparkle
+    float lod = smoothstep(0.004, 0.012, t / (uRes.y * 0.5 * uFocal));
+    house = mix(house, 0.33, lod);
+    hc = mix(hc, mix(stone, roof, 0.22), lod);
+    albedo = mix(albedo, hc, house * vil);
+  }
   // snow above the line, held on the gentler ground
   float snowLine = 1.95 + 0.45 * (nA - 0.5) - 0.25 * n.z;    // lower on the shaded, seaward faces
   float snow = smoothstep(snowLine - 0.12, snowLine + 0.18, alt) * (1.0 - smoothstep(0.30, 0.58, slope + (nC - 0.5) * 0.2));
@@ -317,16 +351,21 @@ vec3 shadeLand(vec3 p, vec3 rd, float t) {
   return col;
 }
 
+float waves(vec2 q, float tm, vec3 w) {
+  return w.x * n2(q + vec2(tm, tm * 0.6)) + 0.5 * w.y * n2(q * 2.7 - vec2(tm * 0.8, tm)) + 0.25 * w.z * n2g(q * 6.1 + tm);
+}
 vec3 waterNormal(vec2 p, float t) {
-  // long swell plus two trains of smaller waves; the far sea is calmer on screen
+  // a long swell and two trains of smaller waves. Each train fades out once it is finer than a
+  // pixel where it is seen (at a glancing angle a pixel covers a long strip of sea), so the far
+  // water turns smooth and bright instead of breaking into dashes.
   float amp = 1.0 / (1.0 + t * 0.35);
+  float strip = t * t / max(uCamPos.y, 0.01) / (uRes.y * 0.5 * uFocal);
+  vec3 w = vec3(smoothstep(0.20, 0.07, strip), smoothstep(0.074, 0.026, strip), smoothstep(0.033, 0.012, strip));
   vec2 q = p * 5.0;
   float tm = uTime * 0.35;
   vec2 e = vec2(0.03, 0.0);
-  float a = n2(q + vec2(tm, tm * 0.6)) + 0.5 * n2(q * 2.7 - vec2(tm * 0.8, tm)) + 0.25 * n2g(q * 6.1 + tm);
-  float ax = n2(q + e + vec2(tm, tm * 0.6)) + 0.5 * n2((q + e) * 2.7 - vec2(tm * 0.8, tm)) + 0.25 * n2g((q + e) * 6.1 + tm);
-  float az = n2(q + e.yx + vec2(tm, tm * 0.6)) + 0.5 * n2((q + e.yx) * 2.7 - vec2(tm * 0.8, tm)) + 0.25 * n2g((q + e.yx) * 6.1 + tm);
-  vec2 grad = vec2(ax - a, az - a) / e.x;
+  float a = waves(q, tm, w);
+  vec2 grad = vec2(waves(q + e, tm, w) - a, waves(q + e.yx, tm, w) - a) / e.x;
   return normalize(vec3(-grad.x * 0.055 * amp, 1.0, -grad.y * 0.055 * amp));
 }
 
@@ -531,7 +570,7 @@ vec3 tonemap(vec3 x) {
 }
 
 void main() {
-  vec2 frag = gl_FragCoord.xy;
+  vec2 frag = gl_FragCoord.xy + uJitter;
   vec2 uv = (frag - 0.5 * uRes) / (0.5 * uRes.y);
   vec3 ro = uCamPos;
   vec3 fw = normalize(uCamTar - uCamPos);
@@ -586,7 +625,7 @@ void main() {
   // the soft edge of the title, drawn over the scene where it was not solid enough to stop the ray
   if (what != 4 && titleA > 0.0) col = mix(col, vec3(2.2), titleA * cl.a);
 
-  col = tonemap(col);
+  col = tonemap(col * uExposure);
   col = pow(col, vec3(1.0 / 2.2));
 
   // grade

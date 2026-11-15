@@ -58,8 +58,8 @@ const BEATS = [
   { id: "title", in: [-1, -0.5], out: [0.04, 0.11] },
   { id: "intro", in: [-1, -0.5], out: [0.05, 0.12] },
   { id: "b1", in: [0.16, 0.21], out: [0.3, 0.35] },
-  { id: "b2", in: [0.37, 0.42], out: [0.49, 0.54] },
-  { id: "b3", in: [0.7, 0.75], out: [0.86, 0.91] },
+  { id: "b2", in: [0.53, 0.58], out: [0.66, 0.71] },
+  { id: "b3", in: [0.75, 0.8], out: [0.87, 0.91] },
 ];
 
 // onTooSlow(reason) is called when this device cannot run the realistic scene; the page then
@@ -96,11 +96,16 @@ export default function DawnHeroReal({ onTooSlow }) {
     const params = new URLSearchParams(window.location.search);
     const forced = params.has("s") ? clamp01(parseFloat(params.get("s"))) : null;
 
+    // the camera of the last frame: while it holds still, frames are blended into a sharp image
+    const prevCam = new Float32Array(10);
     const apply = (quad, time, dt) => {
       const target = forced ?? (reduce ? 0 : sectionProgress(section));
       s = dt === 0 ? target : s + (target - s) * (1 - Math.exp(-dt * 6));
+      if (Math.abs(target - s) < 2e-5) s = target;
       px += (tx - px) * (1 - Math.exp(-dt * 3));
       py += (ty - py) * (1 - Math.exp(-dt * 3));
+      if (Math.abs(tx - px) < 1e-4) px = tx;
+      if (Math.abs(ty - py) < 1e-4) py = ty;
       intro = dt === 0 ? 1 : Math.min(1, intro + dt / 1.8);
       frameNo += 1;
 
@@ -122,10 +127,19 @@ export default function DawnHeroReal({ onTooSlow }) {
       const dirY = Math.sin(pitch);
       const dirZ = Math.cos(az) * Math.cos(pitch);
 
+      const focal = mix(4.2, 2.5, smoothstep(0.08, 0.5, s));
+      const now = [cam.x, cam.y, cam.z, dirX, dirY, dirZ, focal, s, intro, 0];
+      let moved = false;
+      for (let i = 0; i < now.length; i++) {
+        if (Math.abs(now[i] - prevCam[i]) > 1e-6) moved = true;
+        prevCam[i] = now[i];
+      }
+      if (moved && quad.resetHistory) quad.resetHistory();
+
       quad.set("uCamPos", cam.x, cam.y, cam.z);
       quad.set("uCamTar", cam.x + dirX, cam.y + dirY, cam.z + dirZ);
       // a long lens out at sea, opening up as the valley closes round the camera
-      quad.set("uFocal", mix(4.2, 2.5, smoothstep(0.08, 0.5, s)));
+      quad.set("uFocal", focal);
       quad.set("uSunDir", Math.sin(SUN_AZ) * Math.cos(sunElev), Math.sin(sunElev), Math.cos(SUN_AZ) * Math.cos(sunElev));
       quad.set("uDay", 0.24 + 0.76 * smoothstep(0.08, 0.8, s));
       quad.set("uSunR", 0.0125 + 0.95 * Math.pow(smoothstep(0.86, 1.0, s), 2.2));
@@ -134,6 +148,8 @@ export default function DawnHeroReal({ onTooSlow }) {
       quad.set("uFrame", frameNo);
       // out at sea the morning is clear and the whole range shows; the cloud gathers as we climb
       quad.set("uCover", smoothstep(0.08, 0.42, s));
+      // inland, in the shadow of the range and under the cloud, the camera opens up
+      quad.set("uExposure", 1 + 0.9 * smoothstep(0.12, 0.28, s) * (1 - smoothstep(0.46, 0.58, s)));
       quad.set("uTitleA", 0);
 
       for (const b of BEATS) {
@@ -196,6 +212,7 @@ export default function DawnHeroReal({ onTooSlow }) {
       initialScale: 0.5,
       adaptive: false,
       timer: !params.has("notimer"),
+      accumulate: !params.has("noaccum"),
       shouldDraw: (now) => {
         const t = sectionProgress(section);
         if (Math.abs(t - lastTarget) > 1e-4) {
