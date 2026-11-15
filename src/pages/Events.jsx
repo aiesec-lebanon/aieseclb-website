@@ -2,7 +2,8 @@ import { lazy, Suspense } from "react";
 import Reveal, { Lines } from "../components/Reveal";
 import Media from "../components/Scenic";
 import World, { Frame, SceneryToggle } from "../components/World";
-import { headingProps } from "../components/worldType";
+import { BACKDROP_CROP, headingProps } from "../components/worldType";
+import Backdrop from "../components/Backdrop";
 import SampleNote from "../components/SampleNote";
 import { hasGen } from "../lib/media";
 import { EVENTS } from "../content/events";
@@ -52,6 +53,7 @@ export default function Events() {
               world={w}
               from={i ? EVENTS[i - 1].world.bg : NIGHT}
               label={e.name}
+              backdrop={<Backdrop photo={photoOf(e)} world={w} textSide={i % 2 ? "right" : "left"} />}
               className="flex min-h-[150svh] items-center"
             >
               <div className="shell grid items-center gap-10 py-[34svh] md:grid-cols-12 md:gap-14">
@@ -70,14 +72,18 @@ export default function Events() {
                 <div className="md:col-span-7">
                   <div className="tilt-in [perspective:1600px]">
                     <Frame world={w}>
-                      <Media
-                        name={photoOf(e)}
-                        alt={e.name}
-                        tone={e.tone}
-                        seed={400 + i * 9}
-                        sizes="(max-width: 768px) 92vw, 58vw"
-                        className="aspect-[16/10]"
-                      />
+                      {/* the middle of the photograph; the rest of it carries on behind, in 3D */}
+                      <div data-backdrop-frame="" style={{ "--crop": BACKDROP_CROP }}>
+                        <Media
+                          name={photoOf(e)}
+                          alt={e.name}
+                          tone={e.tone}
+                          seed={400 + i * 9}
+                          sizes="(max-width: 768px) 92vw, 58vw"
+                          className="aspect-[16/10]"
+                          imgClassName="scale-[var(--crop)]"
+                        />
+                      </div>
                     </Frame>
                   </div>
                 </div>
