@@ -61,7 +61,11 @@ export default function Events() {
               className="flex min-h-[150svh] items-center"
             >
               <div className="shell grid items-center gap-10 py-[34svh] md:grid-cols-12 md:gap-14">
-                <Reveal className={`relative z-10 md:col-span-5 ${i % 2 ? "md:order-2 md:pl-2" : "md:pr-2"}`}>
+                {/* on a phone the words sit over the photograph carried on behind: a panel of the event's
+                    own colour keeps them as readable as on that colour */}
+                <Reveal
+                  className={`relative z-10 md:col-span-5 max-md:rounded-[1.6rem] max-md:bg-[color-mix(in_oklab,var(--w-bg)_80%,transparent)] max-md:p-6 max-md:backdrop-blur-md ${i % 2 ? "md:order-2 md:pl-2" : "md:pr-2"}`}
+                >
                   <p className="fade font-bold text-[var(--w-accent-ink)]">
                     {e.kind}
                     {/* while developing: which events are still placeholders */}
