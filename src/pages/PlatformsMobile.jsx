@@ -140,7 +140,7 @@ export default function PlatformsMobile() {
 
       <section aria-label="The platforms" className="bg-[linear-gradient(180deg,#030b1c,#06142e)] pb-16 pt-10 text-white">
         <div className="shell flex items-end justify-between">
-          <h2 className="display text-[2rem]">Swipe through the worlds</h2>
+          <h2 className="display text-[2rem]">Swipe through the platforms</h2>
           <p aria-live="polite" className="font-bold text-white/70">
             {at + 1} / {total}
           </p>

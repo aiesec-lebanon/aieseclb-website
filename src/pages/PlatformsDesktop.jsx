@@ -146,8 +146,8 @@ export default function PlatformsDesktop() {
               <Lines text={["What we build", "after class."]} />
             </h1>
             <p className="fade text-lead mx-auto mt-5 max-w-[36rem] text-white/80" style={{ "--i": 3 }}>
-              AIESEC in Lebanon is run by volunteers, and some of them write software. Each of these is a world of its
-              own: scroll down and walk through them.
+              AIESEC in Lebanon is run by volunteers, and some of them write software. Here are the platforms
+              they have built, one after another.
             </p>
           </Reveal>
         </div>
