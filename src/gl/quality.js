@@ -39,8 +39,8 @@ export function detectDevice(gl) {
   if (software) tier = -1;
   else if (mobile) {
     if (/apple/.test(r)) tier = 2; // recent iPhones and iPads
-    else if (/adreno.*\b(7\d\d|8\d\d)\b|mali-g7[1-9]|mali-g[89]\d|immortalis|xclipse/.test(r)) tier = 2;
-    else tier = 1;
+    else if (/adreno.*\b(7\d\d|8\d\d)\b|mali-g7[1-9]|mali-g[89]\d|immortalis|xclipse/.test(r)) tier = 1;
+    else tier = 0; // phones start low and are raised if they keep up: stuck too heavy is worse than plain
     if (memory && memory <= 3) tier = Math.min(tier, 0);
   } else {
     if (/rtx|radeon rx|radeon pro|quadro|arc a\d|geforce gtx (1[6-9]|[2-9]\d)|apple m[2-9]|apple m\d (pro|max|ultra)/.test(r)) tier = 4;
@@ -131,9 +131,12 @@ export class Governor {
   }
 
   // true once quality has stopped moving: only then may the page save power by drawing less
+  // settled: measured, found smooth, and left alone for a while (only then may the scene rest
+  // between frames while nothing moves). Never settled without a good verdict.
   settled() {
     const now = performance.now();
-    return this.fixed || (now - this.bornAt > 9000 && now - this.changedAt > 6000 && !this.probe && !this.downCheck);
+    const smooth = this.judged && this.stats.avg > 0 && this.stats.avg < FRAME_MS * 1.3;
+    return this.fixed || (smooth && now - this.bornAt > 9000 && now - this.changedAt > 6000 && !this.probe && !this.downCheck);
   }
 
   // the viewport changed size: keep the same pixel budget
@@ -152,15 +155,18 @@ export class Governor {
 
   frame(dtMs, gpuMs) {
     if (this.fixed) return;
-    if (dtMs > 250) {
-      // a stall (tab switch, garbage collection, a page loading): not the scene's fault
+    if (dtMs > 1000) {
+      // a stall (tab switch, a page loading): not the scene's fault. (Anything shorter is a real
+      // frame: on a struggling phone frames of 200 to 400 ms are exactly what must be seen.)
       this.reset();
       return;
     }
     this.dts.push(dtMs);
     if (gpuMs != null && gpuMs > 0) this.gpus.push(gpuMs);
     this.elapsed += dtMs;
-    if (this.elapsed < 500 || this.dts.length < 20) return;
+    // a verdict every half second, from as few as four frames: at 5 fps, waiting for twenty
+    // meant four seconds per verdict, and none at all once idle rendering began
+    if (this.elapsed < 500 || this.dts.length < 4) return;
     this.evaluate();
     this.reset();
   }
@@ -171,7 +177,24 @@ export class Governor {
     const p90 = quantile(this.dts, 0.9);
     const gpu = this.gpus.length >= 8 ? quantile(this.gpus, 0.5) : null;
     this.stats = { fps: 1000 / avg, avg, p90, gpu };
+    this.judged = true;
     if (now < this.quietUntil) return;
+    // Far too slow (under about 11 frames a second): no gentle steps, straight to the lightest
+    // setting; and if that is where it already is, count it three times towards giving up.
+    if (avg > 90) {
+      this.roomy = 0;
+      this.probe = null;
+      this.downCheck = null;
+      if (this.tier > 0 || this.scale > this.range(0).min * 1.02) {
+        this.tier = 0;
+        this.scale = this.range(0).min;
+        this.commit();
+        return;
+      }
+      this.floor += 3;
+      if (this.floor >= this.patience.windows && now - this.bornAt > this.patience.ms && this.giveUpFn) this.giveUpFn();
+      return;
+    }
     const budget = Math.max(FRAME_MS, this.capMs || 0);
 
     // A step down that changed nothing, with frames arriving like clockwork at 30 (or 20, or 15)

@@ -19,18 +19,40 @@ const GlobeChapter = lazy(() => import("../scenes/GlobeChapter"));
 const logos = import.meta.glob("../assets/images/*_logo.png", { eager: true, query: "?url", import: "default" });
 const logoUrl = (file) => logos[`../assets/images/${file}`];
 
-const MANIFEST =
-  "AIESEC is a global organisation run entirely by youth, for youth. Since 1948 it has helped young people find the leader in themselves through real experiences abroad. In Lebanon, that work has had a home in Beirut since 2011.";
+// The manifesto, with its key phrases marked (true): they fill to AIESEC blue over a band of sun,
+// like a highlighter, as the rest fills to ink.
+const MANIFEST = [
+  ["AIESEC is a global organisation run entirely", false],
+  ["by youth, for youth.", true],
+  ["Since 1948", true],
+  ["it has helped young people find", false],
+  ["the leader in themselves", true],
+  ["through", false],
+  ["real experiences abroad.", true],
+  ["In Lebanon, that work has had a home in", false],
+  ["Beirut since 2011.", true],
+];
+const MANIFEST_WORDS = MANIFEST.flatMap(([text, hl]) => {
+  const ws = text.split(" ");
+  return ws.map((w, i) => ({ w, hl, end: i === ws.length - 1 }));
+});
 
 function Manifest() {
-  const words = MANIFEST.split(" ");
+  const words = MANIFEST_WORDS;
   return (
     <section data-shot="manifest" data-scheme="light" className="dawn-light bg-sky pb-24 pt-28 md:pb-36 md:pt-44">
       <div className="shell">
         <p className="display ink-fill max-w-[30ch] text-[clamp(2.2rem,6.1vw,6.2rem)] leading-[0.98] text-ink">
-          {words.map((w, i) => (
+          {words.map(({ w, hl, end }, i) => (
             <span key={i} style={{ "--i": i, "--step": `${46 / words.length}%` }}>
-              {w}{" "}
+              {hl ? (
+                <>
+                  <mark className="manifest-hl">{end ? w : `${w} `}</mark>
+                  {end ? " " : ""}
+                </>
+              ) : (
+                `${w} `
+              )}
             </span>
           ))}
         </p>
@@ -447,9 +469,35 @@ function Hero() {
       ) : (
         <DawnHeroReal onTooSlow={(reason) => setState({ kind: "graphic", why: reason })} />
       )}
+      {/* while developing: switch between the two heroes in place (and the address keeps the choice) */}
+      {import.meta.env.DEV && (
+        <div role="group" aria-label="Hero, development only" className="fixed bottom-3 left-3 z-[80] flex items-center gap-1 rounded-full bg-black/80 p-1 text-[13px] font-bold text-white backdrop-blur">
+          <span className="px-2 text-white/60">Hero</span>
+          {[
+            ["real", "Realistic"],
+            ["graphic", "Drawn"],
+          ].map(([kind, label]) => (
+            <button
+              key={kind}
+              type="button"
+              aria-pressed={state.kind === kind}
+              onClick={() => {
+                if (kind === "real") clearFallback();
+                const url = new URL(window.location.href);
+                url.searchParams.set("hero", kind);
+                window.history.replaceState(window.history.state, "", url);
+                setState({ kind, why: null });
+              }}
+              className={`rounded-full px-3 py-1.5 transition-colors ${state.kind === kind ? "bg-sun text-ink" : "hover:bg-white/15"}`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
       {/* while developing, say out loud when and why the drawn hero stands in */}
       {import.meta.env.DEV && state.why && (
-        <p className="fixed bottom-3 left-3 z-[80] max-w-[26rem] rounded-xl bg-black/80 px-4 py-3 text-[13px] font-bold text-white">
+        <p className="fixed bottom-16 left-3 z-[80] max-w-[26rem] rounded-xl bg-black/80 px-4 py-3 text-[13px] font-bold text-white">
           Showing the drawn hero: this browser was judged too slow for the realistic one (
           {state.why === "remembered" ? "remembered from an earlier visit" : state.why}). Open{" "}
           <a className="underline" href="/?hero=real">

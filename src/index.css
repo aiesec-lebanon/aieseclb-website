@@ -203,6 +203,13 @@ body,
 .ink-fill {
   view-timeline: --ink;
 }
+/* the manifesto's key phrases: AIESEC blue over a band of sun, like a highlighter */
+.manifest-hl {
+  color: var(--color-aiesec);
+  background: linear-gradient(transparent 60%, rgb(255 200 69 / 0.42) 60%, rgb(255 200 69 / 0.42) 92%, transparent 92%);
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
 @keyframes parallax-y {
   from {
     translate: 0 var(--py, 4rem);

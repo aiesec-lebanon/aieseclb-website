@@ -12,11 +12,10 @@ export const NAV = [
 
 // The two platforms that stakeholders come to this website for, besides sign-up: partners and
 // students who want to become members. In the header and the footer.
-// `url` is the live address. Until it is set, the link opens the platform's section on /platforms.
-// TODO: set both urls when the portals are live.
+// `url` is the live address (without one, the link opens the platform's section on /platforms).
 export const PORTALS = [
-  { id: "partner-portal", label: "Partners", long: "Partner portal", url: null },
-  { id: "member-portal", label: "Membership", long: "Membership portal", url: null },
+  { id: "partner-portal", label: "Partners", long: "Partner portal", url: "https://partners.aieseclb.org" },
+  { id: "member-portal", label: "Membership", long: "Membership portal", url: "https://members.aieseclb.org" },
 ];
 export const portalHref = (p) => p.url || `/platforms#${p.id}`;
 

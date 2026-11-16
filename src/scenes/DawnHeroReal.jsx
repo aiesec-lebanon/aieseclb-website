@@ -71,6 +71,7 @@ export default function DawnHeroReal({ onTooSlow }) {
   const canvasRef = useRef(null);
   const beatRefs = useRef({});
   const cueRef = useRef(null);
+  const shadeRef = useRef(null);
   const hudRef = useRef(null);
   const tooSlowRef = useRef(onTooSlow);
   const [mode, setMode] = useState(() =>
@@ -159,6 +160,8 @@ export default function DawnHeroReal({ onTooSlow }) {
       quad.set("uDay", 0.24 + 0.76 * smoothstep(0.08, 0.8, s));
       quad.set("uSunR", 0.0125 + 0.95 * Math.pow(smoothstep(0.86, 1.0, s), 2.2));
       quad.set("uWash", smoothstep(0.94, 1.0, s));
+      // the shade behind the words lifts as the scene turns into the page, or it greys the light
+      if (shadeRef.current) shadeRef.current.style.opacity = (1 - smoothstep(0.86, 0.95, s)).toFixed(3);
       quad.set("uIntro", intro * intro * (3 - 2 * intro));
       quad.set("uFrame", frameNo);
       // out at sea the morning is clear and the whole range shows; the cloud gathers as we climb
@@ -425,6 +428,7 @@ export default function DawnHeroReal({ onTooSlow }) {
         )}
         {/* a little shade behind the words, none over the picture */}
         <div
+          ref={shadeRef}
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgb(3_11_28/0.30)_0%,transparent_30%,transparent_62%,rgb(3_11_28/0.42)_100%)]"
         />

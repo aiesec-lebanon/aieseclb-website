@@ -132,8 +132,10 @@ export default function Nav() {
                   {item.label}
                 </NavLink>
               ))}
-              {/* the doors for partners and future members, set apart from the pages */}
-              <span aria-hidden="true" className={`mx-2 hidden h-5 w-px lg:block ${light ? "bg-ink/20" : "bg-white/25"}`} />
+            </nav>
+
+            <div className="flex items-center gap-2">
+              {/* the doors for partners and future members, on the right with sign-up */}
               {PORTALS.map((p) => (
                 <PortalLink
                   key={p.id}
@@ -143,9 +145,6 @@ export default function Nav() {
                   }`}
                 />
               ))}
-            </nav>
-
-            <div className="flex items-center gap-2">
               <a
                 href={SIGNUP_URL}
                 className={`hidden items-center rounded-full bg-sun px-5 font-bold text-ink transition-[background-color,height] duration-300 hover:bg-white sm:inline-flex ${
