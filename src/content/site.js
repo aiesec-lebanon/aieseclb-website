@@ -2,9 +2,9 @@
 
 export const SIGNUP_URL = "https://signup.aieseclb.org";
 
-// Where someone abroad finds an exchange in Lebanon: AIESEC's global site.
-// TODO: the aiesec.org opportunity search already filtered to Lebanon (until then, aiesec.org).
-export const INCOMING_URL = "https://aiesec.org";
+// Where someone abroad finds an exchange in Lebanon: the aiesec.org opportunity search filtered to
+// Lebanon (home_mcs=182). Each programme has its own (PROGRAMS[].incoming); this one shows all three.
+export const INCOMING_URL = "https://aiesec.org/search?home_mcs=182";
 export const INCOMING_SITE = "aiesec.org";
 
 export const NAV = [
@@ -65,6 +65,7 @@ export const PROGRAMS = [
     name: "Global Volunteer",
     color: "ember",
     verb: "Volunteer",
+    incoming: "https://aiesec.org/search?programmes=7&home_mcs=182",
     line: "Give a few weeks. Come home changed.",
     body: "Join a volunteering project abroad built around the Sustainable Development Goals, with a team of young people from all over the world.",
     image: "program-volunteer",
@@ -74,6 +75,7 @@ export const PROGRAMS = [
     name: "Global Talent",
     color: "teal",
     verb: "Intern",
+    incoming: "https://aiesec.org/search?programmes=8&home_mcs=182",
     line: "Start your career somewhere new.",
     body: "Take an internship abroad with a company or a startup, and learn to work in a culture that is not your own.",
     image: "program-talent",
@@ -83,6 +85,7 @@ export const PROGRAMS = [
     name: "Global Teacher",
     color: "tangerine",
     verb: "Teach",
+    incoming: "https://aiesec.org/search?programmes=9&home_mcs=182",
     line: "Stand in front of a class a world away.",
     body: "Teach abroad, share what you know, and discover how much a classroom can teach you back.",
     image: "program-teacher",

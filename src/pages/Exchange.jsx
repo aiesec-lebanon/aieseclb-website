@@ -214,7 +214,7 @@ export default function Exchange() {
                   Apply for {p.name}
                   <Arrow className="transition-transform duration-500 group-hover:translate-x-1.5" />
                 </a>
-                <a href={INCOMING_URL} target="_blank" rel="noreferrer" className="font-bold underline decoration-2 underline-offset-4">
+                <a href={p.incoming} target="_blank" rel="noreferrer" className="font-bold underline decoration-2 underline-offset-4">
                   Coming from abroad? It is on {INCOMING_SITE}
                 </a>
               </div>
