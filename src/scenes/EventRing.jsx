@@ -86,6 +86,12 @@ async function makePoster(event, index) {
   shade.addColorStop(1, "rgba(3,11,28,0.88)");
   ctx.fillStyle = shade;
   ctx.fillRect(0, 0, W, H);
+  // the poster as it is now, before the words go on: the reflection on the floor shows this one,
+  // so no title hangs upside down under the ring
+  const bare = document.createElement("canvas");
+  bare.width = W;
+  bare.height = H;
+  bare.getContext("2d").drawImage(c, 0, 0);
 
   ctx.fillStyle = "#ffc845";
   ctx.font = '700 30px "Lato", sans-serif';
@@ -115,11 +121,14 @@ async function makePoster(event, index) {
   const lh = size * 0.92;
   lines.forEach((l, i) => ctx.fillText(l, 44, H - 150 + size * 0.8 + i * lh - (lines.length - 1) * lh * 0.5 + 20));
 
-  const tex = new CanvasTexture(c);
-  tex.colorSpace = SRGBColorSpace;
-  tex.minFilter = LinearMipmapLinearFilter;
-  tex.generateMipmaps = true;
-  return tex;
+  const texture = (canvas) => {
+    const tex = new CanvasTexture(canvas);
+    tex.colorSpace = SRGBColorSpace;
+    tex.minFilter = LinearMipmapLinearFilter;
+    tex.generateMipmaps = true;
+    return tex;
+  };
+  return { words: texture(c), bare: texture(bare) };
 }
 
 const VERT = `
@@ -231,7 +240,8 @@ export default function EventRing({ events }) {
       document.fonts.load('800 condensed 60px "Archivo Variable"').catch(() => {}),
       document.fonts.load('700 30px "Lato"').catch(() => {}),
     ]).then(async () => {
-      const textures = await Promise.all(events.map((e, i) => makePoster(e, i)));
+      const posters = await Promise.all(events.map((e, i) => makePoster(e, i)));
+      const textures = posters.flatMap((p) => [p.words, p.bare]);
       if (!alive) {
         textures.forEach((t) => t.dispose());
         return;
@@ -239,8 +249,8 @@ export default function EventRing({ events }) {
       const maxAniso = Math.min(8, renderer.capabilities.getMaxAnisotropy());
       textures.forEach((t) => (t.anisotropy = maxAniso));
       panels.forEach((p, i) => {
-        p.mat.uniforms.uMap.value = textures[i % events.length];
-        p.reflMat.uniforms.uMap.value = textures[i % events.length];
+        p.mat.uniforms.uMap.value = posters[i % events.length].words;
+        p.reflMat.uniforms.uMap.value = posters[i % events.length].bare;
       });
       panels.textures = textures;
     });
