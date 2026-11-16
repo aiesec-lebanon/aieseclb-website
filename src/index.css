@@ -225,6 +225,13 @@ textarea,
       animation-timeline: view();
       animation-range: entry 5% cover 38%;
     }
+    /* on a phone a tall photo is most of the screen: still closed when it was half in view, it
+       showed as a blank band. There it opens while it comes in, and is whole once half of it is. */
+    @media (max-width: 767px) {
+      .unveil {
+        animation-range: entry 0% entry 50%;
+      }
+    }
     .ink-fill > span {
       animation: ink-fill linear both;
       animation-timeline: --ink;
