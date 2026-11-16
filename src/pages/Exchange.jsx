@@ -190,6 +190,19 @@ export default function Exchange() {
                   </li>
                 ))}
               </ul>
+              {/* straight to this programme's own form on the sign-up portal (signup/<id>) */}
+              <div className="fade mt-10 flex flex-wrap items-center gap-x-6 gap-y-4" style={{ "--i": 5 }}>
+                <a
+                  href={`${SIGNUP_URL}/${p.id}`}
+                  className="group inline-flex h-14 items-center gap-3 rounded-full bg-ink px-8 text-lg font-bold text-white transition-colors duration-300 hover:bg-night"
+                >
+                  Apply for {p.name}
+                  <Arrow className="transition-transform duration-500 group-hover:translate-x-1.5" />
+                </a>
+                <a href={INCOMING_URL} target="_blank" rel="noreferrer" className="font-bold underline decoration-2 underline-offset-4">
+                  Coming from abroad? It is on {INCOMING_SITE}
+                </a>
+              </div>
             </Reveal>
           </div>
         </section>
