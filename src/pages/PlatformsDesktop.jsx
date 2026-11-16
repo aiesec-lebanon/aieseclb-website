@@ -106,12 +106,11 @@ function Points({ p }) {
 }
 function Stack({ p }) {
   return (
-    <div className="fade mt-8 flex flex-wrap items-center gap-3" style={{ "--i": 4 }}>
-      {p.stack.map((s) => (
-        <span key={s} className="rounded-full border border-[var(--w-line)] px-4 py-1.5 text-[0.92rem] font-bold text-[var(--w-soft)]">
-          {s}
-        </span>
-      ))}
+    <div className="fade mt-8 flex flex-wrap items-center gap-x-6 gap-y-4" style={{ "--i": 4 }}>
+      {/* a line, not pills: pills look like buttons, and these are only what it is made with */}
+      <p className="text-[0.95rem] text-[var(--w-soft)]">
+        Built with <span className="font-bold">{p.stack.join(", ")}</span>
+      </p>
       <span className="ml-auto">
         <OpenIt platform={p} />
       </span>
