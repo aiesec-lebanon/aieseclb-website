@@ -82,7 +82,8 @@ export default function Events() {
                   </p>
                 </Reveal>
                 <div className="max-md:order-first md:col-span-7">
-                  <div className="tilt-in [perspective:1600px]">
+                  <Reveal>
+                  <div className="rise-in">
                     <Frame world={w}>
                       {/* the middle of the photograph; the rest of it carries on behind, in 3D */}
                       <div data-backdrop-frame="" style={{ "--crop": BACKDROP_CROP }}>
@@ -98,6 +99,7 @@ export default function Events() {
                       </div>
                     </Frame>
                   </div>
+                  </Reveal>
                 </div>
               </div>
             </World>

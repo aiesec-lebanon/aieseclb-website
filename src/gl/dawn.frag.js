@@ -18,6 +18,9 @@ uniform float uTime;
 uniform float uDay;      // 0 night, 0.5 sunrise, 1 day
 uniform vec3  uCam;      // x, height, z
 uniform float uHy;       // horizon height on screen, in units of half the frame height
+// Always 0, added to the loop bounds so the shader compiler cannot unroll them (Chrome on Windows
+// hands WebGL to Direct3D's compiler, which took 21 s on this shader cold when it could).
+uniform int   uZero;
 uniform vec2  uSun;      // sun direction as slopes (kx, ky)
 uniform float uSunR;     // sun radius in slope units
 uniform float uBearing;  // bearing of the flight valley (the sun's bearing at the start)
@@ -58,12 +61,12 @@ float vnoise2(vec2 x) {
 }
 float fbm1(float x) {
   float a = 0.5, s = 0.0;
-  for (int i = 0; i < 4; i++) { s += a * vnoise1(x); x = x * 2.03 + 17.13; a *= 0.5; }
+  for (int i = 0; i < 4 + uZero; i++) { s += a * vnoise1(x); x = x * 2.03 + 17.13; a *= 0.5; }
   return s / 0.9375;
 }
 float fbm2(vec2 x) {
   float a = 0.5, s = 0.0;
-  for (int i = 0; i < 4; i++) { s += a * vnoise2(x); x = x * 2.02 + vec2(11.7, 5.3); a *= 0.5; }
+  for (int i = 0; i < 4 + uZero; i++) { s += a * vnoise2(x); x = x * 2.02 + vec2(11.7, 5.3); a *= 0.5; }
   return s / 0.9375;
 }
 float ridged(float x) { return 1.0 - abs(2.0 * vnoise1(x) - 1.0); }
@@ -231,7 +234,10 @@ vec3 layerColor(int i, float wx, float wy, float h, float dz, vec2 k, float z, f
   float reach = exp(-below / (A * 0.85 + 0.05));
   float xs = wx + below * 0.62;
   float e = 0.06 / f;
-  float slope = (ridgeH(i, xs + e, z, B, A, f, jag) - ridgeH(i, xs - e, z, B, A, f, jag)) / (2.0 * e);
+  // the two samples of the slope in a loop: one copy of the ridge for the compiler, not two
+  float hs2[2];
+  for (int j = 0; j < 2 + uZero; j++) hs2[j] = ridgeH(i, xs + (j == 0 ? e : -e), z, B, A, f, jag);
+  float slope = (hs2[0] - hs2[1]) / (2.0 * e);
   float lit = mix(0.5, smoothstep(0.30, -0.30, slope / (A * f + 0.05)), reach);
   float contrast = mix(0.10, 0.34, sunUp) * mix(0.35, 1.0, t);
   col *= 1.0 - contrast * (1.0 - lit);
@@ -323,7 +329,7 @@ float cedars(int i, float wx, float wy, float z, float B, float A, float f, floa
   float sp = 1.0 + float(i) * 0.50;        // spacing along the ridge
   float cellf = wx / sp;
   float acc = 0.0;
-  for (int n = -1; n <= 1; n++) {
+  for (int n = -1; n <= 1 + uZero; n++) {
     float cell = floor(cellf) + float(n);
     float r = hash11(cell * 7.3 + float(i) * 31.0);
     if (r < 0.50) continue;
@@ -414,7 +420,7 @@ vec3 scene(float ox, float oy, vec2 k, float stretch, bool reflected) {
     }
   }
 
-  for (int i = 0; i < NL; i++) {
+  for (int i = 0; i < NL + uZero; i++) {
     if (alpha > 0.995) break;
     float z, B, A, f, jag;
     layerDims(i, z, B, A, f, jag);
@@ -500,20 +506,27 @@ void main() {
     }
   }
 
-  if (!water) {
-    col = scene(uCam.x, uCam.y, k, 1.0, false);
-  } else {
-    float t = uCam.y / max(-k.y, 1e-4);     // distance to where the ray meets the sea
-    float wxh = uCam.x + k.x * t;
-    float zh = uCam.z + t;
+  // The land, seen directly or reflected in the water: one call to the scene either way (a second
+  // call site would be a whole second copy of the landscape for the shader compiler).
+  float t = 0.0, wxh = 0.0, zh = 0.0, rip = 0.0;
+  vec2 kr = k;
+  if (water) {
+    t = uCam.y / max(-k.y, 1e-4);           // distance to where the ray meets the sea
+    wxh = uCam.x + k.x * t;
+    zh = uCam.z + t;
     // two trains of ripples moving against each other, and a slow swell
     vec2 q = vec2(wxh * 4.6, zh * 20.0);
     float r1 = vnoise2(q + vec2(uTime * 0.28, uTime * 0.52)) - 0.5;
     float r2 = vnoise2(q * 2.9 - vec2(uTime * 0.20, uTime * 0.38)) - 0.5;
     float swell = sin(zh * 3.1 - uTime * 0.42 + wxh * 0.4) * 0.5;
-    float rip = r1 + 0.5 * r2;
-    vec2 kr = vec2(k.x + rip * 0.014, max(-k.y + rip * 0.030 + swell * 0.004, 0.0015));
-    vec3 refl = scene(uCam.x, -uCam.y, kr, 3.4, true);
+    rip = r1 + 0.5 * r2;
+    kr = vec2(k.x + rip * 0.014, max(-k.y + rip * 0.030 + swell * 0.004, 0.0015));
+  }
+  vec3 seen = scene(uCam.x, water ? -uCam.y : uCam.y, kr, water ? 3.4 : 1.0, water);
+  if (!water) {
+    col = seen;
+  } else {
+    vec3 refl = seen;
 
     float graze = clamp(-k.y / 0.34, 0.0, 1.0);
     float fres = mix(0.22, 0.97, pow(1.0 - graze, 2.4));

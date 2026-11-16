@@ -352,6 +352,23 @@ html.lenis body {
     }
   }
 }
+/* A large picture rising in once as it arrives (a transition on .is-in, not tied to the scroll: a
+   scroll-linked animation on the Platforms pictures could not be composited there and cost the
+   page a full repaint every frame, about 83 ms). */
+@media (prefers-reduced-motion: no-preference) {
+  [data-reveal] .rise-in {
+    opacity: 0;
+    transform: translateY(3.5rem) scale(0.97);
+    transition:
+      opacity 1s var(--ease-out-expo),
+      transform 1.3s var(--ease-out-expo);
+  }
+  [data-reveal].is-in .rise-in {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 @keyframes tilt-in {
   from {
     transform: rotateX(22deg) scale(0.94);

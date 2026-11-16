@@ -120,8 +120,8 @@ function Stack({ p }) {
 }
 function Picture({ p, i, sizes }) {
   return (
-    // a soft reflection on the floor below the picture (where the browser can draw one)
-    <div className="tilt-in [perspective:1600px] [-webkit-box-reflect:below_10px_linear-gradient(transparent_74%,rgb(255_255_255/0.16))]">
+    <Reveal>
+      <div className="rise-in">
       {hasGen(p.image) ? (
         <Frame world={p.world}>
           <Media name={p.image} alt={`${p.name} on a laptop and a phone`} tone={p.tone} seed={520 + i * 7} sizes={sizes} className="aspect-[16/10]" />
@@ -129,7 +129,8 @@ function Picture({ p, i, sizes }) {
       ) : (
         <Screen platform={p} seed={520 + i * 7} />
       )}
-    </div>
+      </div>
+    </Reveal>
   );
 }
 
