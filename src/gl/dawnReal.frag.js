@@ -107,6 +107,39 @@ float ridged(vec2 p, int oct) {
   return s / w;
 }
 
+// Villages. Where a village is (the same places whose lights are on before dawn), each cell of a
+// 14 m grid may hold a house: standing off-centre in its plot, so no grid shows, and only where a
+// second, larger noise allows, so houses gather in clusters with lanes and gardens between.
+// house(p): x how much of p is under a roof (soft edge), y the house's hash (the tall hashes have
+// red pitched roofs), z the height of its walls, w how far inside its footprint p is.
+float villageAt(vec2 p, float alt) {
+  return smoothstep(0.64, 0.82, n2(p * 0.55 + 31.0)) * (1.0 - smoothstep(1.3, 1.6, alt)) * smoothstep(0.03, 0.10, alt);
+}
+vec4 house(vec2 p) {
+  vec2 g = p * 70.0;
+  vec2 id = floor(g);
+  float hh = hash12(id);
+  vec2 off = (vec2(hash12(id + 11.0), hash12(id + 17.0)) - 0.5) * 0.3;
+  vec2 f = fract(g) - 0.5 - off;
+  float w = 0.22 + 0.12 * hash12(id + 3.0);
+  float edge = max(abs(f.x), abs(f.y));
+  float gathered = smoothstep(0.35, 0.55, n2(p * 9.0 + 4.0));
+  float inside = step(0.55, hh) * gathered * (1.0 - smoothstep(w - 0.035, w, edge));
+  return vec4(inside, hh, 0.0045 + 0.0085 * hash12(id + 7.0), w - edge);
+}
+// The houses in the land's shape. Level of detail: only within about 4 km of the camera (fading out
+// from 2), only for the camera's view and its shading (oct >= 4: shadows and reflections use 3),
+// and not on the lightest setting. Further off they are colour only (shadeLand).
+float houses(vec2 p, float h) {
+  float near = 1.0 - smoothstep(2.0, 4.0, length(p - uCamPos.xz));
+  if (near <= 0.0) return 0.0;
+  float vil = villageAt(p, h);
+  if (vil <= 0.0) return 0.0;
+  vec4 c = house(p);
+  float roof = c.y > 0.85 ? max(c.w, 0.0) * 0.016 : 0.0;
+  return c.x * (c.z + roof) * vil * near;
+}
+
 float terrain(vec2 p, int oct) {
   // p = (x, z)
   float zc = p.y - 1.6 * (n2x(vec2(p.x * 0.11, 3.7)) - 0.5);  // a coast that wanders
@@ -120,6 +153,7 @@ float terrain(vec2 p, int oct) {
   // the valley floor never dips under the sea, or its mouth would flood into a lagoon
   h = mix(h, min(h, max(valleyFloor(zc) + 0.14 * (r - 0.4), 0.035)), g);
   h -= smoothstep(-0.25, -2.5, zc) * 0.5;                       // the sea bed falls away
+  if (oct >= 4) h += houses(p, h);
   return h;
 }
 
@@ -325,19 +359,15 @@ vec3 shadeLand(vec3 p, vec3 rd, float t, vec3 n, float sh) {
   albedo = mix(albedo, vec3(0.180, 0.170, 0.160), (1.0 - smoothstep(0.02, 0.09, alt)) * 0.7);
   // villages: pale stone houses and red tile roofs gathered on the gentler slopes, in the same
   // places whose lights are on before dawn
-  float vil = smoothstep(0.60, 0.80, n2(p.xz * 0.55 + 31.0)) * (1.0 - smoothstep(0.28, 0.44, slope))
-            * (1.0 - smoothstep(1.3, 1.6, alt)) * smoothstep(0.03, 0.10, alt);
+  float vil = villageAt(p.xz, alt) * (1.0 - smoothstep(0.28, 0.44, slope));
   if (vil > 0.0) {
-    vec2 g = p.xz * 70.0;
-    vec2 id = floor(g);
-    float hh = hash12(id);
-    vec2 f = fract(g) - 0.5;
-    float house = step(0.45, hh) * step(max(abs(f.x), abs(f.y)), 0.28 + 0.12 * hash12(id + 3.0));
-    vec3 stone = vec3(0.60, 0.56, 0.48), roof = vec3(0.44, 0.15, 0.09);
-    vec3 hc = hh > 0.80 ? roof : stone;
+    vec4 hc4 = house(p.xz);
+    float house = hc4.x;
+    vec3 stone = vec3(0.50, 0.47, 0.41), roof = vec3(0.40, 0.14, 0.09);
+    vec3 hc = hc4.y > 0.85 ? roof : stone;
     // once a house is smaller than a pixel, show the village as its average tone instead of sparkle
     float lod = smoothstep(0.004, 0.012, t / (uRes.y * 0.5 * uFocal));
-    house = mix(house, 0.33, lod);
+    house = mix(house, 0.18, lod);
     hc = mix(hc, mix(stone, roof, 0.22), lod);
     albedo = mix(albedo, hc, house * vil);
   }
@@ -442,6 +472,10 @@ const vec3  ROCK_B = vec3(0.322, 0.0, -4.400);
 const vec3  ROCK_S = vec3(0.2545, 0.0, -4.418);
 const float RH = 0.072;
 const float SH = 0.064;
+// Drawn larger than life (1.7 times), so they hold the foreground of the opening view as they do
+// when you stand on the corniche; scaled about their feet, so they still stand in the water.
+const float ROCK_K = 1.7;
+const vec3  ROCK_S2 = ROCK_B + (ROCK_S - ROCK_B) * ROCK_K;
 
 // Weathered limestone: broad, rounded lumps seen from two directions so no grain shows, and
 // only the faintest relief from the beds. The layering itself is drawn in the colour.
@@ -450,7 +484,7 @@ float rockNoise(vec3 q) {
   float b = n2(vec2(q.z * 70.0 - q.x * 23.0, q.y * 40.0 + 7.0));
   float fine = n2g(vec2(q.x * 260.0 + q.z * 190.0, q.y * 210.0));
   float beds = sin(q.y * 1150.0 + 5.0 * a);
-  return (a + b - 1.0) * 0.0016 + (fine - 0.5) * 0.0005 + beds * 0.00010;
+  return (a + b - 1.0) * 0.0016 + (fine - 0.5) * 0.0005 + beds * 0.0;
 }
 
 float sdBigRock(vec3 q) {
@@ -488,7 +522,8 @@ float sdSpire(vec3 q) {
 }
 
 float sdRocks(vec3 p) {
-  return min(sdBigRock(p - ROCK_B), sdSpire(p - ROCK_S)) + rockNoise(p - ROCK_B);
+  vec3 qb = (p - ROCK_B) / ROCK_K;
+  return (min(sdBigRock(qb), sdSpire((p - ROCK_S2) / ROCK_K)) + rockNoise(qb)) * ROCK_K;
 }
 
 // A low ledge of weathered limestone a few hundred metres off the bow, in the lower left of the
@@ -530,10 +565,10 @@ float marchLedge(vec3 ro, vec3 rd) {
 float sdStone(vec3 p) { return min(sdRocks(p), sdLedge(p)); }
 float marchRocks(vec3 ro, vec3 rd) {
   // bounding sphere first: almost every pixel stops here
-  vec3 c = vec3(0.2985, 0.035, -4.41);
+  vec3 c = ROCK_B + vec3(-0.0235, 0.035, -0.010) * ROCK_K;
   vec3 oc = ro - c;
   float b = dot(oc, rd);
-  float h = b * b - dot(oc, oc) + 0.0075;
+  float h = b * b - dot(oc, oc) + 0.0075 * ROCK_K * ROCK_K;
   if (h < 0.0) return -1.0;
   float tEnd = -b + sqrt(h);
   float t = max(-b - sqrt(h), 0.0);
@@ -554,21 +589,62 @@ vec3 stoneNormal(vec3 p) {
   }
   return normalize(n);
 }
+// Weathered limestone, lit physically: rough and warm in its beds, streaked dark where rain runs
+// down, dark, wet and glossy where the sea reaches with a line of salt above, scrub on the tops.
+// GGX specular with Schlick's Fresnel (stone's F0, 0.04), roughness 0.82 dry and 0.22 wet.
 vec3 shadeRocks(vec3 p, vec3 rd, vec3 n, float sh) {
-  vec3 q = p - ROCK_B;
-  // pale limestone in beds, dark and wet where the sea reaches, scrub on the tops
-  float beds = 0.86 + 0.14 * sin(p.y * 1150.0 + 6.0 * n2(vec2(q.x * 140.0 + q.z * 97.0, q.y * 30.0)));
-  vec3 albedo = mix(vec3(0.50, 0.44, 0.35), vec3(0.66, 0.60, 0.50), n2(vec2(q.x * 300.0 + q.z * 170.0, q.y * 260.0))) * beds;
-  albedo = mix(albedo, albedo * 0.35, 1.0 - smoothstep(0.001, 0.007, p.y));
-  float scrub = smoothstep(0.55, 0.8, n.y) * smoothstep(0.050, 0.058, p.y);
+  vec3 q = (p - ROCK_B) / ROCK_K;
+  float dist = length(p - uCamPos);
+  // fine relief: the normal bent by the slope of a small noise, fading out with distance
+  // (turned off the noise lattice, so no grid shows in the relief)
+  vec2 bq = ROT * vec2(q.x * 700.0 + q.z * 480.0, q.y * 700.0);
+  float b0 = n2(bq);
+  float bx = n2(bq + vec2(0.35, 0.0));
+  float by = n2(bq + vec2(0.0, 0.35));
+  vec3 tang = normalize(cross(n, vec3(0.0, 1.0, 0.0)) + vec3(1e-4, 0.0, 0.0));
+  vec3 bit = cross(n, tang);
+  vec3 nb = normalize(n + (tang * (bx - b0) + bit * (by - b0)) * 0.75 * (1.0 - smoothstep(0.4, 2.0, dist)));
+
+  // the beds: faint and wavering, not ruled lines
+  float beds = 0.95 + 0.05 * sin(q.y * 1150.0 + 9.0 * n2(vec2(q.x * 90.0 + q.z * 70.0, q.y * 18.0)));
+  // broad patches of paler and darker stone, in two sizes
+  float tone = n2(ROT * vec2(q.x * 120.0 + q.z * 80.0, q.y * 95.0)) * 0.6 + n2(ROT * vec2(q.z * 310.0 - q.x * 190.0, q.y * 240.0 + 5.0)) * 0.4;
+  vec3 albedo = mix(vec3(0.50, 0.45, 0.37), vec3(0.72, 0.66, 0.55), tone) * beds;
+  // rain streaks: a few, broad and soft, wandering, only down the steep faces
+  float sx = q.x * 160.0 + q.z * 120.0 + 3.0 * n2(vec2(q.y * 40.0, q.x * 50.0));
+  float streak = smoothstep(0.62, 0.9, n2(vec2(sx, q.y * 9.0))) * (1.0 - smoothstep(0.3, 0.7, nb.y));
+  albedo *= 1.0 - 0.22 * streak;
+  float wet = 1.0 - smoothstep(0.001, 0.008, p.y);
+  float salt = smoothstep(0.008, 0.011, p.y) * (1.0 - smoothstep(0.011, 0.016, p.y));
+  albedo = mix(albedo, albedo * 0.32, wet);
+  albedo = mix(albedo, vec3(0.80, 0.78, 0.72), salt * 0.35);
+  float scrub = smoothstep(0.55, 0.8, nb.y) * smoothstep(0.050 * ROCK_K, 0.058 * ROCK_K, p.y);
   albedo = mix(albedo, vec3(0.09, 0.11, 0.05), scrub);
+  float rough = mix(0.82, 0.22, wet);
+
   // darker in hollows and inside the arch
   float ao = clamp(0.4 + 0.6 * sdStone(p + n * 0.003) / 0.003, 0.0, 1.0);
-  float ndl = max(dot(n, uSunDir), 0.0);
+  float ndl = max(dot(nb, uSunDir), 0.0);
   vec3 sun = sunColor() * 5.5 * smoothstep(-0.02, 0.05, uSunDir.y);
   vec3 skyAmb = mix(vec3(0.020, 0.036, 0.085), vec3(0.230, 0.340, 0.560), uDay);
-  vec3 seaBounce = mix(vec3(0.006, 0.012, 0.030), vec3(0.040, 0.090, 0.150), uDay) * clamp(0.5 - 0.5 * n.y, 0.0, 1.0);
-  vec3 col = albedo * (sun * ndl * sh + (skyAmb * (0.45 + 0.55 * n.y) + seaBounce) * ao);
+  vec3 seaBounce = mix(vec3(0.006, 0.012, 0.030), vec3(0.040, 0.090, 0.150), uDay) * clamp(0.5 - 0.5 * nb.y, 0.0, 1.0);
+
+  // specular
+  vec3 v = -rd;
+  vec3 hv = normalize(v + uSunDir);
+  float nh = max(dot(nb, hv), 0.0);
+  float nv = max(dot(nb, v), 1e-3);
+  float a2 = pow(rough, 4.0);
+  float dd = nh * nh * (a2 - 1.0) + 1.0;
+  float D = a2 / (3.14159 * dd * dd);
+  float k = (rough + 1.0) * (rough + 1.0) / 8.0;
+  float G = (ndl / (ndl * (1.0 - k) + k)) * (nv / (nv * (1.0 - k) + k));
+  float F = 0.04 + 0.96 * pow(1.0 - max(dot(hv, v), 0.0), 5.0);
+  float spec = D * G * F / max(4.0 * ndl * nv, 1e-3);
+
+  vec3 col = albedo * (sun * ndl * sh + (skyAmb * (0.45 + 0.55 * nb.y) + seaBounce) * ao) + sun * spec * ndl * sh;
+  // the wet stone mirrors a little of the sky
+  col += skyAmb * 0.7 * wet * (0.04 + 0.96 * pow(1.0 - nv, 5.0)) * ao;
   // light wrapping round only the edges that face the sun behind
   vec2 sunH = normalize(uSunDir.xz);
   float rim = pow(1.0 - max(dot(n, -rd), 0.0), 3.0) * max(dot(normalize(n.xz + 1e-4), sunH), 0.0);
