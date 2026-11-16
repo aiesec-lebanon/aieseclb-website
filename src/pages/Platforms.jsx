@@ -125,7 +125,7 @@ export default function Platforms() {
               className="flex min-h-[150svh] items-center"
             >
               <div className="shell grid items-center gap-10 py-[34svh] md:grid-cols-12 md:gap-14">
-                <Reveal className={`relative z-10 md:col-span-5 ${i % 2 ? "md:order-2 md:pl-2" : "md:pr-2"}`}>
+                <Reveal className={`relative z-10 md:col-span-4 ${i % 2 ? "md:order-2 md:pl-2" : "md:pr-2"}`}>
                   <p className="fade font-bold text-[var(--w-accent-ink)]">{p.kind}</p>
                   <h2 className={`mt-3 ${h.className}`} style={h.style}>
                     <Lines text={[p.name]} />
@@ -155,8 +155,9 @@ export default function Platforms() {
                     </span>
                   </div>
                 </Reveal>
-                <div className="md:col-span-7">
-                  <div className="tilt-in [perspective:1600px]">
+                <div className="max-md:order-first md:col-span-8">
+                  {/* a soft reflection on the floor below the picture (where the browser can draw one) */}
+                  <div className="tilt-in [perspective:1600px] [-webkit-box-reflect:below_10px_linear-gradient(transparent_74%,rgb(255_255_255/0.16))]">
                     {hasGen(p.image) ? (
                       <Frame world={w}>
                         <Media

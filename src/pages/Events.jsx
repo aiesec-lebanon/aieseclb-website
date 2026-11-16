@@ -70,7 +70,7 @@ export default function Events() {
                     {e.where} · {e.when}
                   </p>
                 </Reveal>
-                <div className="md:col-span-7">
+                <div className="max-md:order-first md:col-span-7">
                   <div className="tilt-in [perspective:1600px]">
                     <Frame world={w}>
                       {/* the middle of the photograph; the rest of it carries on behind, in 3D */}
