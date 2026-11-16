@@ -28,6 +28,12 @@ uniform float uExposure;   // the camera opens up in the shaded valley, as a rea
 uniform vec2  uJitter;     // sub-pixel shift for this frame (the runner blends frames into a sharp image)
 
 // Quality. Chosen per device and adjusted while it runs: see src/gl/quality.js.
+// Always 0. Added to loop bounds so the shader compiler cannot see them. Chrome on Windows hands
+// WebGL shaders to Direct3D's compiler, which copies a function into every place it is called
+// and tries to unroll fixed loops; the code below calls its heavy functions (the terrain, the
+// stone, the cloud) from as few places as it can, inside such loops, so it compiles in seconds
+// rather than the 38 s it once took cold.
+uniform int   uZero;
 uniform int   uSteps;      // terrain march steps
 uniform int   uOct;        // terrain octaves while marching
 uniform int   uNOct;       // terrain octaves for surface normals
@@ -90,7 +96,7 @@ float valleyFloor(float z) { return envelope(z) * 1.8 + 0.012; }
 
 float ridged(vec2 p, int oct) {
   float a = 0.5, s = 0.0, w = 0.0;
-  for (int i = 0; i < 9; i++) {
+  for (int i = 0; i < 9 + uZero; i++) {
     if (i >= oct) break;
     float n = 1.0 - abs(2.0 * (i < uExact ? n2x(p) : n2(p)) - 1.0);
     s += a * n * n;
@@ -120,7 +126,7 @@ float terrain(vec2 p, int oct) {
 // the exact crossing between a point above the ground (a) and one below it (b), by halving.
 // Stopping at "close enough" instead snaps hits to step positions, which draws bands.
 float refineHit(vec3 ro, vec3 rd, float a, float b, int oct) {
-  for (int j = 0; j < 7; j++) {
+  for (int j = 0; j < 7 + uZero; j++) {
     float m = 0.5 * (a + b);
     vec3 q = ro + rd * m;
     if (q.y - terrain(q.xz, oct) < 0.0) b = m; else a = m;
@@ -135,43 +141,42 @@ float marchTerrain(vec3 ro, vec3 rd, float tmax, int oct, int steps, float stepK
   if (ro.z < -1.0 && rd.z > 1e-4) t = max(t, (-1.0 - ro.z) / rd.z);
   if (t > tmax) return -1.0;                                   // the sea is nearer than the coast
   float lastD = 1.0, lastT = t;
-  for (int i = 0; i < 200; i++) {
-    if (i >= steps) break;
+  float ha = -1.0, hb = -1.0;                                  // the bracket of the crossing, once found
+  // Fine steps first; then, if they run out (a ray that skimmed a crest uses many), long strides,
+  // so it still finds the land behind instead of showing a thread of sky along the ridge.
+  for (int i = 0; i < 224 + uZero; i++) {
+    if (i >= steps + 24) break;
     vec3 p = ro + rd * t;
     if (p.y > 4.6 && rd.y > 0.0) return -1.0;                  // above every summit and climbing
     float d = p.y - terrain(p.xz, oct);
-    if (d < 0.0) return refineHit(ro, rd, lastT, t, oct);
-    // Steps lengthen with distance, or the far range would never be reached. Far off, where
-    // crests are seen edge-on, they shorten again while the ray skims the ground.
-    float far = smoothstep(10.0, 20.0, t);
-    float stepLen = max(d * stepK, uGrow * t * mix(1.0, clamp(d / 0.4, 0.04, 1.0), far) + 0.002);
-    // a long step close to the ground could carry the ray clean over a thin crest: look inside
-    // it too, at a third and two thirds of the way
-    if (d < 0.3 && stepLen > 3.0 * d) {
-      float ta = t + stepLen * 0.333;
-      vec3 ma = ro + rd * ta;
-      if (ma.y - terrain(ma.xz, oct) < 0.0) return refineHit(ro, rd, t, ta, oct);
-      float tb = t + stepLen * 0.667;
-      vec3 mb = ro + rd * tb;
-      if (mb.y - terrain(mb.xz, oct) < 0.0) return refineHit(ro, rd, ta, tb, oct);
+    if (d < 0.0) { ha = lastT; hb = t; break; }
+    float stepLen;
+    if (i < steps) {
+      // Steps lengthen with distance, or the far range would never be reached. Far off, where
+      // crests are seen edge-on, they shorten again while the ray skims the ground.
+      float far = smoothstep(10.0, 20.0, t);
+      stepLen = max(d * stepK, uGrow * t * mix(1.0, clamp(d / 0.4, 0.04, 1.0), far) + 0.002);
+      // a long step close to the ground could carry the ray clean over a thin crest: look inside
+      // it too, at a third and two thirds of the way
+      if (d < 0.3 && stepLen > 3.0 * d) {
+        float ta = t;
+        for (int k = 1; k < 3 + uZero; k++) {
+          float tk = t + stepLen * (float(k) / 3.0);
+          vec3 mk = ro + rd * tk;
+          if (mk.y - terrain(mk.xz, oct) < 0.0) { ha = ta; hb = tk; break; }
+          ta = tk;
+        }
+        if (hb > 0.0) break;
+      }
+    } else {
+      stepLen = max(d * stepK, uGrow * t + 0.003);
     }
     lastD = d;
     lastT = t;
     t += stepLen;
     if (t > tmax) return -1.0;
   }
-  // Out of fine steps (a ray that skimmed a crest uses many): carry on in long strides, so it
-  // still finds the land behind instead of showing a thread of sky along the ridge.
-  for (int i = 0; i < 24; i++) {
-    vec3 p = ro + rd * t;
-    if (p.y > 4.6 && rd.y > 0.0) return -1.0;
-    float d = p.y - terrain(p.xz, oct);
-    if (d < 0.0) return refineHit(ro, rd, lastT, t, oct);
-    lastD = d;
-    lastT = t;
-    t += max(d * stepK, uGrow * t + 0.003);
-    if (t > tmax) return -1.0;
-  }
+  if (hb > 0.0) return refineHit(ro, rd, ha, hb, oct);
   // Still nothing while skimming the land on the way down: call it land, rather than let the sea
   // far beyond show through as bright patches. A ray on its way up past a summit is sky.
   return (lastD < 0.35 && rd.y < 0.0) ? lastT : -1.0;
@@ -179,32 +184,37 @@ float marchTerrain(vec3 ro, vec3 rd, float tmax, int oct, int steps, float stepK
 
 vec3 terrainNormal(vec2 p, float t) {
   float e = max(0.004, 0.0009 * t);
-  float h0 = terrain(p, uNOct);
-  float hx = terrain(p + vec2(e, 0.0), uNOct);
-  float hz = terrain(p + vec2(0.0, e), uNOct);
-  return normalize(vec3(h0 - hx, e, h0 - hz));
+  // three samples in a loop: one copy of the terrain for the compiler, not three
+  float h[3];
+  for (int k = 0; k < 3 + uZero; k++) h[k] = terrain(p + (k == 1 ? vec2(e, 0.0) : k == 2 ? vec2(0.0, e) : vec2(0.0)), uNOct);
+  return normalize(vec3(h[0] - h[1], e, h[0] - h[2]));
 }
 
 float sunShadow(vec3 p) {
   if (uSunDir.y < -0.02) return 0.0;
   // The sun is low and behind the range, so most shadows are thrown by ridges many kilometres
-  // away. Check the sun ray against the land at a few fixed distances inland first.
-  if (uSunDir.z > 0.05) {
-    for (int j = 0; j < 5; j++) {
-      float zz = 12.0 + float(j) * 3.7;
-      if (zz > p.z + 0.5) {
-        vec3 q = p + uSunDir * ((zz - p.z) / uSunDir.z);
-        if (q.y < terrain(q.xz, 3)) return 0.0;
-      }
-    }
-  }
+  // away: first the sun ray is checked against the land at a few fixed distances inland, then a
+  // short march close by. One loop, so one copy of the terrain.
+  bool farChecks = uSunDir.z > 0.05;
   float res = 1.0;
   float t = 0.05;
-  for (int i = 0; i < 32; i++) {
-    if (i >= uShadowN) break;
-    vec3 q = p + uSunDir * t;
-    if (q.y > 4.6) break;
-    float d = q.y - terrain(q.xz, 3);
+  for (int i = 0; i < 37 + uZero; i++) {
+    vec3 q;
+    if (i < 5) {
+      float zz = 12.0 + float(i) * 3.7;
+      if (!farChecks || zz <= p.z + 0.5) continue;
+      q = p + uSunDir * ((zz - p.z) / uSunDir.z);
+    } else {
+      if (i - 5 >= uShadowN) break;
+      q = p + uSunDir * t;
+      if (q.y > 4.6) break;
+    }
+    float h = terrain(q.xz, 3);
+    if (i < 5) {
+      if (q.y < h) return 0.0;
+      continue;
+    }
+    float d = q.y - h;
     res = min(res, 9.0 * d / t);
     if (res < 0.02) break;
     t += max(d * 0.6, 0.08 + 0.05 * t);
@@ -295,8 +305,8 @@ vec3 applyAir(vec3 col, vec3 rd, float t) {
 }
 
 // ---------- surfaces ----------
-vec3 shadeLand(vec3 p, vec3 rd, float t) {
-  vec3 n = terrainNormal(p.xz, t);
+// (n and sh, the surface normal and the sun's shadow, are worked out once in main for land or stone)
+vec3 shadeLand(vec3 p, vec3 rd, float t, vec3 n, float sh) {
   float slope = 1.0 - n.y;                                   // 0 flat, 1 cliff
   float alt = p.y;
   float nA = n2(p.xz * 1.7 + 2.0);
@@ -337,7 +347,6 @@ vec3 shadeLand(vec3 p, vec3 rd, float t) {
   albedo = mix(albedo, vec3(0.86, 0.90, 0.96), snow);
 
   float ndl = max(dot(n, uSunDir), 0.0);
-  float sh = ndl > 0.0 ? sunShadow(p + n * 0.01) : 0.0;
   vec3 sun = sunColor() * 5.5 * smoothstep(-0.02, 0.05, uSunDir.y);
   vec3 skyAmb = mix(vec3(0.020, 0.036, 0.085), vec3(0.230, 0.340, 0.560), uDay);
   vec3 col = albedo * (sun * ndl * sh + skyAmb * (0.45 + 0.55 * n.y));
@@ -381,8 +390,9 @@ vec3 waterNormal(vec2 p, float t) {
   vec2 q = p * 5.0;
   float tm = uTime * 0.35;
   vec2 e = vec2(0.03, 0.0);
-  float a = waves(q, tm, w);
-  vec2 grad = vec2(waves(q + e, tm, w) - a, waves(q + e.yx, tm, w) - a) / e.x;
+  float wv[3];
+  for (int k = 0; k < 3 + uZero; k++) wv[k] = waves(q + (k == 1 ? e : k == 2 ? e.yx : vec2(0.0)), tm, w);
+  vec2 grad = vec2(wv[1] - wv[0], wv[2] - wv[0]) / e.x;
   return normalize(vec3(-grad.x * 0.055 * amp, 1.0, -grad.y * 0.055 * amp));
 }
 
@@ -390,13 +400,14 @@ float marchRocks(vec3 ro, vec3 rd);   // defined further down, with the rocks
 float marchLedge(vec3 ro, vec3 rd);
 
 // what a reflected ray sees: sky, high cloud, and the dark shape of the land
-vec3 reflection(vec3 p, vec3 rr, vec3 rm) {
-  vec3 c = highCloud(p, rr, skyColor(rr, true));
+// (rLand and rRock: what the reflected ray met, marched in main alongside the camera ray)
+vec3 reflection(vec3 p, vec3 rr, vec3 rm, float rLand, float rRock, vec3 sky) {
+  vec3 c = sky;
   // the land is found along the plain mirror direction, barely ruffled, so its dark shape in the
   // water holds still instead of breaking into specks
   vec3 landDark = mix(vec3(0.012, 0.018, 0.030), vec3(0.10, 0.12, 0.13), uDay);
   if (uReflN > 0) {
-    float t = marchTerrain(p + vec3(0.0, 0.002, 0.0), rm, 70.0, 3, uReflN, 0.9);
+    float t = rLand;
     if (t > 0.0) {
       vec3 q = p + rr * t;
       c = applyAir(landDark * (0.7 + 0.6 * n2(q.xz * 2.0)), rr, t);
@@ -407,24 +418,16 @@ vec3 reflection(vec3 p, vec3 rr, vec3 rm) {
     c = mix(c, applyAir(landDark, rr, 26.0), band);
   }
   // the rocks stand in their own reflection
-  float tr = marchRocks(p + vec3(0.0, 0.0005, 0.0), rm);
-  if (tr < 0.0) tr = marchLedge(p + vec3(0.0, 0.0005, 0.0), rm);
-  if (tr > 0.0) c = mix(vec3(0.006, 0.014, 0.034), vec3(0.18, 0.20, 0.23), uDay);
+  if (rRock > 0.0) c = mix(vec3(0.006, 0.014, 0.034), vec3(0.18, 0.20, 0.23), uDay);
   return c;
 }
 
-vec3 shadeSea(vec3 p, vec3 rd, float t) {
-  vec3 n = waterNormal(p.xz, t);
-  vec3 rr = reflect(rd, n);
-  rr.y = abs(rr.y) + 0.002;
-  rr = normalize(rr);
-  // the mirror direction of a flat sea, with a quarter of the ripple: used to find the land
-  vec3 calm = reflect(rd, normalize(mix(vec3(0.0, 1.0, 0.0), n, 0.25)));
-  calm.y = abs(calm.y) + 0.002;
-  calm = normalize(calm);
+// (n, rr, calm: the water's normal, the reflected ray, and the barely ruffled one the land is found
+// along; rLand, rRock: what that found. All worked out in main.)
+vec3 shadeSea(vec3 p, vec3 rd, vec3 n, vec3 rr, vec3 calm, float rLand, float rRock, vec3 sky) {
   float fres = 0.02 + 0.98 * pow(1.0 - max(dot(-rd, n), 0.0), 5.0);
   vec3 deep = mix(vec3(0.004, 0.012, 0.028), vec3(0.010, 0.060, 0.120), uDay);
-  vec3 col = mix(deep, reflection(p, rr, calm), fres);
+  vec3 col = mix(deep, reflection(p, rr, calm, rLand, rRock, sky), fres);
   // the sun broken up on the waves
   float sp = pow(max(dot(rr, uSunDir), 0.0), 900.0) * 30.0 + pow(max(dot(rr, uSunDir), 0.0), 60.0) * 0.5;
   col += sunColor() * sp * fres * smoothstep(-0.03, 0.03, uSunDir.y);
@@ -516,7 +519,7 @@ float marchLedge(vec3 ro, vec3 rd) {
   if (h < 0.0) return -1.0;
   float tEnd = -b + sqrt(h);
   float t = max(-b - sqrt(h), 0.0);
-  for (int i = 0; i < 56; i++) {
+  for (int i = 0; i < 56 + uZero; i++) {
     float d = sdLedge(ro + rd * t);
     if (d < max(0.00015, t * 0.0004)) return t;
     t += d * 0.7;
@@ -534,7 +537,7 @@ float marchRocks(vec3 ro, vec3 rd) {
   if (h < 0.0) return -1.0;
   float tEnd = -b + sqrt(h);
   float t = max(-b - sqrt(h), 0.0);
-  for (int i = 0; i < 64; i++) {
+  for (int i = 0; i < 64 + uZero; i++) {
     float d = sdRocks(ro + rd * t);
     if (d < max(0.0003, t * 0.00035)) return t;
     t += d * 0.7;
@@ -542,9 +545,16 @@ float marchRocks(vec3 ro, vec3 rd) {
   }
   return -1.0;
 }
-vec3 shadeRocks(vec3 p, vec3 rd) {
-  vec2 e = vec2(0.0009, 0.0);
-  vec3 n = normalize(vec3(sdStone(p + e.xyy) - sdStone(p - e.xyy), sdStone(p + e.yxy) - sdStone(p - e.yxy), sdStone(p + e.yyx) - sdStone(p - e.yyx)));
+// the stone's normal from four samples on a tetrahedron, in a loop: one copy of the stone, not six
+vec3 stoneNormal(vec3 p) {
+  vec3 n = vec3(0.0);
+  for (int i = 0; i < 4 + uZero; i++) {
+    vec3 k = 0.5773 * (2.0 * vec3(float(((i + 3) >> 1) & 1), float((i >> 1) & 1), float(i & 1)) - 1.0);
+    n += k * sdStone(p + k * 0.0009);
+  }
+  return normalize(n);
+}
+vec3 shadeRocks(vec3 p, vec3 rd, vec3 n, float sh) {
   vec3 q = p - ROCK_B;
   // pale limestone in beds, dark and wet where the sea reaches, scrub on the tops
   float beds = 0.86 + 0.14 * sin(p.y * 1150.0 + 6.0 * n2(vec2(q.x * 140.0 + q.z * 97.0, q.y * 30.0)));
@@ -555,7 +565,6 @@ vec3 shadeRocks(vec3 p, vec3 rd) {
   // darker in hollows and inside the arch
   float ao = clamp(0.4 + 0.6 * sdStone(p + n * 0.003) / 0.003, 0.0, 1.0);
   float ndl = max(dot(n, uSunDir), 0.0);
-  float sh = ndl > 0.0 ? sunShadow(p + n * 0.002) : 0.0;
   vec3 sun = sunColor() * 5.5 * smoothstep(-0.02, 0.05, uSunDir.y);
   vec3 skyAmb = mix(vec3(0.020, 0.036, 0.085), vec3(0.230, 0.340, 0.560), uDay);
   vec3 seaBounce = mix(vec3(0.006, 0.012, 0.030), vec3(0.040, 0.090, 0.150), uDay) * clamp(0.5 - 0.5 * n.y, 0.0, 1.0);
@@ -603,13 +612,20 @@ vec4 marchCloud(vec3 ro, vec3 rd, float tmax, float jitter) {
   vec3 amb = mix(vec3(0.030, 0.050, 0.110), vec3(0.420, 0.520, 0.700), uDay);
   float mu = max(dot(rd, uSunDir), 0.0);
   float phase = 0.55 + 1.6 * pow(mu, 6.0);                  // bright silver lining toward the sun
-  for (int i = 0; i < 32; i++) {
+  for (int i = 0; i < 32 + uZero; i++) {
     if (i >= N) break;
     vec3 p = ro + rd * t;
     float d = cloudDensity(p);
     if (d > 0.001) {
       float toSun = 0.45;
-      if (uCloudLight > 0) toSun = cloudDensity(p + uSunDir * 0.16) + (uCloudLight > 1 ? cloudDensity(p + uSunDir * 0.42) * 0.6 : 0.25);
+      if (uCloudLight > 0) {
+        // one or two samples towards the sun, in a loop: one copy of the cloud, not two
+        toSun = uCloudLight > 1 ? 0.0 : 0.25;
+        for (int k = 0; k < 2 + uZero; k++) {
+          if (k >= uCloudLight) break;
+          toSun += cloudDensity(p + uSunDir * (k == 0 ? 0.16 : 0.42)) * (k == 0 ? 1.0 : 0.6);
+        }
+      }
       float light = exp(-toSun * 1.7);
       float hgt = clamp((p.y - CB) / (CT - CB), 0.0, 1.0);
       vec3 c = sunL * light * phase + amb * (0.35 + 0.65 * hgt);
@@ -639,43 +655,88 @@ void main() {
   vec3 rd = normalize(uv.x * rt + uv.y * up + uFocal * fw);
   float jitter = hash12(frag + fract(uFrame * 0.618) * 71.0);
 
-  // what is the first solid thing along this ray?
+  // What is the first solid thing along this ray, and, if it is the sea, along the ray the water
+  // reflects? Two passes of one loop, so the shader compiler sees each march once.
   float tSea = rd.y < -1e-4 ? -ro.y / rd.y : -1.0;
   float tmax = tSea > 0.0 ? min(tSea, FAR) : FAR;
-  float tLand = marchTerrain(ro, rd, tmax, uOct, uSteps, 0.5);
-  float tRock = marchRocks(ro, rd);
-  float tLedge = marchLedge(ro, rd);
-  if (tLedge > 0.0 && (tRock < 0.0 || tLedge < tRock)) tRock = tLedge;
   float tHit = FAR;
   int what = 0;                                              // 0 sky, 1 land, 2 sea, 3 rocks, 4 title
-  if (tLand > 0.0) { tHit = tLand; what = 1; }
-  else if (tSea > 0.0 && tSea < FAR) { tHit = tSea; what = 2; }
-  if (tRock > 0.0 && tRock < tHit) { tHit = tRock; what = 3; }
-
-  // the title stands in the air on a plane across the valley
   float titleA = 0.0;
-  if (uTitleA > 0.0 && rd.z > 1e-4) {
-    float tt = (uTitleZ - ro.z) / rd.z;
-    if (tt > 0.0 && tt < tHit) {
-      vec3 q = ro + rd * tt;
-      vec2 tuv = (q.xy - uTitleRect.xy) / (uTitleRect.zw - uTitleRect.xy);
-      if (tuv.x > 0.0 && tuv.x < 1.0 && tuv.y > 0.0 && tuv.y < 1.0) {
-        float lod = max(0.0, log2(2048.0 * tt / (uRes.y * 0.5 * uFocal) / (uTitleRect.z - uTitleRect.x)));
-        titleA = textureLod(uTitle, tuv, lod).r * uTitleA;
-        if (titleA > 0.5) { tHit = tt; what = 4; }
+  vec3 seaN = vec3(0.0, 1.0, 0.0), seaRR = seaN, seaCalm = seaN;
+  float rLand = -1.0, rRock = -1.0;
+  vec3 mo = ro, md = rd;
+  float mmax = tmax, mstep = 0.5;
+  int moct = uOct, msteps = uSteps;
+  for (int pass = 0; pass < 2 + uZero; pass++) {
+    float tl = (pass == 0 || uReflN > 0) ? marchTerrain(mo, md, mmax, moct, msteps, mstep) : -1.0;
+    float tr = marchRocks(mo, md);
+    float tg = marchLedge(mo, md);
+    if (tg > 0.0 && (tr < 0.0 || tg < tr)) tr = tg;
+    if (pass == 1) {
+      rLand = tl;
+      rRock = tr;
+      break;
+    }
+    if (tl > 0.0) { tHit = tl; what = 1; }
+    else if (tSea > 0.0 && tSea < FAR) { tHit = tSea; what = 2; }
+    if (tr > 0.0 && tr < tHit) { tHit = tr; what = 3; }
+
+    // the title stands in the air on a plane across the valley
+    float titleA = 0.0;
+    if (uTitleA > 0.0 && rd.z > 1e-4) {
+      float tt = (uTitleZ - ro.z) / rd.z;
+      if (tt > 0.0 && tt < tHit) {
+        vec3 q = ro + rd * tt;
+        vec2 tuv = (q.xy - uTitleRect.xy) / (uTitleRect.zw - uTitleRect.xy);
+        if (tuv.x > 0.0 && tuv.x < 1.0 && tuv.y > 0.0 && tuv.y < 1.0) {
+          float lod = max(0.0, log2(2048.0 * tt / (uRes.y * 0.5 * uFocal) / (uTitleRect.z - uTitleRect.x)));
+          titleA = textureLod(uTitle, tuv, lod).r * uTitleA;
+          if (titleA > 0.5) { tHit = tt; what = 4; }
+        }
       }
     }
+
+    if (what != 2) break;
+    // the sea: its ripple, the ray it reflects, and the barely ruffled mirror ray the land is
+    // found along (so its dark shape in the water holds still instead of breaking into specks)
+    vec3 sp = ro + rd * tHit;
+    seaN = waterNormal(sp.xz, tHit);
+    seaRR = reflect(rd, seaN);
+    seaRR.y = abs(seaRR.y) + 0.002;
+    seaRR = normalize(seaRR);
+    seaCalm = reflect(rd, normalize(mix(vec3(0.0, 1.0, 0.0), seaN, 0.25)));
+    seaCalm.y = abs(seaCalm.y) + 0.002;
+    seaCalm = normalize(seaCalm);
+    mo = sp + vec3(0.0, 0.002, 0.0);
+    md = seaCalm;
+    mmax = 70.0;
+    moct = 3;
+    msteps = uReflN;
+    mstep = 0.9;
   }
+
+  // the sky: seen straight up the camera ray, or in the water along the reflected one. A pixel
+  // needs one of the two, so it is worked out once.
+  vec3 skyDir = what == 2 ? seaRR : rd;
+  vec3 skyFrom = what == 2 ? ro + rd * tHit : ro;
+  vec3 sky = vec3(0.0);
+  if (what == 0 || what == 2) sky = highCloud(skyFrom, skyDir, skyColor(skyDir, true) + (what == 0 ? starField(rd) : vec3(0.0)));
 
   vec3 col;
   if (what == 0) {
-    col = skyColor(rd, true) + starField(rd);
-    col = highCloud(ro, rd, col);
+    col = sky;
   } else {
     vec3 p = ro + rd * tHit;
-    if (what == 1) col = shadeLand(p, rd, tHit);
-    else if (what == 2) col = shadeSea(p, rd, tHit);
-    else if (what == 3) col = shadeRocks(p, rd);
+    // the normal and the sun's shadow, once, for land or stone
+    vec3 n = vec3(0.0, 1.0, 0.0);
+    float sh = 0.0;
+    if (what == 1 || what == 3) {
+      n = what == 1 ? terrainNormal(p.xz, tHit) : stoneNormal(p);
+      if (dot(n, uSunDir) > 0.0) sh = sunShadow(p + n * (what == 1 ? 0.01 : 0.002));
+    }
+    if (what == 1) col = shadeLand(p, rd, tHit, n, sh);
+    else if (what == 2) col = shadeSea(p, rd, seaN, seaRR, seaCalm, rLand, rRock, sky);
+    else if (what == 3) col = shadeRocks(p, rd, n, sh);
     else col = vec3(2.2);
     col = applyAir(col, rd, what == 4 ? tHit * 0.25 : tHit);
   }

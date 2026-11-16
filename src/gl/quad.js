@@ -142,6 +142,74 @@ function link(gl, fragSrc) {
   return p;
 }
 
+const GL_OPTIONS = {
+  antialias: false,
+  alpha: false,
+  depth: false,
+  stencil: false,
+  powerPreference: "high-performance",
+  preserveDrawingBuffer: false,
+};
+
+// Compile and link a scene's programs without holding up the page where possible. Where the
+// browser offers KHR_parallel_shader_compile the driver may compile in the background, and this
+// waits for it a frame at a time. Some drivers only compile when the result is asked for (a
+// large shader on Chrome over Direct3D never reports done on its own), so after a short wait it
+// asks, which compiles it there and then. Hand the result to createQuad({ programs }).
+export function prelink(canvas, frag, { accumulate = false } = {}) {
+  const gl = canvas.getContext("webgl2", GL_OPTIONS);
+  if (!gl) return Promise.reject(new Error("no webgl2"));
+  const start = (src) => {
+    const vs = gl.createShader(gl.VERTEX_SHADER);
+    gl.shaderSource(vs, VERT);
+    gl.compileShader(vs);
+    const fs = gl.createShader(gl.FRAGMENT_SHADER);
+    gl.shaderSource(fs, src);
+    gl.compileShader(fs);
+    const p = gl.createProgram();
+    gl.attachShader(p, vs);
+    gl.attachShader(p, fs);
+    gl.bindAttribLocation(p, 0, "aPos");
+    gl.linkProgram(p);
+    return { p, vs, fs };
+  };
+  const jobs = [start(frag), accumulate ? start(ACCUM_FRAG) : null];
+  // send the work to the GPU now: with nothing drawn yet, nothing else would
+  gl.flush();
+  const ext = gl.getExtension("KHR_parallel_shader_compile");
+  const finish = () => {
+    const out = jobs.map((j) => {
+      if (!j) return null;
+      if (!gl.getProgramParameter(j.p, gl.LINK_STATUS)) {
+        const log = gl.getShaderInfoLog(j.fs) || gl.getShaderInfoLog(j.vs) || gl.getProgramInfoLog(j.p);
+        throw new Error("Program link failed: " + log);
+      }
+      gl.deleteShader(j.vs);
+      gl.deleteShader(j.fs);
+      return j.p;
+    });
+    return { main: out[0], accum: out[1] };
+  };
+  if (!ext) return Promise.resolve().then(finish);
+  const t0 = performance.now();
+  return new Promise((resolve, reject) => {
+    const poll = () => {
+      const done = jobs.every((j) => !j || gl.getProgramParameter(j.p, ext.COMPLETION_STATUS_KHR));
+      if (done || performance.now() - t0 > 1200) {
+        try {
+          resolve(finish());
+        } catch (err) {
+          reject(err);
+        }
+      } else {
+        gl.flush();
+        requestAnimationFrame(poll);
+      }
+    };
+    poll();
+  });
+}
+
 // Halton (2, 3): sub-pixel offsets that cover a pixel evenly over successive frames
 function halton(i, b) {
   let f = 1;
@@ -169,23 +237,17 @@ export function createQuad(
     timer = false,
     accumulate = false,
     reproject = true,
+    programs = null, // from prelink(): already compiled
   } = {},
 ) {
-  const gl = canvas.getContext("webgl2", {
-    antialias: false,
-    alpha: false,
-    depth: false,
-    stencil: false,
-    powerPreference: "high-performance",
-    preserveDrawingBuffer: false,
-  });
+  const gl = canvas.getContext("webgl2", GL_OPTIONS);
   if (!gl) return { ok: false };
 
   let program;
   let accProg = null;
   try {
-    program = link(gl, frag);
-    if (accumulate) accProg = link(gl, ACCUM_FRAG);
+    program = programs ? programs.main : link(gl, frag);
+    if (accumulate) accProg = programs && programs.accum ? programs.accum : link(gl, ACCUM_FRAG);
   } catch (err) {
     console.error(err);
     return { ok: false, error: err, gl };

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { createQuad } from "../gl/quad";
+import { createQuad, prelink } from "../gl/quad";
+import HeroLoader from "./HeroLoader";
 import { Governor, TIERS, detectDevice, readStored, tierIndex, writeStored } from "../gl/quality";
 import { DAWN_REAL_FRAG } from "../gl/dawnReal.frag";
 import { clamp01, mix, sectionProgress, smoothstep } from "../lib/scroll";
@@ -76,6 +77,11 @@ export default function DawnHeroReal({ onTooSlow }) {
     window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "still" : "gl",
   );
   const [hudOn] = useState(() => new URLSearchParams(window.location.search).has("hud"));
+  // the loader: how far the scene has come, whether the day has opened, whether it is gone
+  const [load, setLoad] = useState(0.16);
+  const [opened, setOpened] = useState(false);
+  const [loaderGone, setLoaderGone] = useState(false);
+  const [creep, setCreep] = useState(false);
 
   useEffect(() => {
     tooSlowRef.current = onTooSlow;
@@ -93,6 +99,16 @@ export default function DawnHeroReal({ onTooSlow }) {
     let ty = 0;
     let intro = 0;
     let frameNo = 0;
+    // the scene is ready once its first frames are drawn: the loader opens, the intro begins
+    let revealed = false;
+    let disposed = false;
+    const timers = [];
+    const reveal = () => {
+      if (revealed || disposed) return;
+      revealed = true;
+      setLoad(1);
+      timers.push(setTimeout(() => setOpened(true), 380), setTimeout(() => setLoaderGone(true), 2100));
+    };
     const params = new URLSearchParams(window.location.search);
     const forced = params.has("s") ? clamp01(parseFloat(params.get("s"))) : null;
 
@@ -104,8 +120,9 @@ export default function DawnHeroReal({ onTooSlow }) {
       py += (ty - py) * (1 - Math.exp(-dt * 3));
       if (Math.abs(tx - px) < 1e-4) px = tx;
       if (Math.abs(ty - py) < 1e-4) py = ty;
-      intro = dt === 0 ? 1 : Math.min(1, intro + dt / 1.8);
+      intro = dt === 0 ? 1 : revealed ? Math.min(1, intro + dt / 1.8) : 0;
       frameNo += 1;
+      if (frameNo === 8) reveal();
 
       const cam = cameraAt(s);
       // Look up the valley: partly along its bends, partly straight at the pass, and at the very
@@ -205,7 +222,12 @@ export default function DawnHeroReal({ onTooSlow }) {
 
     // Raymarching costs per pixel, so this scene draws below screen resolution and lets the
     // browser stretch it. How far below, and how much detail, the governor decides.
+    let cleanup = () => {};
+    const boot = (programs) => {
+    if (disposed) return;
+    setLoad(0.82);
     quad = createQuad(canvas, DAWN_REAL_FRAG, {
+      programs,
       maxDpr: 1,
       initialScale: 0.5,
       adaptive: false,
@@ -343,12 +365,38 @@ export default function DawnHeroReal({ onTooSlow }) {
     };
     document.addEventListener("visibilitychange", onVis);
 
-    return () => {
+    if (reduce) reveal();
+    cleanup = () => {
       ro.disconnect();
       if (io) io.disconnect();
       window.removeEventListener("pointermove", onPointer);
       document.removeEventListener("visibilitychange", onVis);
       quad.destroy();
+    };
+    };
+
+    // while the shader compiles there is nothing to report: the line creeps towards 0.6
+    requestAnimationFrame(() => {
+      if (disposed) return;
+      setCreep(true);
+      setLoad(0.6);
+    });
+    prelink(canvas, DAWN_REAL_FRAG, { accumulate: !params.has("noaccum") })
+      .then((programs) => {
+        if (disposed) return;
+        setCreep(false);
+        setLoad(0.66);
+        // a frame for the loader to show it, then the rest of the setup
+        requestAnimationFrame(() => boot(programs));
+      })
+      .catch((err) => {
+        console.error(err);
+        if (!disposed) setMode("fallback");
+      });
+    return () => {
+      disposed = true;
+      timers.forEach(clearTimeout);
+      cleanup();
     };
   }, []);
 
@@ -370,7 +418,10 @@ export default function DawnHeroReal({ onTooSlow }) {
             className="absolute inset-0 bg-[linear-gradient(180deg,#030b1c_0%,#06224f_38%,#0a5cc4_62%,#ffc27a_78%,#06142e_78.2%,#030b1c_100%)]"
           />
         ) : (
-          <canvas ref={canvasRef} aria-hidden="true" className="absolute inset-0 h-full w-full" />
+          <>
+            <canvas ref={canvasRef} aria-hidden="true" className="absolute inset-0 h-full w-full" />
+            {!loaderGone && <HeroLoader progress={load} open={opened} creep={creep} />}
+          </>
         )}
         {/* a little shade behind the words, none over the picture */}
         <div
