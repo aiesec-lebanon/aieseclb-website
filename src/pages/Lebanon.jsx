@@ -122,6 +122,7 @@ export default function Lebanon() {
                       alt={p.name}
                       tone={p.tone}
                       seed={200 + i * 11}
+                      sizes="(max-width: 640px) 92vw, (max-width: 1024px) 46vw, 23vw"
                       className="unveil aspect-[4/5]"
                       imgClassName="zoom-out"
                     />

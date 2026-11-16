@@ -173,6 +173,7 @@ function LebanonTeaser() {
             <div className="overflow-clip rounded-[1.6rem]">
               <Media
                 name="lebanon-cedars"
+                sizes="(max-width: 768px) 92vw, 40vw"
                 alt="Ancient cedars in the snow above Bsharri"
                 tone="cedar"
                 seed={11}
@@ -186,6 +187,7 @@ function LebanonTeaser() {
             <div className="overflow-clip rounded-[1.6rem]">
               <Media
                 name="lebanon-byblos"
+                sizes="(max-width: 768px) 92vw, 56vw"
                 alt="The old harbour of Byblos at golden hour"
                 tone="dawn"
                 seed={5}
@@ -197,13 +199,13 @@ function LebanonTeaser() {
             <div className="mt-10 grid gap-5 sm:grid-cols-2 md:mt-14 md:gap-6">
               <div className="parallax" style={{ "--py": "2.2rem" }}>
                 <div className="overflow-clip rounded-[1.6rem]">
-                  <Media name="lebanon-baalbek" alt="The Roman temples of Baalbek" tone="tangerine" seed={21} className="aspect-square" />
+                  <Media name="lebanon-baalbek" alt="The Roman temples of Baalbek" tone="tangerine" seed={21} sizes="(max-width: 640px) 92vw, (max-width: 768px) 46vw, 27vw" className="aspect-square" />
                 </div>
                 <p className="mt-4 text-white/70">Baalbek</p>
               </div>
               <div className="parallax" style={{ "--py": "-1.6rem" }}>
                 <div className="overflow-clip rounded-[1.6rem]">
-                  <Media name="lebanon-raouche" alt="The Pigeon Rocks of Raouché, Beirut" tone="night" seed={30} className="aspect-square" />
+                  <Media name="lebanon-raouche" alt="The Pigeon Rocks of Raouché, Beirut" tone="night" seed={30} sizes="(max-width: 640px) 92vw, (max-width: 768px) 46vw, 27vw" className="aspect-square" />
                 </div>
                 <p className="mt-4 text-white/70">Raouché, Beirut</p>
               </div>
