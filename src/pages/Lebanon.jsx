@@ -41,7 +41,7 @@ export default function Lebanon() {
       <section aria-label="One day across Lebanon" className="bg-night py-20 text-white md:hidden">
         <div className="shell">
           <Reveal>
-            <p className="display text-[clamp(3.6rem,17vw,5.2rem)] text-sun">One day.</p>
+            <h2 className="display text-[clamp(3.6rem,17vw,5.2rem)] text-sun">One day.</h2>
             <p className="fade text-lead mt-4 text-white/80" style={{ "--i": 2 }}>
               Six stops, one small country, every landscape it has.
             </p>
@@ -74,7 +74,7 @@ export default function Lebanon() {
 
       <HorizontalStory label="One day across Lebanon" className="bg-night text-white max-md:hidden">
         <div className="flex w-[78vw] shrink-0 flex-col justify-center px-[7vw] md:w-[46vw]">
-          <p className="display text-[clamp(4rem,11vw,11rem)] text-sun">One day.</p>
+          <h2 className="display text-[clamp(4rem,11vw,11rem)] text-sun">One day.</h2>
           <p className="text-lead mt-6 max-w-[24rem] text-white/80">Six stops, one small country, every landscape it has.</p>
         </div>
         {ONE_DAY.map((s, i) => (
