@@ -232,7 +232,7 @@ textarea,
         animation-range: entry 0% entry 50%;
       }
     }
-    .ink-fill > span {
+    .ink-fill .w {
       animation: ink-fill linear both;
       animation-timeline: --ink;
       animation-range: cover calc(18% + var(--i) * var(--step, 0.7%))
@@ -244,8 +244,12 @@ textarea,
   view-timeline: --ink;
 }
 /* the manifesto's key phrases: AIESEC blue over a band of sun, like a highlighter */
+/* one <mark> a phrase; the band is drawn on its words, so it fills in with each of them */
 .manifest-hl {
   color: var(--color-aiesec);
+  background: none;
+}
+.manifest-hl .w {
   background: linear-gradient(transparent 60%, rgb(255 200 69 / 0.42) 60%, rgb(255 200 69 / 0.42) 92%, transparent 92%);
   -webkit-box-decoration-break: clone;
   box-decoration-break: clone;

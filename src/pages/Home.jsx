@@ -35,29 +35,32 @@ const MANIFEST = [
   ["In Lebanon, that work has had a home in", false],
   ["Beirut since 2011.", true],
 ];
-const MANIFEST_WORDS = MANIFEST.flatMap(([text, hl]) => {
-  const ws = text.split(" ");
-  return ws.map((w, i) => ({ w, hl, end: i === ws.length - 1 }));
-});
+// each word fills in on its own as the page scrolls (--i); a highlighted phrase is one <mark>, so a
+// screen reader announces it once, not once a word
+let wordCount = 0;
+const MANIFEST_PHRASES = MANIFEST.map(([text, hl]) => ({ hl, words: text.split(" ").map((w) => ({ w, i: wordCount++ })) }));
+const MANIFEST_WORDS = wordCount;
 
 function Manifest() {
-  const words = MANIFEST_WORDS;
+  const step = `${46 / MANIFEST_WORDS}%`;
+  const word = ({ w, i }, space) => (
+    <span key={i} className="w" style={{ "--i": i, "--step": step }}>
+      {space ? `${w} ` : w}
+    </span>
+  );
   return (
     <section data-shot="manifest" data-scheme="light" className="dawn-light bg-sky pb-24 pt-28 md:pb-36 md:pt-44">
       <div className="shell">
         <p className="display ink-fill max-w-[30ch] text-[clamp(2.2rem,6.1vw,6.2rem)] leading-[0.98] text-ink">
-          {words.map(({ w, hl, end }, i) => (
-            <span key={i} style={{ "--i": i, "--step": `${46 / words.length}%` }}>
-              {hl ? (
-                <>
-                  <mark className="manifest-hl">{end ? w : `${w} `}</mark>
-                  {end ? " " : ""}
-                </>
-              ) : (
-                `${w} `
-              )}
-            </span>
-          ))}
+          {MANIFEST_PHRASES.map((ph, k) =>
+            ph.hl ? (
+              <span key={k}>
+                <mark className="manifest-hl">{ph.words.map((x, j) => word(x, j < ph.words.length - 1))}</mark>{" "}
+              </span>
+            ) : (
+              ph.words.map((x) => word(x, true))
+            ),
+          )}
         </p>
 
         <Reveal className="mt-20 grid grid-cols-2 gap-x-6 gap-y-12 border-t border-ink/14 pt-10 md:mt-28 lg:grid-cols-4">
