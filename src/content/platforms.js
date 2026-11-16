@@ -14,7 +14,7 @@
 // text on a glass card over the corner of a large picture). `card: true` puts a split world's text on
 // a glass card too, where the world's scenery runs behind the words.
 //
-// `url` is where "Open it" goes; `cta` changes its label. Tools that need an AIESEC account have
+// `url` is where the "Open <name>" button goes; `cta` changes its label. Tools that need an AIESEC account have
 // no url. Check the lines before going live: they describe what each README says the platform
 // does, not usage numbers or launch dates, which are not known here.
 
@@ -174,7 +174,7 @@ export const PLATFORMS = [
   {
     id: "website",
     name: "aieseclb.org",
-    url: "/",
+    url: null, // this site: a button to open the page you are on would go nowhere
     kind: "For everyone",
     line: "The site you are on: built in-house, drawn in code, and maintained by the team.",
     points: ["React and Vite", "A real-time dawn rendered in a single shader", "Fast on a phone, usable without motion"],
