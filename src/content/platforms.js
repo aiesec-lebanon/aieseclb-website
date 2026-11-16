@@ -32,7 +32,7 @@ export const PLATFORMS = [
     mock: "form",
     tone: "day",
     world: {
-      scheme: "dark", bg: "#0a5fc4", ink: "#ffffff", soft: "#d6e8ff", accent: "#ffc845", accentInk: "#ffd56e", line: "#3a82d6", card: "#0b55b0",
+      scheme: "dark", bg: "#0a5fc4", ink: "#ffffff", soft: "#d6e8ff", accent: "#ffc845", accentInk: "#ffe08f", line: "#3a82d6", card: "#0b55b0",
       scenery: "door", font: "site", frame: "window",
     },
   },
@@ -49,7 +49,7 @@ export const PLATFORMS = [
     mock: "site",
     tone: "night",
     world: {
-      scheme: "dark", bg: "#121417", ink: "#ffffff", soft: "#b5bac2", accent: "#037ef3", accentInk: "#5aa9ff", line: "#2a2e35", card: "#1b1e23",
+      scheme: "dark", bg: "#15120e", ink: "#fffaf2", soft: "#c9c0b2", accent: "#ffc845", accentInk: "#ffd36b", line: "#322a20", card: "#1f1a14",
       scenery: "ascent", font: "site", frame: "window",
     },
   },

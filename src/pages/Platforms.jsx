@@ -119,12 +119,13 @@ export default function Platforms() {
               key={p.id}
               id={p.id}
               world={w}
+              textSide={i % 2 ? "right" : "left"}
               from={i ? PLATFORMS[i - 1].world.bg : NIGHT}
               label={p.name}
               className="flex min-h-[150svh] items-center"
             >
               <div className="shell grid items-center gap-10 py-[34svh] md:grid-cols-12 md:gap-14">
-                <Reveal className={`md:col-span-5 ${i % 2 ? "md:order-2" : ""}`}>
+                <Reveal className={`relative z-10 md:col-span-5 ${i % 2 ? "md:order-2 md:pl-2" : "md:pr-2"}`}>
                   <p className="fade font-bold text-[var(--w-accent-ink)]">{p.kind}</p>
                   <h2 className={`mt-3 ${h.className}`} style={h.style}>
                     <Lines text={[p.name]} />

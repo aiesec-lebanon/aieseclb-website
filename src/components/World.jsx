@@ -26,7 +26,7 @@ import { setSceneryPaused, useSceneryPaused } from "./sceneryPause";
 // drawn under the set.
 
 
-export default function World({ world, from, id, label, backdrop = null, className = "", children }) {
+export default function World({ world, from, id, label, backdrop = null, textSide = "left", className = "", children }) {
   const ref = useRef(null);
   const [live, setLive] = useState(false);
   useEffect(() => {
@@ -58,7 +58,7 @@ export default function World({ world, from, id, label, backdrop = null, classNa
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 overflow-clip">
         <div className={`world-set sticky top-0 h-[100lvh] overflow-clip ${live ? "is-live" : ""}`}>
           {live ? backdrop : null}
-          {live ? <Scenery name={world.scenery} world={world} /> : null}
+          {live ? <Scenery name={world.scenery} world={world} side={textSide} /> : null}
           {world.weather && <Weather {...world.weather} live={live} />}
         </div>
       </div>
@@ -80,7 +80,7 @@ export function SceneryToggle() {
         type="button"
         onClick={() => setSceneryPaused(!paused)}
         aria-pressed={paused}
-        className="pointer-events-auto inline-flex h-11 items-center gap-2 self-end rounded-full border border-white/20 bg-night/75 px-4 text-[0.92rem] font-bold text-white backdrop-blur-md transition-colors hover:bg-night"
+        className="pointer-events-auto inline-flex h-11 min-w-11 items-center justify-center gap-2 self-end rounded-full border border-white/20 bg-night/75 px-3 md:px-4 text-[0.92rem] font-bold text-white backdrop-blur-md transition-colors hover:bg-night"
       >
         <span aria-hidden="true" className="grid h-4 w-4 place-items-center">
           {paused ? (
@@ -93,7 +93,7 @@ export function SceneryToggle() {
             </svg>
           )}
         </span>
-        {paused ? "Play the scenery" : "Pause the scenery"}
+        <span className="max-md:sr-only">{paused ? "Play the scenery" : "Pause the scenery"}</span>
       </button>
     </div>
   );
@@ -106,6 +106,10 @@ const FRAMES = {
   polaroid: "rotate-[1.6deg] rounded-[0.3rem] bg-white p-3 pb-12 shadow-[0_30px_70px_rgb(40_20_0/0.18)] md:p-4 md:pb-16",
   taped: "-rotate-[1.2deg] rounded-[0.2rem] bg-white p-2 shadow-[0_26px_60px_rgb(0_0_0/0.16)]",
   window: "rounded-[1rem] shadow-[0_40px_110px_rgb(0_0_0/0.35)] md:rounded-[1.4rem]",
+  // a stage screen: a dark bezel with the light of the screen on it
+  bezel: "rounded-[1rem] bg-[#0a0a0a] p-2 shadow-[0_0_0_1px_rgb(255_255_255/0.08),0_40px_110px_rgb(0_0_0/0.6),0_0_80px_rgb(255_120_90/0.12)] md:rounded-[1.3rem] md:p-2.5",
+  // a print in a white mat, as in a cabin
+  mat: "rounded-[0.35rem] bg-[#f4f1ea] p-3 shadow-[0_34px_90px_rgb(0_0_0/0.5)] md:p-4",
 };
 export function Frame({ world, children }) {
   const kind = world.frame || "plain";
@@ -117,7 +121,7 @@ export function Frame({ world, children }) {
           <span aria-hidden="true" className="absolute -top-3 right-[10%] h-7 w-20 rotate-[8deg] bg-[#f6e7b0]/85 shadow-sm" />
         </>
       )}
-      <div className={kind === "plain" || kind === "window" ? "overflow-clip rounded-[inherit]" : "overflow-clip rounded-[0.2rem]"}>{children}</div>
+      <div className={kind === "plain" || kind === "window" ? "overflow-clip rounded-[inherit]" : kind === "bezel" ? "overflow-clip rounded-[0.7rem]" : "overflow-clip rounded-[0.2rem]"}>{children}</div>
     </div>
   );
 }

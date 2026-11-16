@@ -10,7 +10,7 @@
 //
 // `world` is the world the event becomes on the events page (see src/components/World.jsx):
 // its colours, its set (scenery), what is in the air (weather), the type of its heading (font)
-// and how its photograph is mounted (frame: plain, gold, polaroid, taped).
+// and how its photograph is mounted (frame: plain, gold, polaroid, taped, bezel, mat).
 
 export const EVENTS = [
   {
@@ -35,7 +35,7 @@ export const EVENTS = [
     world: {
       // a stage: near-black, coral light, spotlights and haze
       scheme: "dark", bg: "#150907", ink: "#fff2ec", soft: "#d8b2a5", accent: "#f85a40", accentInk: "#ff8f78", line: "#3b201a", card: "#24110d",
-      scenery: "stage", weather: { kind: "dust", density: 0.7 }, font: "site", frame: "plain",
+      scenery: "stage", weather: { kind: "dust", density: 0.7 }, font: "site", frame: "bezel",
     },
     name: "Youth Speak Forum",
     kind: "Forum",
@@ -69,7 +69,7 @@ export const EVENTS = [
     world: {
       // the mountains in winter: pine dark, cold light, snow on the wind
       scheme: "dark", bg: "#0b1d18", ink: "#eef5f1", soft: "#a7c1b6", accent: "#5fd39b", accentInk: "#84e2b4", line: "#23403a", card: "#10271f",
-      scenery: "mountain", weather: { kind: "snow", density: 1, wind: 0.8 }, font: "site", frame: "plain",
+      scenery: "mountain", weather: { kind: "snow", density: 1, wind: 0.8 }, font: "site", frame: "mat",
     },
     name: "Leadership Development Days",
     kind: "Training",

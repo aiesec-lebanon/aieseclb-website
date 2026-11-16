@@ -5,7 +5,7 @@ import Reveal, { Lines } from "./Reveal";
 // that rises into it.
 export default function PageHero({ title, lead, image, alt = "", tone = "dawn", seed = 1, arabic, children }) {
   return (
-    <section className="relative isolate flex min-h-[92svh] items-end overflow-clip bg-night text-white">
+    <section className="relative isolate flex min-h-[100svh] items-end overflow-clip bg-night text-white">
       <Media
         name={image}
         alt={alt}

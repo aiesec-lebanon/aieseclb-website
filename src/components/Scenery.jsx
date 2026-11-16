@@ -171,11 +171,19 @@ function Campus() {
 function splat(seed, cx, cy, r) {
   const rnd = seeded(seed);
   const n = 22;
-  let d = "";
-  for (let i = 0; i <= n; i++) {
+  const pts = [];
+  for (let i = 0; i < n; i++) {
     const a = (i / n) * Math.PI * 2;
-    const k = r * (0.72 + rnd() * 0.5) * (i % 4 === 0 ? 1.25 : 1);
-    d += `${i ? "L" : "M"}${(cx + Math.cos(a) * k).toFixed(0)} ${(cy + Math.sin(a) * k).toFixed(0)} `;
+    const k = r * (0.8 + rnd() * 0.32) * (i % 5 === 0 ? 1.3 : 1);
+    pts.push([cx + Math.cos(a) * k, cy + Math.sin(a) * k]);
+  }
+  // a smooth closed curve: through the midpoints, bending at each point
+  const mid = (p, q) => [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2];
+  const f = (v) => v.toFixed(1);
+  let d = `M${mid(pts[n - 1], pts[0]).map(f).join(" ")} `;
+  for (let i = 0; i < n; i++) {
+    const m = mid(pts[i], pts[(i + 1) % n]);
+    d += `Q${f(pts[i][0])} ${f(pts[i][1])} ${f(m[0])} ${f(m[1])} `;
   }
   const drops = Array.from({ length: 7 }, () => {
     const a = rnd() * Math.PI * 2;
@@ -270,7 +278,6 @@ function Whiteboard({ world }) {
           <text x="140" y="900" fontFamily='"JetBrains Mono Variable", monospace' fontSize="26" fill={rgba(world.ink, 0.55)}>
             $ git switch -c feature
           </text>
-          <path className="draw-on" pathLength="1" d="M1180 900 C1240 860 1330 940 1400 890 S1500 870 1520 900" {...marker} stroke="#178246" strokeWidth="4" />
         </g>
       </Svg>
     </>
@@ -360,15 +367,17 @@ function FormCard({ fields, className, style }) {
     </div>
   );
 }
-function Paper({ world }) {
+// (side: where the text is; the props keep to the other side, behind the picture)
+function Paper({ world, side }) {
+  const away = side === "left" ? "right" : "left";
   return (
     <>
       <div className="absolute inset-0" style={{ backgroundImage: `radial-gradient(${rgba(world.ink, 0.12)} 1px, transparent 1.4px)`, backgroundSize: "26px 26px" }} />
       <div data-depth="" className="absolute inset-0" style={{ "--depth": 0.8 }}>
-        <FormCard fields={2} className="anim-float left-[-3rem] top-[14%] -rotate-6 md:left-[2%]" />
+        <FormCard fields={2} className={`anim-float top-[14%] -rotate-6 ${away === "left" ? "left-[-3rem] md:left-[2%]" : "right-[-3rem] md:right-[2%]"}`} />
       </div>
       <div data-depth="" className="absolute inset-0" style={{ "--depth": 1.3 }}>
-        <div className="absolute bottom-[7%] left-[-4rem] w-[19rem] -rotate-2 overflow-clip md:left-[3%] rounded-2xl bg-white shadow-[0_18px_50px_rgb(16_24_40/0.12)] md:right-[2%]">
+        <div className={`absolute bottom-[7%] w-[19rem] -rotate-2 overflow-clip rounded-2xl bg-white shadow-[0_18px_50px_rgb(16_24_40/0.12)] ${away === "left" ? "left-[-4rem] md:left-[3%]" : "right-[-4rem] md:right-[3%]"}`}>
           <div className="flex h-9 items-center gap-2 bg-[#0f9d58] px-4">
             <span className="h-2 w-16 rounded-full bg-white/80" />
           </div>
@@ -486,7 +495,7 @@ const SCENERY = {
   dawn: Dawn,
 };
 
-export default function Scenery({ name, world }) {
+export default function Scenery({ name, world, side = "left" }) {
   const Set = SCENERY[name];
-  return Set ? <Set world={world} /> : null;
+  return Set ? <Set world={world} side={side} /> : null;
 }
