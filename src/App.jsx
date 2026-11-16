@@ -56,7 +56,8 @@ function Layout() {
       <main id="main">
         <Outlet />
       </main>
-      <Footer />
+      {/* every page but Home ends with its own call to action */}
+      <Footer compact={location.pathname !== "/"} />
     </>
   );
 }
