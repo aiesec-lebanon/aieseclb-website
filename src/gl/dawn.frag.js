@@ -104,6 +104,8 @@ vec3 skyGlow(vec2 k, float stretch) {
   col += tint * band * 0.72 * g;
   // the glow round the sun: wide and warm
   col += tint * (exp(-dist * 2.5) * 0.42 + exp(-dist * 8.5) * 0.72) * g;
+  // bloom just outside the disc, so it reads as a light as well as a shape
+  col += tint * exp(-max(dist - uSunR, 0.0) * 26.0) * 0.55 * g;
   return col;
 }
 

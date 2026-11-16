@@ -218,7 +218,7 @@ export default function Platforms() {
               ) : layout === "overlap" ? (
                 // a large picture with the words on a card laid over its corner
                 <div className="shell grid items-center py-[30svh] md:grid-cols-12">
-                  <div className="max-md:order-first md:col-span-9 md:col-start-4 md:row-start-1">
+                  <div className="max-md:order-first md:col-span-8 md:col-start-5 md:row-start-1">
                     <Picture p={p} i={i} sizes="(max-width: 768px) 92vw, 66vw" />
                   </div>
                   <Reveal className="relative z-10 mt-10 md:col-span-5 md:col-start-1 md:row-start-1 md:mt-0 md:rounded-[1.6rem] md:border md:border-[var(--w-line)] md:bg-[color-mix(in_oklab,var(--w-card)_88%,transparent)] md:p-10 md:shadow-[0_30px_80px_rgb(0_0_0/0.45)] md:backdrop-blur-md">

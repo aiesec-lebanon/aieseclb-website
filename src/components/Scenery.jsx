@@ -403,6 +403,8 @@ function Showcase({ world }) {
   return (
     <>
       <div className="absolute inset-0" style={{ background: `radial-gradient(60% 50% at 50% 40%, ${rgba(world.accent, 0.16)}, transparent 75%)` }} />
+      {/* gallery light from above, warm on the wall of partners */}
+      <div className="absolute inset-0" style={{ background: "radial-gradient(46% 38% at 50% 0%, rgb(255 214 150 / 0.2), transparent 72%), radial-gradient(30% 30% at 18% 8%, rgb(255 214 150 / 0.1), transparent 70%)" }} />
       <div className="absolute inset-0 [perspective:1200px]">
         <div data-depth="" className="absolute inset-x-[-6%] top-[8%] grid grid-cols-6 gap-5 opacity-90 [transform:rotateX(14deg)]" style={{ "--depth": 0.7 }}>
           {tiles.map((t) => (
