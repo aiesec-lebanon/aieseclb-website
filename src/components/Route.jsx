@@ -18,6 +18,28 @@ export default function Route({ from, to, className = "" }) {
   const len = Math.hypot(b[0] - a[0], b[1] - a[1]);
   const mid = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2 - Math.max(24, len * 0.32)];
   const labelSide = (p, other) => (p[0] <= other[0] ? "end" : "start");
+  // A label goes beside its city, away from the other one; where that would run out of the
+  // drawing (a city near the edge, a long name), it goes under the dot instead, kept inside.
+  const label = (p, other, name) => {
+    const w = name.length * 8.6; // about how wide 15 px bold is
+    const side = labelSide(p, other);
+    const fits = side === "end" ? p[0] - 14 - w >= 0 : p[0] + 14 + w <= W;
+    if (fits) return { x: p[0] + (side === "end" ? -14 : 14), y: p[1] + 5, anchor: side };
+    return { x: Math.min(Math.max(p[0], w / 2), W - w / 2), y: p[1] + 26, anchor: "middle" };
+  };
+  // the arrowhead at the destination, along the curve as it arrives (a quadratic's end tangent)
+  const tx = b[0] - mid[0];
+  const ty = b[1] - mid[1];
+  const tl = Math.hypot(tx, ty) || 1;
+  const ux = tx / tl;
+  const uy = ty / tl;
+  const head = [
+    [b[0] - ux * 4, b[1] - uy * 4],
+    [b[0] - ux * 17 - uy * 7, b[1] - uy * 17 + ux * 7],
+    [b[0] - ux * 17 + uy * 7, b[1] - uy * 17 - ux * 7],
+  ]
+    .map((q) => q.map((v) => v.toFixed(1)).join(","))
+    .join(" ");
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className={`route w-full overflow-visible ${className}`} role="img" aria-label={`From ${from.city}, ${from.country} to ${to.city}, ${to.country}`}>
       {/* the graticule: a hint of a map */}
@@ -29,6 +51,8 @@ export default function Route({ from, to, className = "" }) {
       ))}
       <path d={`M${a[0]} ${a[1]} Q${mid[0]} ${mid[1]} ${b[0]} ${b[1]}`} fill="none" stroke="#ffc845" strokeOpacity="0.25" strokeWidth="6" strokeLinecap="round" />
       <path className="route-draw" pathLength="1" d={`M${a[0]} ${a[1]} Q${mid[0]} ${mid[1]} ${b[0]} ${b[1]}`} fill="none" stroke="#ffc845" strokeWidth="2" strokeLinecap="round" />
+      {/* which way it goes: a head at the destination, arriving as the line does */}
+      <polygon className="route-head" points={head} fill="#ffc845" />
       {[
         [a, from, b],
         [b, to, a],
@@ -36,14 +60,14 @@ export default function Route({ from, to, className = "" }) {
         <g key={place.city}>
           <circle cx={p[0]} cy={p[1]} r="10" fill="#ffc845" opacity="0.18" />
           <circle cx={p[0]} cy={p[1]} r="4.5" fill="#ffc845" />
-          <text
-            x={p[0] + (labelSide(p, other) === "end" ? -14 : 14)}
-            y={p[1] + 5}
-            textAnchor={labelSide(p, other)}
-            className="fill-current text-[15px] font-bold"
-          >
-            {place.city}
-          </text>
+          {(() => {
+            const l = label(p, other, place.city);
+            return (
+              <text x={l.x} y={l.y} textAnchor={l.anchor} className="fill-current text-[15px] font-bold">
+                {place.city}
+              </text>
+            );
+          })()}
         </g>
       ))}
     </svg>

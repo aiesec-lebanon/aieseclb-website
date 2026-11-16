@@ -555,6 +555,17 @@ html.lenis body {
       animation-timeline: --route;
       animation-range: entry 20% cover 50%;
     }
+    .route .route-head {
+      animation: route-head linear both;
+      animation-timeline: --route;
+      animation-range: cover 44% cover 52%;
+    }
+  }
+}
+
+@keyframes route-head {
+  from {
+    opacity: 0;
   }
 }
 
