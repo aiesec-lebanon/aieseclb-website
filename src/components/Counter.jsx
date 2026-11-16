@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 
 const fmt = new Intl.NumberFormat("en-US");
+// a million and up is written short (1M): "1,000,000+" ran past its column
+const short = new Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 1 });
 
 // Rolls up to its value once, the first time it is seen. Reduced motion gets the final number.
 export default function Counter({ value, suffix = "", duration = 1800 }) {
@@ -38,8 +40,15 @@ export default function Counter({ value, suffix = "", duration = 1800 }) {
 
   return (
     <span ref={ref} className="tabular-nums">
-      {fmt.format(n)}
-      {suffix}
+      {/* heard once, in full; the rolling digits are only to look at */}
+      <span className="sr-only">
+        {fmt.format(value)}
+        {suffix}
+      </span>
+      <span aria-hidden="true">
+        {(value >= 1e6 ? short : fmt).format(n)}
+        {suffix}
+      </span>
     </span>
   );
 }
