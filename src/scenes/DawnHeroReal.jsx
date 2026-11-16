@@ -103,6 +103,7 @@ export default function DawnHeroReal({ onTooSlow }) {
     let ty = 0;
     let intro = 0;
     let titleOn = false;
+    let titleSwapped = false;
     let frameNo = 0;
     // the scene is ready once its first frames are drawn: the loader opens, the intro begins
     let revealed = false;
@@ -185,6 +186,12 @@ export default function DawnHeroReal({ onTooSlow }) {
       // drawn sharp at screen resolution over the scene where the runner can (quad.js), else in it
       if (quad.crispTitle) quad.setTitle({ a: titleA });
       quad.set("uTitleA", quad.crispTitle ? 0 : titleA);
+      // the page's own heading stands (over the loader, from the first paint) until the scene's copy
+      // of it has fully come in, then steps aside: there is never a moment without a title
+      if (titleOn && !titleSwapped && intro >= 0.98) {
+        titleSwapped = true;
+        setTitleInScene(true);
+      }
 
       for (const b of BEATS) {
         const el = beatRefs.current[b.id];
@@ -444,7 +451,10 @@ export default function DawnHeroReal({ onTooSlow }) {
       if (quad.crispTitle) quad.setTitle({ rect, z: TITLE_Z });
       quad.set("uTitleZ", TITLE_Z);
       titleOn = true;
-      setTitleInScene(true);
+      if (reduce && !titleSwapped) {
+        titleSwapped = true;
+        setTitleInScene(true);
+      }
       if (reduce) quad.renderOnce();
     };
     placeTitle();
@@ -561,7 +571,7 @@ export default function DawnHeroReal({ onTooSlow }) {
           className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgb(3_11_28/0.30)_0%,transparent_30%,transparent_62%,rgb(3_11_28/0.42)_100%)]"
         />
 
-        <div ref={setBeat("title")} className="absolute inset-x-0 top-[15vh] will-change-transform md:top-[17vh]">
+        <div ref={setBeat("title")} className="absolute inset-x-0 top-[15vh] z-30 will-change-transform md:top-[17vh]">
           <div className="shell">
             <h1
               id="page-title"
@@ -582,7 +592,7 @@ export default function DawnHeroReal({ onTooSlow }) {
 
         <div
           ref={setBeat("intro")}
-          className="absolute inset-x-0 bottom-0 pb-[max(5.5vh,2.2rem)] will-change-transform max-md:bg-[linear-gradient(180deg,transparent_0%,rgb(3_11_28/0.62)_38%,rgb(3_11_28/0.82)_100%)] max-md:pt-28"
+          className="absolute inset-x-0 bottom-0 z-30 pb-[max(5.5vh,2.2rem)] will-change-transform max-md:bg-[linear-gradient(180deg,transparent_0%,rgb(3_11_28/0.62)_38%,rgb(3_11_28/0.82)_100%)] max-md:pt-28"
         >
           <div className="shell flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <p className="text-lead max-w-[30rem] text-white/90 [text-shadow:0_1px_18px_rgb(3_11_28/0.6)]">
