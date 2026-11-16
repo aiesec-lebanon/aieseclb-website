@@ -74,8 +74,22 @@ export default function World({ world, from, id, label, backdrop = null, textSid
 // worlds are in view; nothing moves for anyone who asks for reduced motion, so it hides then.
 export function SceneryToggle() {
   const paused = useSceneryPaused();
+  // shown once the worlds fill a good part of the screen: at the top of the page their container
+  // already reaches into view, and the button sat over the ring above them
+  const ref = useRef(null);
+  const [shown, setShown] = useState(false);
+  useEffect(() => {
+    const worlds = ref.current && ref.current.parentElement;
+    if (!worlds) return undefined;
+    const io = new IntersectionObserver(([e]) => setShown(e.isIntersecting), { rootMargin: "0px 0px -45% 0px" });
+    io.observe(worlds);
+    return () => io.disconnect();
+  }, []);
   return (
-    <div className="scenery-toggle pointer-events-none sticky bottom-4 z-30 -mt-14 flex h-14 justify-end px-4 md:bottom-6 md:px-6">
+    <div
+      ref={ref}
+      className={`scenery-toggle pointer-events-none sticky bottom-4 z-30 -mt-14 flex h-14 justify-end px-4 transition-opacity duration-500 md:bottom-6 md:px-6 ${shown ? "opacity-100" : "invisible opacity-0"}`}
+    >
       <button
         type="button"
         onClick={() => setSceneryPaused(!paused)}
