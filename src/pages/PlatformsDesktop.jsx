@@ -104,6 +104,16 @@ function Points({ p }) {
     </ul>
   );
 }
+// the code: these platforms are open source (repo in content/platforms.js)
+function Code({ p }) {
+  if (!p.repo) return null;
+  return (
+    <a href={p.repo} target="_blank" rel="noreferrer" className="font-bold text-[var(--w-ink)] underline decoration-[var(--w-accent)] decoration-2 underline-offset-[6px]">
+      Source code
+    </a>
+  );
+}
+
 function Stack({ p }) {
   return (
     <div className="fade mt-8 flex flex-wrap items-center gap-x-6 gap-y-4" style={{ "--i": 4 }}>
@@ -111,7 +121,8 @@ function Stack({ p }) {
       <p className="text-[0.95rem] text-[var(--w-soft)]">
         Built with <span className="font-bold">{p.stack.join(", ")}</span>
       </p>
-      <span className="ml-auto">
+      <span className="ml-auto flex flex-wrap items-center gap-x-6 gap-y-3">
+        <Code p={p} />
         <OpenIt platform={p} />
       </span>
     </div>
