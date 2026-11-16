@@ -161,52 +161,54 @@ export default function Exchange() {
         <section
           key={p.id}
           id={p.id}
-          className={`relative isolate scroll-mt-0 overflow-clip text-ink ${BG[p.color]}`}
+          className={`relative isolate flex min-h-[100svh] scroll-mt-0 items-end overflow-clip text-ink md:items-center ${BG[p.color]}`}
           style={{ "--prog": `var(--color-${p.color})` }}
         >
-          {/* the photograph bleeds into the programme's colour: above the text on a phone, to one
-              side on a large screen. Light falls on the colour from the text's side. */}
-          <div aria-hidden="true" className={`pointer-events-none absolute inset-0 -z-20 bg-[radial-gradient(60%_70%_at_${i % 2 ? "92%" : "8%"}_12%,rgb(255_255_255/0.28),transparent_70%)]`} />
-          <div className={`relative -z-10 h-[62svh] w-full md:absolute md:inset-y-0 md:h-auto md:w-[58%] ${i % 2 ? "md:left-0" : "md:right-0"}`}>
-            <Media
-              name={p.image}
-              alt={`${p.name}: young people on exchange`}
-              tone={p.color}
-              seed={300 + i * 17}
-              className="h-full w-full"
-              imgClassName="zoom-out"
-            />
-            <div className="absolute inset-0 bg-[linear-gradient(to_top,var(--prog)_0%,transparent_45%)] md:hidden" />
-            <div
-              className={`absolute inset-0 hidden md:block ${
-                i % 2
-                  ? "bg-[linear-gradient(to_left,var(--prog)_0%,color-mix(in_oklab,var(--prog)_70%,transparent)_18%,transparent_55%)]"
-                  : "bg-[linear-gradient(to_right,var(--prog)_0%,color-mix(in_oklab,var(--prog)_70%,transparent)_18%,transparent_55%)]"
-              }`}
-            />
-          </div>
-          <div className="shell grid gap-10 pb-24 pt-2 md:min-h-[92svh] md:grid-cols-2 md:items-center md:gap-16 md:py-36">
-            <Reveal className={i % 2 ? "md:col-start-2" : ""}>
+          {/* Like the page's cover: the photograph fills the screen, whatever the screen, and the
+              words are sized to the screen too (its width and its height), so they fit on a phone,
+              a short laptop and a wide monitor alike. The programme's colour comes in from the
+              side the words are on; on a phone it rises from below, behind the words themselves. */}
+          <Media
+            name={p.image}
+            alt={`${p.name}: young people on exchange`}
+            tone={p.color}
+            seed={300 + i * 17}
+            sizes="100vw"
+            className="!absolute inset-0 -z-20"
+            imgClassName="zoom-out"
+          />
+          <div
+            aria-hidden="true"
+            className={`absolute inset-0 -z-10 hidden md:block ${
+              i % 2
+                ? "bg-[linear-gradient(to_left,var(--prog)_0%,var(--prog)_36%,color-mix(in_oklab,var(--prog)_72%,transparent)_52%,transparent_74%)]"
+                : "bg-[linear-gradient(to_right,var(--prog)_0%,var(--prog)_36%,color-mix(in_oklab,var(--prog)_72%,transparent)_52%,transparent_74%)]"
+            }`}
+          />
+          <div className="shell grid md:grid-cols-2 md:gap-16 md:pb-14 md:pt-28">
+            <Reveal
+              className={`max-md:-mx-5 max-md:bg-[linear-gradient(to_top,var(--prog)_0%,var(--prog)_78%,transparent_100%)] max-md:px-5 max-md:pb-10 max-md:pt-28 ${i % 2 ? "md:col-start-2" : ""}`}
+            >
               <p className="fade font-bold">{p.name}</p>
-              <h2 className="display mt-3 text-[clamp(4rem,11vw,11.5rem)]">
+              <h2 className="display mt-2 text-[clamp(3rem,min(11vw,14svh),10.5rem)]">
                 <Lines text={[`${p.verb}.`]} />
               </h2>
-              <p className="display-wide fade mt-6 text-[clamp(1.3rem,2.1vw,1.9rem)]" style={{ "--i": 2 }}>
+              <p className="display-wide fade mt-4 text-[clamp(1.15rem,min(2vw,3.2svh),1.9rem)]" style={{ "--i": 2 }}>
                 {p.line}
               </p>
-              <p className="fade text-lead mt-5 max-w-[32rem]" style={{ "--i": 3 }}>
+              <p className="fade mt-3 max-w-[32rem] text-[clamp(1rem,min(1.35vw,2.5svh),1.25rem)]" style={{ "--i": 3 }}>
                 {DETAIL[p.id].who}
               </p>
-              <ul className="fade mt-8 space-y-3 text-[1.08rem] md:text-[1.15rem]" style={{ "--i": 4 }}>
+              <ul className="fade mt-5 space-y-2 text-[clamp(0.95rem,min(1.2vw,2.3svh),1.15rem)]" style={{ "--i": 4 }}>
                 {DETAIL[p.id].what.map((w) => (
-                  <li key={w} className="flex gap-3 border-t border-ink/20 pt-3">
+                  <li key={w} className="flex gap-3 border-t border-ink/20 pt-2">
                     <span aria-hidden="true" className="mt-[0.55em] h-2 w-2 shrink-0 rounded-full bg-ink" />
                     {w}
                   </li>
                 ))}
               </ul>
               {/* straight to this programme's own form on the sign-up portal (signup/<id>) */}
-              <div className="fade mt-10 flex flex-wrap items-center gap-x-6 gap-y-4" style={{ "--i": 5 }}>
+              <div className="fade mt-[clamp(1.25rem,4svh,2.5rem)] flex flex-wrap items-center gap-x-6 gap-y-4" style={{ "--i": 5 }}>
                 <a
                   href={`${SIGNUP_URL}/${p.id}`}
                   className="group inline-flex h-14 items-center gap-3 rounded-full bg-ink px-8 text-lg font-bold text-white transition-colors duration-300 hover:bg-night"
