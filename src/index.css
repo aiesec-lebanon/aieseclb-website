@@ -5,6 +5,9 @@
    ------------------------------------------------------------------ */
 @theme {
   --color-aiesec: #037ef3;
+  /* AIESEC blue for anything that carries white text: #037ef3 gives white only 3.9:1,
+     this gives it 5.6:1 (the same rule as Learn Git's design system) */
+  --color-aiesec-deep: #0266cc;
   --color-aiesec-600: #0468c9;
   --color-aiesec-700: #06519c;
   --color-aiesec-800: #083a70;
@@ -81,6 +84,14 @@ body,
 /* ------------------------------------------------------------------
    Type
    ------------------------------------------------------------------ */
+/* a blue section with light in it: deep AIESEC blue, a cool glow up high, a hint of dawn below */
+@utility blue-field {
+  background-color: var(--color-aiesec-deep);
+  background-image:
+    radial-gradient(58% 70% at 88% 0%, rgb(64 164 255 / 0.42), transparent 70%),
+    radial-gradient(55% 65% at 0% 100%, rgb(255 200 69 / 0.13), transparent 70%);
+}
+
 @utility display {
   font-family: var(--font-display);
   font-stretch: 76%;

@@ -9,7 +9,7 @@ export default function Footer() {
       {/* the sun again, flat and whole, as at the top of the first page */}
       <div
         aria-hidden="true"
-        className="parallax pointer-events-none absolute -right-[22vw] top-[4rem] -z-10 aspect-square w-[72vw] rounded-full bg-[linear-gradient(180deg,#ffd77e,#ffb347)] md:-right-[9vw] md:top-[6rem] md:w-[42vw]"
+        className="parallax pointer-events-none absolute -right-[22vw] top-[4rem] -z-10 aspect-square w-[72vw] rounded-full bg-[radial-gradient(circle_at_38%_32%,#fff4d0_0%,#ffd77e_32%,#ffb347_70%,#f48924_100%)] shadow-[0_0_80px_20px_rgb(255_200_69/0.35),0_0_220px_80px_rgb(255_160_60/0.18)] md:-right-[9vw] md:top-[6rem] md:w-[42vw]"
         style={{ "--py": "5rem" }}
       />
 

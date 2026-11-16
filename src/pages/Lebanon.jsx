@@ -104,7 +104,7 @@ export default function Lebanon() {
         </div>
       </section>
 
-      <section className="bg-aiesec py-24 text-white md:py-40">
+      <section className="blue-field py-24 text-white md:py-40">
         <div className="shell">
           <Reveal>
             <h2 className="display text-mega max-w-[14ch]">

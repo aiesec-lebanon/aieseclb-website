@@ -95,8 +95,8 @@ export default function Events() {
         <SceneryToggle />
       </div>
 
-      <section className="bg-aiesec text-white">
-        <div aria-hidden="true" className="h-[22svh]" style={{ background: `linear-gradient(${last.bg}, var(--color-aiesec))` }} />
+      <section className="blue-field text-white">
+        <div aria-hidden="true" className="h-[22svh]" style={{ background: `linear-gradient(${last.bg}, var(--color-aiesec-deep))` }} />
         <div className="shell flex flex-col gap-8 pb-24 pt-4 md:flex-row md:items-end md:justify-between md:pb-36">
           <Reveal>
             <h2 className="display text-mega max-w-[13ch]">

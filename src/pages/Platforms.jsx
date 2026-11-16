@@ -180,8 +180,8 @@ export default function Platforms() {
         <SceneryToggle />
       </div>
 
-      <section className="bg-aiesec text-white">
-        <div aria-hidden="true" className="h-[22svh]" style={{ background: `linear-gradient(${last.bg}, var(--color-aiesec))` }} />
+      <section className="blue-field text-white">
+        <div aria-hidden="true" className="h-[22svh]" style={{ background: `linear-gradient(${last.bg}, var(--color-aiesec-deep))` }} />
         <div className="shell grid gap-10 pb-24 pt-4 md:grid-cols-[1.3fr_1fr] md:items-end md:pb-36">
           <Reveal>
             <h2 className="display text-mega max-w-[13ch]">

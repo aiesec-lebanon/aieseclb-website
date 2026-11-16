@@ -221,19 +221,19 @@ function Programs() {
           {PROGRAMS.map((p, i) => (
             <article
               key={p.id}
-              className={`sticky mb-6 grid overflow-clip rounded-[2rem] text-white shadow-[0_-18px_50px_rgb(11_27_51/0.16)] md:grid-cols-2 md:rounded-[2.6rem] ${PROGRAM_BG[p.color]}`}
+              className={`sticky mb-6 grid overflow-clip rounded-[2rem] text-ink shadow-[0_-18px_50px_rgb(11_27_51/0.16)] md:grid-cols-2 md:rounded-[2.6rem] ${PROGRAM_BG[p.color]}`}
               style={{ top: `calc(5.5rem + ${i * 1.4}rem)` }}
             >
               <div className="flex flex-col justify-between gap-12 p-8 md:p-14">
-                <p className="text-[1.05rem] font-bold text-white/90">{p.name}</p>
+                <p className="text-[1.05rem] font-bold">{p.name}</p>
                 <div>
                   <h3 className="display text-[clamp(3.6rem,8.8vw,9rem)]">{p.verb}.</h3>
                   <p className="display-wide mt-5 text-[clamp(1.25rem,2vw,1.75rem)]">{p.line}</p>
-                  <p className="mt-4 max-w-[30rem] text-white/90">{p.body}</p>
+                  <p className="mt-4 max-w-[30rem]">{p.body}</p>
                   <Link
                     to={`/exchange#${p.id}`}
                     viewTransition
-                    className="group mt-8 inline-flex h-13 items-center gap-3 rounded-full bg-white px-7 font-bold text-ink transition-colors duration-300 hover:bg-night hover:text-white"
+                    className="group mt-8 inline-flex h-13 items-center gap-3 rounded-full bg-ink px-7 font-bold text-white transition-colors duration-300 hover:bg-white hover:text-ink"
                   >
                     How it works
                     <Arrow className="transition-transform duration-500 group-hover:translate-x-1.5" />
@@ -251,7 +251,7 @@ function Programs() {
           ))}
         </div>
 
-        <Reveal className="mt-10 flex flex-col items-start gap-5 rounded-[2rem] bg-aiesec p-8 text-white md:flex-row md:items-center md:justify-between md:rounded-[2.6rem] md:p-14">
+        <Reveal className="mt-10 flex flex-col items-start gap-5 rounded-[2rem] blue-field p-8 text-white md:flex-row md:items-center md:justify-between md:rounded-[2.6rem] md:p-14">
           <div>
             <p className="fade text-[1.05rem] font-bold text-white/90">Membership</p>
             <h3 className="display fade mt-3 text-[clamp(2.2rem,4.4vw,4.2rem)]" style={{ "--i": 1 }}>
@@ -295,7 +295,7 @@ function Showcases() {
     },
   ];
   return (
-    <section data-shot="showcases" className="bg-aiesec py-28 text-white md:py-40">
+    <section data-shot="showcases" className="blue-field py-28 text-white md:py-40">
       <div className="shell grid gap-5 md:grid-cols-2">
         {items.map((it, i) => (
           <Reveal key={it.to} delay={i * 120}>
