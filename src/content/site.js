@@ -119,3 +119,11 @@ export const PAGE_META = {
   },
 };
 export const NOT_FOUND_META = { title: "Page not found | AIESEC in Lebanon", description: PAGE_META["/"].description };
+
+// How to reach AIESEC in Lebanon, in the footer's "Get in touch". TODO: fill these in; each line
+// appears once it has a value (nothing is shown for a null).
+export const CONTACT = {
+  email: null, // the public email address, e.g. "hello@example.org"
+  place: null, // where people can find you, in one line
+  privacy: null, // the address of a privacy notice for this site
+};

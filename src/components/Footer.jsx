@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import logoWhite from "../assets/images/aiesec_logo_white.png";
-import { NAV, PORTALS, SIGNUP_URL, SOCIALS, portalHref } from "../content/site";
+import { CONTACT, NAV, PORTALS, SIGNUP_URL, SOCIALS, portalHref } from "../content/site";
 import Reveal, { Lines } from "./Reveal";
 
 export default function Footer() {
@@ -67,23 +67,41 @@ export default function Footer() {
               ))}
             </ul>
           </nav>
-          <ul className="space-y-2.5 text-lg">
-            {SOCIALS.map((s) => (
-              <li key={s.label}>
-                <a
-                  href={s.href}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="font-bold text-white/85 transition-colors hover:text-sun"
-                >
-                  {s.label}
-                </a>
-              </li>
-            ))}
-          </ul>
+          <div>
+            <h2 className="text-[0.8rem] font-bold uppercase tracking-[0.2em] text-white/60">Get in touch</h2>
+            <ul className="mt-4 space-y-2.5 text-lg">
+              {CONTACT.email && (
+                <li>
+                  <a href={`mailto:${CONTACT.email}`} className="font-bold text-white/85 transition-colors hover:text-sun">
+                    {CONTACT.email}
+                  </a>
+                </li>
+              )}
+              {CONTACT.place && <li className="text-white/72">{CONTACT.place}</li>}
+              {SOCIALS.map((s) => (
+                <li key={s.label}>
+                  <a
+                    href={s.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="font-bold text-white/85 transition-colors hover:text-sun"
+                  >
+                    {s.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
 
-        <p className="mt-14 text-sm text-white/62">© {new Date().getFullYear()} AIESEC in Lebanon. All rights reserved.</p>
+        <p className="mt-14 flex flex-wrap gap-x-5 gap-y-2 text-sm text-white/62">
+          <span>© {new Date().getFullYear()} AIESEC in Lebanon. All rights reserved.</span>
+          {CONTACT.privacy && (
+            <a href={CONTACT.privacy} className="underline underline-offset-4 hover:text-white">
+              Privacy
+            </a>
+          )}
+        </p>
       </div>
     </footer>
   );
