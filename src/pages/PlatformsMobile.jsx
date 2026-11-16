@@ -35,6 +35,7 @@ function Card({ p, i, total }) {
   return (
     <article
       id={`m-${p.id}`}
+      tabIndex={-1}
       aria-label={`${p.name}, ${i + 1} of ${total}`}
       className="relative flex w-[86vw] shrink-0 snap-center flex-col overflow-clip rounded-[1.8rem] shadow-[0_24px_60px_rgb(0_0_0/0.35)]"
       style={{
@@ -114,6 +115,8 @@ export default function PlatformsMobile() {
     if (!card) return;
     el.scrollTo({ left: card.offsetLeft - (el.clientWidth - card.offsetWidth) / 2, behavior: "smooth" });
     el.scrollIntoView({ behavior: "smooth", block: "center" });
+    // and focus goes with it, so the next Tab is inside the card that was asked for
+    card.focus({ preventScroll: true });
   };
 
   return (
@@ -170,7 +173,6 @@ export default function PlatformsMobile() {
                     <span className="block text-[1.15rem] font-bold">{p.name}</span>
                     <span className="block text-[0.92rem] text-white/60">{p.kind}</span>
                   </span>
-                  <span aria-hidden="true" className="h-3 w-3 shrink-0 rounded-full" style={{ background: p.world.accent }} />
                 </button>
               </li>
             ))}
