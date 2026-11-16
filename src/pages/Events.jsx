@@ -120,7 +120,7 @@ export default function Events() {
             href={MEMBER_URL}
             className="inline-flex h-14 w-max items-center rounded-full bg-sun px-8 text-lg font-bold text-ink transition-colors duration-300 hover:bg-white"
           >
-            Join AIESEC in Lebanon
+            Become a member
           </a>
         </div>
       </section>

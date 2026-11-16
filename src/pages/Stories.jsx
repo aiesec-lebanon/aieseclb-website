@@ -132,7 +132,7 @@ export default function Stories() {
             <p className="fade text-lead text-white/90">Go out from Lebanon to volunteer, work or teach, or come to Lebanon from wherever you are.</p>
             <div className="fade mt-8 flex flex-wrap gap-3" style={{ "--i": 2 }}>
               <a href={SIGNUP_URL} className="group inline-flex h-14 items-center gap-3 rounded-full bg-sun px-8 text-lg font-bold text-ink transition-colors duration-300 hover:bg-white">
-                Sign up from Lebanon
+                Go abroad
                 <Arrow className="transition-transform duration-500 group-hover:translate-x-1.5" />
               </a>
               <a href="https://aiesec.org" target="_blank" rel="noreferrer" className="inline-flex h-14 items-center rounded-full border border-white/40 px-8 text-lg font-bold text-white transition-colors duration-300 hover:border-white hover:bg-white/10">

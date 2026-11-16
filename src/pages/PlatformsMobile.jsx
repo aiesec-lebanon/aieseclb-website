@@ -186,7 +186,7 @@ export default function PlatformsMobile() {
             is you, there is room.
           </p>
           <a href={MEMBER_URL} className="mt-8 inline-flex h-14 items-center rounded-full bg-sun px-8 text-lg font-bold text-ink">
-            Join the team
+            Become a member
           </a>
         </div>
       </section>

@@ -295,7 +295,7 @@ function Programs() {
             className="fade inline-flex h-14 shrink-0 items-center rounded-full bg-sun px-8 text-lg font-bold text-ink transition-colors duration-300 hover:bg-white"
             style={{ "--i": 2 }}
           >
-            Join AIESEC in Lebanon
+            Become a member
           </a>
         </Reveal>
       </div>

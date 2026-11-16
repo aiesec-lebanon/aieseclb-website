@@ -178,7 +178,7 @@ export default function Lebanon() {
               className="fade group inline-flex h-14 items-center gap-3 rounded-full bg-sun px-8 text-lg font-bold text-ink transition-colors duration-300 hover:bg-white"
               style={{ "--i": 2 }}
             >
-              Find an opportunity in Lebanon
+              Come to Lebanon
               <Arrow className="transition-transform duration-500 group-hover:translate-x-1.5" />
             </a>
           </Reveal>

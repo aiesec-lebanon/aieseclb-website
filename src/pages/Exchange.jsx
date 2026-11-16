@@ -123,7 +123,7 @@ export default function Exchange() {
                 href={SIGNUP_URL}
                 className="group inline-flex h-14 items-center gap-3 rounded-full bg-aiesec-deep px-8 text-lg font-bold text-white transition-colors duration-300 hover:bg-night"
               >
-                Sign up from Lebanon
+                Go abroad
                 <Arrow className="transition-transform duration-500 group-hover:translate-x-1.5" />
               </a>
             ) : (
@@ -133,7 +133,7 @@ export default function Exchange() {
                 rel="noreferrer"
                 className="group inline-flex h-14 items-center gap-3 rounded-full bg-aiesec-deep px-8 text-lg font-bold text-white transition-colors duration-300 hover:bg-night"
               >
-                Search opportunities in Lebanon
+                Come to Lebanon
                 <Arrow className="transition-transform duration-500 group-hover:translate-x-1.5" />
               </a>
             )}

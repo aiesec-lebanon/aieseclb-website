@@ -23,7 +23,7 @@ export default function Footer() {
               href={SIGNUP_URL}
               className="inline-flex h-14 items-center rounded-full bg-sun px-8 text-lg font-bold text-ink transition-colors duration-300 hover:bg-white"
             >
-              Sign up with AIESEC
+              Go abroad
             </a>
             <Link
               to="/exchange"

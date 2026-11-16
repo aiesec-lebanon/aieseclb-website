@@ -244,7 +244,7 @@ export default function PlatformsDesktop() {
               className="fade mt-8 inline-flex h-14 items-center rounded-full bg-sun px-8 text-lg font-bold text-ink transition-colors duration-300 hover:bg-white"
               style={{ "--i": 2 }}
             >
-              Join the team
+              Become a member
             </a>
           </Reveal>
         </div>
