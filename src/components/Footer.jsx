@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import logoWhite from "../assets/images/aiesec_logo_white.png";
 import { CONTACT, NAV, PORTALS, SIGNUP_URL, SOCIALS, portalHref } from "../content/site";
 import Reveal, { Lines } from "./Reveal";
+import ContactIcon from "./ContactIcon";
 
 // compact: for a page that already ends with its own call to action, the footer leaves out its
 // own (two big "start here" blocks in a row said the same thing twice)
@@ -78,7 +79,8 @@ export default function Footer({ compact = false }) {
             <ul className="mt-4 space-y-2.5 text-lg">
               {CONTACT.email && (
                 <li>
-                  <a href={`mailto:${CONTACT.email}`} className="font-bold text-white/85 transition-colors hover:text-sun">
+                  <a href={`mailto:${CONTACT.email}`} className="inline-flex items-center gap-3 font-bold text-white/85 transition-colors hover:text-sun">
+                    <ContactIcon name="email" />
                     {CONTACT.email}
                   </a>
                 </li>
@@ -90,8 +92,9 @@ export default function Footer({ compact = false }) {
                     href={s.href}
                     target="_blank"
                     rel="noreferrer"
-                    className="font-bold text-white/85 transition-colors hover:text-sun"
+                    className="inline-flex items-center gap-3 font-bold text-white/85 transition-colors hover:text-sun"
                   >
+                    <ContactIcon name={s.label} />
                     {s.label}
                   </a>
                 </li>
