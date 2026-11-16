@@ -455,6 +455,11 @@ export default function GlobeChapter() {
       <div
         className={`${pinned ? "sticky top-0" : "relative"} h-svh min-h-[36rem] overflow-clip bg-[radial-gradient(120%_90%_at_50%_45%,#1590ff_0%,#037ef3_34%,#0554b0_72%,#06346f_100%)]`}
       >
+        {/* first light behind the world, top right */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(42%_46%_at_88%_6%,rgb(255_214_120/0.42),rgb(255_190_90/0.12)_45%,transparent_72%)]"
+        />
         <div ref={mountRef} className="absolute inset-0" />
 
         <div

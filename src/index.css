@@ -449,6 +449,39 @@ html.lenis body {
     display: none;
   }
 }
+/* Lebanon map (components/LebanonMap.jsx): the outline draws, then the places come up */
+.lebanon-map svg {
+  view-timeline: --lbmap block;
+}
+@media (prefers-reduced-motion: no-preference) {
+  @supports ((animation-timeline: view()) and (animation-range: entry)) {
+    .lebanon-map .map-draw {
+      stroke-dasharray: 1;
+      animation: draw-on linear both;
+      animation-timeline: --lbmap;
+      animation-range: entry 15% cover 48%;
+    }
+    .lebanon-map .map-fill {
+      animation: map-pin linear both;
+      animation-timeline: --lbmap;
+      animation-range: cover 30% cover 48%;
+    }
+    .lebanon-map .map-pin {
+      animation: map-pin linear both;
+      animation-timeline: --lbmap;
+      animation-range: cover calc(40% + var(--n, 0) * 2%) cover calc(46% + var(--n, 0) * 2%);
+    }
+  }
+}
+@keyframes map-pin {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 @keyframes world-depth {
   from {
     translate: 0 calc(var(--depth, 1) * 7vh);

@@ -257,7 +257,7 @@ export default function EventRing({ events }) {
       // far enough that the front poster, which steps forward and grows, has air above and below;
       // on a narrow screen, far enough that it is not wider than the screen
       // the posters fill the upper part of the frame, with their reflection on the floor below
-      const dist = Math.max((HGT * 0.5 + 0.62) / tanHalf, (arc * 0.62) / (tanHalf * camera.aspect));
+      const dist = Math.max((HGT * 0.5 + 0.4) / tanHalf, (arc * 0.62) / (tanHalf * camera.aspect));
       camera.position.set(0, 0.06, R + dist);
       camera.lookAt(0, -0.42, R);
       camera.updateProjectionMatrix();
