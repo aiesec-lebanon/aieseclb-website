@@ -582,7 +582,7 @@ export default function DawnHeroReal({ onTooSlow }) {
 
         <div
           ref={setBeat("intro")}
-          className="absolute inset-x-0 bottom-0 pb-[max(5.5vh,2.2rem)] will-change-transform"
+          className="absolute inset-x-0 bottom-0 pb-[max(5.5vh,2.2rem)] will-change-transform max-md:bg-[linear-gradient(180deg,transparent_0%,rgb(3_11_28/0.62)_38%,rgb(3_11_28/0.82)_100%)] max-md:pt-28"
         >
           <div className="shell flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <p className="text-lead max-w-[30rem] text-white/90 [text-shadow:0_1px_18px_rgb(3_11_28/0.6)]">
