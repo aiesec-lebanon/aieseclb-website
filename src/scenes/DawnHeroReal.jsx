@@ -8,6 +8,7 @@ import { DAWN_FRAG } from "../gl/dawn.frag";
 import { warmUp } from "../gl/warm";
 import { clamp01, mix, sectionProgress, smoothstep } from "../lib/scroll";
 import { SIGNUP_URL } from "../content/site";
+import PauseScenery from "../components/PauseScenery";
 
 // The same morning as DawnHero, rendered as a real place instead of a drawing.
 // World units are kilometres. These three functions must match the shader.
@@ -143,7 +144,12 @@ export default function DawnHeroReal({ onTooSlow }) {
       return { cam, dirX, dirY, dirZ, focal, sunElev };
     };
 
+    // the scene's own clock: it stands still while the scenery is paused (the water, the cloud);
+    // scrolling still flies the camera
+    let clock = 0;
     const apply = (quad, time, dt) => {
+      if (!document.documentElement.classList.contains("scenery-paused")) clock += dt;
+      quad.set("uTime", dt === 0 && clock === 0 ? time : clock);
       const target = forced ?? (reduce ? 0 : sectionProgress(section));
       s = dt === 0 ? target : s + (target - s) * (1 - Math.exp(-dt * 6));
       if (Math.abs(target - s) < 2e-5) s = target;
@@ -592,7 +598,7 @@ export default function DawnHeroReal({ onTooSlow }) {
 
         <div
           ref={setBeat("intro")}
-          className="absolute inset-x-0 bottom-0 z-30 pb-[max(5.5vh,2.2rem)] will-change-transform max-md:bg-[linear-gradient(180deg,transparent_0%,rgb(3_11_28/0.62)_38%,rgb(3_11_28/0.82)_100%)] max-md:pt-28"
+          className="absolute inset-x-0 bottom-0 z-30 pb-[max(5.5vh,2.2rem)] will-change-transform max-md:bg-[linear-gradient(180deg,transparent_0%,rgb(3_11_28/0.62)_38%,rgb(3_11_28/0.82)_100%)] max-md:pb-16 max-md:pt-28"
         >
           <div className="shell flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <p className="text-lead max-w-[30rem] text-white/90 [text-shadow:0_1px_18px_rgb(3_11_28/0.6)]">
@@ -629,12 +635,12 @@ export default function DawnHeroReal({ onTooSlow }) {
           />
         )}
 
-        <div
-          ref={cueRef}
-          aria-hidden="true"
-          className="pointer-events-none absolute bottom-[max(2.2vh,0.9rem)] left-1/2 hidden -translate-x-1/2 text-[0.82rem] font-bold tracking-wide text-white/75 md:block"
-        >
-          Scroll to climb
+        {/* the cue (on phones too, where the opening is pinned as well) and a pause for the scene */}
+        <div className="absolute bottom-[max(1.4vh,0.6rem)] left-1/2 z-30 flex -translate-x-1/2 items-center gap-3 md:bottom-[max(2.2vh,0.9rem)]">
+          <span ref={cueRef} aria-hidden="true" className="whitespace-nowrap text-[0.82rem] font-bold tracking-wide text-white/75">
+            Scroll to climb
+          </span>
+          <PauseScenery />
         </div>
       </div>
 
