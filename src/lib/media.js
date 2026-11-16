@@ -23,6 +23,11 @@ const depth = {};
 for (const [path, url] of Object.entries(depthFiles)) depth[path.split("/").pop().replace(/.png$/, "")] = url;
 export const genDepth = (name) => depth[name] || null;
 
+// WebP twins (npm run images writes them to src/assets/gen-webp/)
+const webpFiles = import.meta.glob("../assets/gen-webp/*.webp", { eager: true, query: "?url", import: "default" });
+const webp = {};
+for (const [path, url] of Object.entries(webpFiles)) webp[path.split("/").pop().replace(/.webp$/, "")] = url;
+
 export const gen = (name) => full[name] || null;
 export const genSmall = (name) => small[name] || full[name] || null;
 export const hasGen = (name) => Boolean(full[name]);
@@ -32,6 +37,8 @@ export function genImage(name) {
   const src = full[name];
   if (!src) return null;
   const w = sizes[name];
-  if (small[name] && w) return { src, srcSet: `${small[name]} ${w[1]}w, ${src} ${w[0]}w` };
-  return { src, srcSet: undefined };
+  // the same choice of sizes in WebP, offered first where it exists
+  const webpSet = webp[name] ? (webp[`${name}-sm`] && w ? `${webp[`${name}-sm`]} ${w[1]}w, ${webp[name]} ${w[0]}w` : webp[name]) : undefined;
+  if (small[name] && w) return { src, srcSet: `${small[name]} ${w[1]}w, ${src} ${w[0]}w`, webpSet };
+  return { src, srcSet: undefined, webpSet };
 }

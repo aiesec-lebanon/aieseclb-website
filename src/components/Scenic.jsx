@@ -89,16 +89,20 @@ export default function Media({
   return (
     <div className={`relative overflow-clip bg-night-800 ${className}`} data-media={name} data-filled={img ? "true" : "false"}>
       {img ? (
-        <img
-          src={img.src}
-          srcSet={img.srcSet}
-          sizes={img.srcSet ? sizes : undefined}
-          alt={alt}
-          loading={priority ? "eager" : "lazy"}
-          fetchPriority={priority ? "high" : "auto"}
-          decoding="async"
-          className={`absolute inset-0 h-full w-full object-cover ${imgClassName}`}
-        />
+        // WebP first (about a third smaller), the JPEG for anything that cannot read it
+        <picture>
+          {img.webpSet && <source type="image/webp" srcSet={img.webpSet} sizes={sizes} />}
+          <img
+            src={img.src}
+            srcSet={img.srcSet}
+            sizes={img.srcSet ? sizes : undefined}
+            alt={alt}
+            loading={priority ? "eager" : "lazy"}
+            fetchPriority={priority ? "high" : "auto"}
+            decoding="async"
+            className={`absolute inset-0 h-full w-full object-cover ${imgClassName}`}
+          />
+        </picture>
       ) : (
         <div role={alt ? "img" : undefined} aria-label={alt || undefined} className={`absolute inset-0 ${imgClassName}`}>
           <Scenic seed={seed} tone={tone} />

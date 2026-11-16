@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { gen, genDepth } from "../lib/media";
+import { genDepth, genSmall } from "../lib/media";
 import { useSceneryPaused } from "./sceneryPause";
 import { BACKDROP_CROP as CROP } from "./worldType";
 
@@ -199,7 +199,8 @@ export default function Backdrop({ photo, world, textSide = "left" }) {
       pointerY = (e.clientY / window.innerHeight - 0.5) * 2;
     };
 
-    Promise.all([loadTexture(gl, gen(photo), 0), loadTexture(gl, genDepth(photo), 1)]).then(([a, d]) => {
+    // the 1000 px version: the continuation is softened anyway, and a quarter of the pixels to upload
+    Promise.all([loadTexture(gl, genSmall(photo), 0), loadTexture(gl, genDepth(photo), 1)]).then(([a, d]) => {
       if (!alive || !a) return;
       img = a;
       hasDepth = Boolean(d);

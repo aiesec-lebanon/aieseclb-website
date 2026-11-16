@@ -7,7 +7,8 @@
 //   <name>.jpg      at most 2000 px on its long side (2400 for the full-bleed page heroes)
 //   <name>-sm.jpg   at most 1000 px, for phones and small cards
 // and moves the original into src/assets/gen/originals/ (ignored by git), so nothing is lost.
-// It also records the pixel widths in src/assets/gen/sizes.json, which the site uses to let
+// Every web version also gets a WebP twin in src/assets/gen-webp/ (about a third smaller; the site
+// offers it first and the JPEG to anything that cannot read it). It also records the pixel widths in src/assets/gen/sizes.json, which the site uses to let
 // each browser pick the smaller or the larger file. Images already done are skipped, so it is
 // safe to run again after adding more.
 import sharp from "sharp";
@@ -93,6 +94,23 @@ for (const file of readdirSync(ORIG)) {
     console.warn(`${name}: skipped for now (${err.message})`);
   }
 }
+
+// WebP twins of the web versions, made or remade whenever their JPEG is newer, and removed when it
+// is gone. In their own folder, so this script never takes them for new photographs.
+const WEBP = "src/assets/gen-webp";
+mkdirSync(WEBP, { recursive: true });
+let webps = 0;
+for (const file of readdirSync(DIR)) {
+  if (extname(file).toLowerCase() !== ".jpg") continue;
+  const out = join(WEBP, basename(file, ".jpg") + ".webp");
+  if (existsSync(out) && statSync(out).mtimeMs >= statSync(join(DIR, file)).mtimeMs) continue;
+  await sharp(join(DIR, file)).webp({ quality: 76, effort: 5 }).toFile(out);
+  webps++;
+}
+for (const file of readdirSync(WEBP)) {
+  if (!existsSync(join(DIR, basename(file, ".webp") + ".jpg"))) unlinkSync(join(WEBP, file));
+}
+if (webps) console.log(`${webps} WebP versions written to ${WEBP}`);
 
 // forget entries whose image has been removed
 for (const name of Object.keys(sizes)) {
