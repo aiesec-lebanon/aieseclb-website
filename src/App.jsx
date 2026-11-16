@@ -4,7 +4,7 @@ import Nav from "./components/Nav";
 import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
-import { scrollToTop, startSmoothScroll, stopSmoothScroll } from "./lib/scroll";
+import { scrollToSection, scrollToTop, startSmoothScroll, stopSmoothScroll } from "./lib/scroll";
 
 function Layout() {
   const location = useLocation();
@@ -22,7 +22,11 @@ function Layout() {
       first.current = false;
       return;
     }
-    if (location.hash) return;
+    // a link to a section of another page: go to the section once the page has arrived
+    if (location.hash) {
+      scrollToSection(decodeURIComponent(location.hash.slice(1)));
+      return;
+    }
     scrollToTop();
     document.getElementById("page-title")?.focus({ preventScroll: true });
   }, [location.pathname, location.hash]);

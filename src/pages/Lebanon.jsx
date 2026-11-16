@@ -34,7 +34,42 @@ export default function Lebanon() {
         </div>
       </section>
 
-      <HorizontalStory label="One day across Lebanon" className="bg-night text-white">
+      {/* On a phone the day runs down the screen: a gold line through the hours, a stop at each one */}
+      <section aria-label="One day across Lebanon" className="bg-night py-20 text-white md:hidden">
+        <div className="shell">
+          <Reveal>
+            <p className="display text-[clamp(3.6rem,17vw,5.2rem)] text-sun">One day.</p>
+            <p className="fade text-lead mt-4 text-white/80" style={{ "--i": 2 }}>
+              Six stops, one small country, every landscape it has.
+            </p>
+          </Reveal>
+          <ol className="relative mt-12 space-y-16 border-l border-sun/35 pl-7">
+            {ONE_DAY.map((s, i) => (
+              <li key={s.time} className="relative">
+                <span
+                  aria-hidden="true"
+                  className="absolute -left-[35px] top-5 h-3.5 w-3.5 rounded-full bg-sun shadow-[0_0_0_5px_var(--color-night),0_0_18px_4px_rgb(255_200_69/0.5)]"
+                />
+                <Reveal>
+                  <p className="display text-[3.4rem] leading-none text-sun">{s.time}</p>
+                  <p className="fade mt-1 font-bold text-white/72">{s.place}</p>
+                  <div className="fade mt-5 overflow-clip rounded-[1.4rem]" style={{ "--i": 1 }}>
+                    <Media name={s.image} alt={s.alt} tone={s.tone} seed={100 + i * 13} sizes="90vw" className="aspect-[4/3]" />
+                  </div>
+                  <h3 className="display-wide fade mt-5 text-[1.45rem] leading-[1.15]" style={{ "--i": 2 }}>
+                    {s.title}
+                  </h3>
+                  <p className="fade mt-3 text-white/82" style={{ "--i": 3 }}>
+                    {s.body}
+                  </p>
+                </Reveal>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      <HorizontalStory label="One day across Lebanon" className="bg-night text-white max-md:hidden">
         <div className="flex w-[78vw] shrink-0 flex-col justify-center px-[7vw] md:w-[46vw]">
           <p className="display text-[clamp(4rem,11vw,11rem)] text-sun">One day.</p>
           <p className="text-lead mt-6 max-w-[24rem] text-white/80">Six stops, one small country, every landscape it has.</p>

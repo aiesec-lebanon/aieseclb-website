@@ -10,8 +10,9 @@
 // Until a picture exists the page draws a generic interface instead (`mock`: form, site,
 // dashboard, board, calendar).
 //
-// `layout` gives a world its own composition: split (the default, side by side), stage (centred),
-// wide (picture across the page, text beneath), overlap (text on a card over the picture).
+// `layout`: split (the default: text beside the picture, both on screen together) or overlap (the
+// text on a glass card over the corner of a large picture). `card: true` puts a split world's text on
+// a glass card too, where the world's scenery runs behind the words.
 //
 // `url` is where "Open it" goes; `cta` changes its label. Tools that need an AIESEC account have
 // no url. Check the lines before going live: they describe what each README says the platform
@@ -41,6 +42,7 @@ export const PLATFORMS = [
   },
   {
     id: "member-portal",
+    card: true,
     name: "Membership portal",
     url: null,
     kind: "For new members",
@@ -81,7 +83,7 @@ export const PLATFORMS = [
   },
   {
     id: "xp",
-    layout: "stage",
+    card: true,
     name: "AIESEC XP",
     url: null,
     kind: "For members",
@@ -126,7 +128,7 @@ export const PLATFORMS = [
   },
   {
     id: "pulse",
-    layout: "wide",
+    card: true,
     name: "AIESEC Pulse",
     url: null,
     kind: "For the network",
@@ -148,6 +150,7 @@ export const PLATFORMS = [
   },
   {
     id: "learn-git",
+    card: true,
     name: "Learn Git",
     url: null,
     kind: "For members, and anyone",

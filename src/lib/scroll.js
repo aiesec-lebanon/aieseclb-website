@@ -25,6 +25,23 @@ export function scrollToTop() {
   window.scrollTo(0, 0);
 }
 
+// back to the top of the page, eased (instantly for anyone who asks for reduced motion)
+export function glideToTop() {
+  if (lenis) lenis.scrollTo(0);
+  else window.scrollTo({ top: 0, behavior: prefersReducedMotion() ? "auto" : "smooth" });
+}
+
+// to a section of the page, once it exists (a page loaded on demand may still be arriving)
+export function scrollToSection(id, tries = 40) {
+  const el = document.getElementById(id);
+  if (!el) {
+    if (tries > 0) setTimeout(() => scrollToSection(id, tries - 1), 60);
+    return;
+  }
+  if (lenis) lenis.scrollTo(el, { immediate: true, force: true });
+  else el.scrollIntoView();
+}
+
 export const clamp01 = (n) => Math.min(1, Math.max(0, n));
 export const smoothstep = (a, b, x) => {
   const t = clamp01((x - a) / (b - a));

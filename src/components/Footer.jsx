@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import logoWhite from "../assets/images/aiesec_logo_white.png";
-import { NAV, SIGNUP_URL, SOCIALS } from "../content/site";
+import { NAV, PORTALS, SIGNUP_URL, SOCIALS, portalHref } from "../content/site";
 import Reveal, { Lines } from "./Reveal";
 
 export default function Footer() {
@@ -49,6 +49,20 @@ export default function Footer() {
                   <Link to={n.to} viewTransition className="font-bold text-white/85 transition-colors hover:text-sun">
                     {n.label}
                   </Link>
+                </li>
+              ))}
+              {/* the portals for partners and future members */}
+              {PORTALS.map((p, i) => (
+                <li key={p.id} className={i === 0 ? "pt-5" : undefined}>
+                  {p.url ? (
+                    <a href={p.url} className="font-bold text-sun transition-colors hover:text-white">
+                      {p.long}
+                    </a>
+                  ) : (
+                    <Link to={portalHref(p)} className="font-bold text-sun transition-colors hover:text-white">
+                      {p.long}
+                    </Link>
+                  )}
                 </li>
               ))}
             </ul>

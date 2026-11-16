@@ -279,6 +279,7 @@ export default function DawnHeroReal({ onTooSlow }) {
       cssPixels: cssPixels(),
       timer: quad.hasTimer,
       fixed: forcedTier >= 0 || reduce,
+      mobile: device.mobile,
       apply: (q) => {
         applyQuality(q);
         if (forcedTier < 0 && startTier < 0 && !reduce) writeStored({ renderer: device.renderer, tier: q.tier, scale: q.scale });

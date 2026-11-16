@@ -2,7 +2,22 @@ import { useEffect, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import logoWhite from "../assets/images/aiesec_logo_white.png";
 import logoBlue from "../assets/images/aiesec_logo_wide_blue.png";
-import { NAV, SIGNUP_URL } from "../content/site";
+import { NAV, PORTALS, SIGNUP_URL, portalHref } from "../content/site";
+import { glideToTop } from "../lib/scroll";
+
+// a portal link: the live site once its url is set, the platform's section on /platforms until then
+function PortalLink({ portal, className, onClick, children }) {
+  const label = children || portal.label;
+  return portal.url ? (
+    <a href={portal.url} className={className} onClick={onClick}>
+      {label}
+    </a>
+  ) : (
+    <Link to={portalHref(portal)} className={className} onClick={onClick}>
+      {label}
+    </Link>
+  );
+}
 
 export default function Nav() {
   const [open, setOpen] = useState(false);
@@ -69,7 +84,19 @@ export default function Nav() {
                 : `h-16 backdrop-blur-md ${light ? "bg-white/50" : "bg-night/28"}`
             }`}
           >
-            <Link to="/" viewTransition aria-label="AIESEC in Lebanon, home" className="flex items-center gap-3">
+            <Link
+              to="/"
+              viewTransition
+              aria-label="AIESEC in Lebanon, home"
+              className="flex items-center gap-3"
+              onClick={(e) => {
+                // already home: a link to the same page does nothing, so take the visitor to the top
+                if (pathname === "/") {
+                  e.preventDefault();
+                  glideToTop();
+                }
+              }}
+            >
               {/* the white logo over dark worlds, the blue one over light ones */}
               <span className="relative block aspect-[1265/259] h-[1.35rem] md:h-6">
                 <img src={logoWhite} alt="AIESEC" className={`absolute inset-0 h-full w-full transition-opacity duration-500 ${light ? "opacity-0" : "opacity-100"}`} />
@@ -104,6 +131,17 @@ export default function Nav() {
                 >
                   {item.label}
                 </NavLink>
+              ))}
+              {/* the doors for partners and future members, set apart from the pages */}
+              <span aria-hidden="true" className={`mx-2 hidden h-5 w-px lg:block ${light ? "bg-ink/20" : "bg-white/25"}`} />
+              {PORTALS.map((p) => (
+                <PortalLink
+                  key={p.id}
+                  portal={p}
+                  className={`hidden rounded-full border px-4 py-1.5 text-[0.95rem] font-bold transition-colors duration-300 lg:inline-block ${
+                    light ? "border-ink/20 text-ink/80 hover:border-ink/50 hover:text-ink" : "border-white/25 text-white/85 hover:border-white/60 hover:text-white"
+                  }`}
+                />
               ))}
             </nav>
 
@@ -166,9 +204,21 @@ export default function Nav() {
               {item.label}
             </NavLink>
           ))}
+          <div className="mt-6 flex flex-wrap gap-3">
+            {PORTALS.map((p) => (
+              <PortalLink
+                key={p.id}
+                portal={p}
+                onClick={() => setOpen(false)}
+                className="inline-flex h-12 items-center rounded-full border border-white/30 px-6 text-lg font-bold text-white"
+              >
+                {p.long}
+              </PortalLink>
+            ))}
+          </div>
           <a
             href={SIGNUP_URL}
-            className="mt-8 inline-flex h-14 w-max items-center rounded-full bg-sun px-8 text-lg font-bold text-ink"
+            className="mt-6 inline-flex h-14 w-max items-center rounded-full bg-sun px-8 text-lg font-bold text-ink"
           >
             Sign up
           </a>

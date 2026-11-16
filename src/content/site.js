@@ -9,6 +9,16 @@ export const NAV = [
   { to: "/platforms", label: "Platforms" },
 ];
 
+// The two platforms that stakeholders come to this website for, besides sign-up: partners and
+// students who want to become members. In the header and the footer.
+// `url` is the live address. Until it is set, the link opens the platform's section on /platforms.
+// TODO: set both urls when the portals are live.
+export const PORTALS = [
+  { id: "partner-portal", label: "Partners", long: "Partner portal", url: null },
+  { id: "member-portal", label: "Membership", long: "Membership portal", url: null },
+];
+export const portalHref = (p) => p.url || `/platforms#${p.id}`;
+
 export const SOCIALS = [
   { label: "Instagram", href: "https://www.instagram.com/aiesecinleb" },
   { label: "LinkedIn", href: "https://www.linkedin.com/company/aiesec-in-lebanon/" },

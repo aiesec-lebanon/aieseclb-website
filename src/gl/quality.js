@@ -91,7 +91,7 @@ const FRAME_MS = 16.9; // one frame at 60 Hz, with a hair of slack
 const GPU_TARGET = 11.5; // GPU time we aim for, leaving room for the page around it
 
 export class Governor {
-  constructor({ tier, scale, maxTier = TIERS.length - 1, cssPixels, apply, giveUp, timer = false, fixed = false }) {
+  constructor({ tier, scale, maxTier = TIERS.length - 1, cssPixels, apply, giveUp, timer = false, fixed = false, mobile = false }) {
     this.maxTier = maxTier;
     this.tier = clamp(tier, 0, maxTier);
     this.cssPixels = Math.max(1, cssPixels);
@@ -106,6 +106,9 @@ export class Governor {
     this.noProbeUntil = 0;
     this.quietUntil = performance.now() + 1800; // the page is still loading: do not judge yet
     this.bornAt = performance.now();
+    // how long a failure at the lightest setting is borne before the drawn hero takes over: a phone
+    // decides sooner (a laggy hero on a phone is worse than the drawn one)
+    this.patience = mobile ? { windows: 5, ms: 5000 } : { windows: 8, ms: 8000 };
     this.changedAt = performance.now();
     this.stats = { fps: 0, avg: 0, p90: 0, gpu: null };
     this.slow = 0;
@@ -242,11 +245,12 @@ export class Governor {
       this.tier--;
       this.scale = this.range().base;
     } else {
-      // Only a sustained, clear failure gives up: about four seconds below roughly 37 frames a
-      // second at the very lightest setting, and never while the page is still starting.
+      // Only a sustained, clear failure gives up: below roughly 37 frames a second at the very
+      // lightest setting for about four seconds (two and a half on a phone), and never while the
+      // page is still starting. Under about 20 frames a second each window counts double.
       // (A dev server reloading the scene, or a busy moment, must not count.)
-      this.floor = over > 1.6 ? this.floor + 1 : 0;
-      if (this.floor >= 8 && performance.now() - this.bornAt > 8000 && this.giveUpFn) this.giveUpFn();
+      this.floor = over > 1.6 ? this.floor + (over > 3 ? 2 : 1) : 0;
+      if (this.floor >= this.patience.windows && performance.now() - this.bornAt > this.patience.ms && this.giveUpFn) this.giveUpFn();
       return;
     }
     this.downCheck = { avg, prev, windows: 2 };
