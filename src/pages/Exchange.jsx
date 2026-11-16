@@ -161,34 +161,34 @@ export default function Exchange() {
         <section
           key={p.id}
           id={p.id}
-          className={`relative isolate flex min-h-[100svh] scroll-mt-0 items-end overflow-clip text-ink md:items-center ${BG[p.color]}`}
+          className={`relative isolate flex min-h-[100svh] scroll-mt-0 flex-col overflow-clip text-ink md:block md:h-[100svh] md:min-h-[38rem] ${BG[p.color]}`}
           style={{ "--prog": `var(--color-${p.color})` }}
         >
-          {/* Like the page's cover: the photograph fills the screen, whatever the screen, and the
-              words are sized to the screen too (its width and its height), so they fit on a phone,
-              a short laptop and a wide monitor alike. The programme's colour comes in from the
-              side the words are on; on a phone it rises from below, behind the words themselves. */}
-          <Media
-            name={p.image}
-            alt={`${p.name}: young people on exchange`}
-            tone={p.color}
-            seed={300 + i * 17}
-            sizes="100vw"
-            className="!absolute inset-0 -z-20"
-            imgClassName="zoom-out"
-          />
-          <div
-            aria-hidden="true"
-            className={`absolute inset-0 -z-10 hidden md:block ${
-              i % 2
-                ? "bg-[linear-gradient(to_left,var(--prog)_0%,var(--prog)_36%,color-mix(in_oklab,var(--prog)_72%,transparent)_52%,transparent_74%)]"
-                : "bg-[linear-gradient(to_right,var(--prog)_0%,var(--prog)_36%,color-mix(in_oklab,var(--prog)_72%,transparent)_52%,transparent_74%)]"
-            }`}
-          />
-          <div className="shell grid md:grid-cols-2 md:gap-16 md:pb-14 md:pt-28">
-            <Reveal
-              className={`max-md:-mx-5 max-md:bg-[linear-gradient(to_top,var(--prog)_0%,var(--prog)_78%,transparent_100%)] max-md:px-5 max-md:pb-10 max-md:pt-28 ${i % 2 ? "md:col-start-2" : ""}`}
-            >
+          {/* the photograph bleeds into the programme's colour: above the words on a phone, to one
+              side on a large screen. Light falls on the colour from the words' side. Each programme
+              is a screen: on a phone the photograph takes what the words leave of it; on a large
+              screen the section is the screen's height and the words are sized to fit it. */}
+          <div aria-hidden="true" className={`pointer-events-none absolute inset-0 -z-20 bg-[radial-gradient(60%_70%_at_${i % 2 ? "92%" : "8%"}_12%,rgb(255_255_255/0.28),transparent_70%)]`} />
+          <div className={`relative -z-10 min-h-[30svh] w-full flex-1 md:absolute md:inset-y-0 md:h-auto md:w-[58%] ${i % 2 ? "md:left-0" : "md:right-0"}`}>
+            <Media
+              name={p.image}
+              alt={`${p.name}: young people on exchange`}
+              tone={p.color}
+              seed={300 + i * 17}
+              className="!absolute inset-0 h-full w-full"
+              imgClassName="zoom-out"
+            />
+            <div className="absolute inset-0 bg-[linear-gradient(to_top,var(--prog)_0%,transparent_45%)] md:hidden" />
+            <div
+              className={`absolute inset-0 hidden md:block ${
+                i % 2
+                  ? "bg-[linear-gradient(to_left,var(--prog)_0%,color-mix(in_oklab,var(--prog)_70%,transparent)_18%,transparent_55%)]"
+                  : "bg-[linear-gradient(to_right,var(--prog)_0%,color-mix(in_oklab,var(--prog)_70%,transparent)_18%,transparent_55%)]"
+              }`}
+            />
+          </div>
+          <div className="shell grid pb-10 pt-1 md:h-full md:grid-cols-2 md:items-center md:gap-16 md:pb-12 md:pt-24">
+            <Reveal className={i % 2 ? "md:col-start-2" : ""}>
               <p className="fade font-bold">{p.name}</p>
               <h2 className="display mt-2 text-[clamp(3rem,min(11vw,14svh),10.5rem)]">
                 <Lines text={[`${p.verb}.`]} />
