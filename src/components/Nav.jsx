@@ -28,11 +28,16 @@ export default function Nav() {
   const { pathname } = useLocation();
 
   useEffect(() => {
+    // at most once a frame: scroll events come faster than frames, and each look is a hit test
+    let raf = 0;
     const onScroll = () => {
-      const y = window.scrollY;
-      // the header stays on screen (the logo is the way home); it only gets more compact
-      setCompact(y > 40);
-      probe();
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        // the header stays on screen (the logo is the way home); it only gets more compact
+        setCompact(window.scrollY > 40);
+        probe();
+      });
     };
     const probe = () => {
       let scheme = "dark";
@@ -49,6 +54,7 @@ export default function Nav() {
     const later = [120, 600].map((ms) => setTimeout(probe, ms));
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => {
+      cancelAnimationFrame(raf);
       later.forEach(clearTimeout);
       window.removeEventListener("scroll", onScroll);
     };
