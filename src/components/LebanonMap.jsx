@@ -18,7 +18,7 @@ export default function LebanonMap({ className = "" }) {
             <feGaussianBlur stdDeviation="6" />
           </filter>
         </defs>
-        <text x="-58" y={H * 0.56} className="fill-white/25 text-[15px] italic" transform={`rotate(-72 -58 ${H * 0.56})`}>
+        <text x="-58" y={H * 0.56} className="fill-white/55 text-[16px] italic max-md:text-[21px]" transform={`rotate(-72 -58 ${H * 0.56})`}>
           Mediterranean Sea
         </text>
         <path d={OUTLINE} fill="url(#lb-land)" className="map-fill" />
@@ -27,7 +27,7 @@ export default function LebanonMap({ className = "" }) {
         {/* the summit */}
         <g className="map-pin" style={{ "--n": 8 }}>
           <path d={`M${SUMMIT[0]} ${SUMMIT[1] - 9} l7 12 h-14 Z`} fill="#ffffff" />
-          <text x={SUMMIT[0] + 12} y={SUMMIT[1] + 3} className="fill-white/60 text-[12px]">
+          <text x={SUMMIT[0] + 12} y={SUMMIT[1] + 3} className="fill-white/80 text-[14px] max-md:text-[20px]">
             3,088 m
           </text>
         </g>
@@ -39,7 +39,7 @@ export default function LebanonMap({ className = "" }) {
               x={p.at[0] + (p.side === "left" ? -12 : 12)}
               y={p.at[1] + 5}
               textAnchor={p.side === "left" ? "end" : "start"}
-              className="fill-white text-[19px] font-bold"
+              className="fill-white text-[19px] font-bold max-md:text-[22px]"
             >
               {p.name}
             </text>
@@ -48,7 +48,7 @@ export default function LebanonMap({ className = "" }) {
         {/* 50 km */}
         <g className="map-pin" style={{ "--n": 9 }} transform={`translate(${W - KM50 + 40} ${H + 30})`}>
           <path d={`M0 0 H${KM50} M0 -5 V5 M${KM50} -5 V5`} stroke="#ffffff" strokeOpacity="0.7" strokeWidth="1.5" />
-          <text x={KM50 / 2} y="-10" textAnchor="middle" className="fill-white/70 text-[12px]">
+          <text x={KM50 / 2} y="-10" textAnchor="middle" className="fill-white/80 text-[14px] max-md:text-[20px]">
             50 km
           </text>
         </g>
