@@ -29,8 +29,7 @@ export default function Events() {
               <Lines text={["What we gather for."]} />
             </h1>
             <p className="fade text-lead mx-auto mt-4 max-w-[34rem] text-white/80" style={{ "--i": 2 }}>
-              The year has a rhythm. These are the days it is built around. Drag the ring, or use the arrows, then
-              scroll down and walk into each one.
+              The year has a rhythm. These are the days it is built around.
             </p>
           </Reveal>
         </div>
