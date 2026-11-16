@@ -402,6 +402,12 @@ html.lenis body {
   }
 }
 
+/* The hero title of the realistic opening stands in the scene, and the land comes up to about 45%
+   of the screen's height. Sized from the width alone, its two lines sank behind the land on short,
+   wide screens (a laptop with its browser bars): the height caps it too. */
+.hero-title {
+  font-size: min(clamp(3.4rem, 11.5vw, 12.5rem), 15.5svh);
+}
 /* The hero title of the realistic opening: lines rise once on load */
 @media (prefers-reduced-motion: no-preference) {
   .hero-title .rl > span {
