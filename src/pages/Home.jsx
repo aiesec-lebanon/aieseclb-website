@@ -4,6 +4,7 @@ import DawnHero from "../scenes/DawnHero";
 import DawnHeroReal from "../scenes/DawnHeroReal";
 import { clearFallback, readStored } from "../gl/quality";
 import Reveal, { Lines } from "../components/Reveal";
+import LebanonMap from "../components/LebanonMap";
 import Counter from "../components/Counter";
 import Media from "../components/Scenic";
 import LogoMarquee from "../components/LogoMarquee";
@@ -130,11 +131,15 @@ function LebanonTeaser() {
   return (
     <section data-shot="lebanon" className="relative overflow-clip bg-night py-28 text-white md:py-44">
       <div className="shell">
-        <Reveal>
-          <h2 className="display text-mega max-w-[15ch]">
-            <Lines text={["Small enough to cross", "in a morning.", "Deep enough for a lifetime."]} />
-          </h2>
-        </Reveal>
+        <div className="grid items-center gap-12 md:grid-cols-12">
+          <Reveal className="md:col-span-7">
+            <h2 className="display text-mega max-w-[15ch]">
+              <Lines text={["Small enough to cross", "in a morning.", "Deep enough for a lifetime."]} />
+            </h2>
+          </Reveal>
+          {/* the country itself: small enough to see whole */}
+          <LebanonMap className="mx-auto h-[26rem] w-full max-w-[24rem] md:col-span-5 md:h-[34rem] md:max-w-none" />
+        </div>
 
         <div className="mt-16 grid gap-5 md:mt-24 md:grid-cols-12 md:gap-6">
           <div className="md:col-span-5 md:pt-24">
