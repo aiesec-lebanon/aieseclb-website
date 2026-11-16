@@ -37,7 +37,10 @@ export default function Events() {
         <Suspense fallback={<div className="h-[62svh]" />}>
           <EventRing events={EVENTS} />
         </Suspense>
-        <SampleNote file="src/content/events.js" />
+        <SampleNote file="src/content/events.js">
+          Waiting for the real event list and photographs. The six events below are samples: their names, dates and
+          places, and four of their photographs are stand-ins.
+        </SampleNote>
       </section>
 
       {/* One world per event: the page becomes the event as you reach it (components/World.jsx;
@@ -59,7 +62,15 @@ export default function Events() {
             >
               <div className="shell grid items-center gap-10 py-[34svh] md:grid-cols-12 md:gap-14">
                 <Reveal className={`relative z-10 md:col-span-5 ${i % 2 ? "md:order-2 md:pl-2" : "md:pr-2"}`}>
-                  <p className="fade font-bold text-[var(--w-accent-ink)]">{e.kind}</p>
+                  <p className="fade font-bold text-[var(--w-accent-ink)]">
+                    {e.kind}
+                    {/* while developing: which events are still placeholders */}
+                    {import.meta.env.DEV && e.sample && (
+                      <span className="ml-3 inline-block rounded-full bg-sun px-2.5 py-0.5 align-middle text-[0.75rem] font-extrabold uppercase tracking-wide text-ink">
+                        Sample
+                      </span>
+                    )}
+                  </p>
                   <h2 className={`mt-3 ${h.className}`} style={h.style}>
                     <Lines text={[e.name]} />
                   </h2>

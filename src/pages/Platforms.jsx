@@ -68,6 +68,66 @@ function OpenIt({ platform }) {
   );
 }
 
+// The pieces a platform's world is laid out from (in each world's own type and colours).
+function Head({ p }) {
+  const h = headingProps(p.world);
+  return (
+    <>
+      <p className="fade font-bold text-[var(--w-accent-ink)]">{p.kind}</p>
+      <h2 className={`mt-3 ${h.className}`} style={h.style}>
+        <Lines text={[p.name]} />
+      </h2>
+    </>
+  );
+}
+function Lead({ p, className = "" }) {
+  return (
+    <p className={`fade text-lead mt-6 ${className}`} style={{ "--i": 2 }}>
+      {p.line}
+    </p>
+  );
+}
+function Points({ p, row = false }) {
+  return (
+    <ul className={`fade mt-8 ${row ? "grid gap-x-8 gap-y-3 md:grid-cols-3" : "space-y-3"}`} style={{ "--i": 3 }}>
+      {p.points.map((pt) => (
+        <li key={pt} className="flex gap-3 border-t border-[var(--w-line)] pt-3">
+          <span aria-hidden="true" className="mt-[0.55em] h-2 w-2 shrink-0 rounded-full bg-[var(--w-accent)]" />
+          {pt}
+        </li>
+      ))}
+    </ul>
+  );
+}
+function Stack({ p }) {
+  return (
+    <div className="fade mt-8 flex flex-wrap items-center gap-3" style={{ "--i": 4 }}>
+      {p.stack.map((s) => (
+        <span key={s} className="rounded-full border border-[var(--w-line)] px-4 py-1.5 text-[0.92rem] font-bold text-[var(--w-soft)]">
+          {s}
+        </span>
+      ))}
+      <span className="ml-auto">
+        <OpenIt platform={p} />
+      </span>
+    </div>
+  );
+}
+function Picture({ p, i, sizes }) {
+  return (
+    // a soft reflection on the floor below the picture (where the browser can draw one)
+    <div className="tilt-in [perspective:1600px] [-webkit-box-reflect:below_10px_linear-gradient(transparent_74%,rgb(255_255_255/0.16))]">
+      {hasGen(p.image) ? (
+        <Frame world={p.world}>
+          <Media name={p.image} alt={`${p.name} on a laptop and a phone`} tone={p.tone} seed={520 + i * 7} sizes={sizes} className="aspect-[16/10]" />
+        </Frame>
+      ) : (
+        <Screen platform={p} seed={520 + i * 7} />
+      )}
+    </div>
+  );
+}
+
 export default function Platforms() {
   const [first, second, third] = PLATFORMS;
   const last = PLATFORMS[PLATFORMS.length - 1].world;
@@ -113,68 +173,75 @@ export default function Platforms() {
       <div className="relative">
         {PLATFORMS.map((p, i) => {
           const w = p.world;
-          const h = headingProps(w);
+          const layout = p.layout || "split";
+          const side = layout === "split" ? (i % 2 ? "right" : "left") : "left";
           return (
             <World
               key={p.id}
               id={p.id}
               world={w}
-              textSide={i % 2 ? "right" : "left"}
+              textSide={side}
               from={i ? PLATFORMS[i - 1].world.bg : NIGHT}
               label={p.name}
               className="flex min-h-[150svh] items-center"
             >
-              <div className="shell grid items-center gap-10 py-[34svh] md:grid-cols-12 md:gap-14">
-                <Reveal className={`relative z-10 md:col-span-4 ${i % 2 ? "md:order-2 md:pl-2" : "md:pr-2"}`}>
-                  <p className="fade font-bold text-[var(--w-accent-ink)]">{p.kind}</p>
-                  <h2 className={`mt-3 ${h.className}`} style={h.style}>
-                    <Lines text={[p.name]} />
-                  </h2>
-                  <p className="fade text-lead mt-6" style={{ "--i": 2 }}>
-                    {p.line}
-                  </p>
-                  <ul className="fade mt-8 space-y-3" style={{ "--i": 3 }}>
-                    {p.points.map((pt) => (
-                      <li key={pt} className="flex gap-3 border-t border-[var(--w-line)] pt-3">
-                        <span aria-hidden="true" className="mt-[0.55em] h-2 w-2 shrink-0 rounded-full bg-[var(--w-accent)]" />
-                        {pt}
-                      </li>
-                    ))}
-                  </ul>
-                  <div className="fade mt-8 flex flex-wrap items-center gap-3" style={{ "--i": 4 }}>
-                    {p.stack.map((s) => (
-                      <span
-                        key={s}
-                        className="rounded-full border border-[var(--w-line)] px-4 py-1.5 text-[0.92rem] font-bold text-[var(--w-soft)]"
-                      >
-                        {s}
-                      </span>
-                    ))}
-                    <span className="ml-auto">
-                      <OpenIt platform={p} />
-                    </span>
+              {layout === "stage" ? (
+                // centre stage: the heading over the platform, its points in a row below
+                <div className="shell py-[28svh]">
+                  <Reveal className="relative z-10 mx-auto max-w-[48rem] text-center">
+                    <Head p={p} />
+                    <Lead p={p} className="mx-auto max-w-[38rem]" />
+                  </Reveal>
+                  <div className="mx-auto mt-12 max-w-[66rem] md:mt-16">
+                    <Picture p={p} i={i} sizes="(max-width: 768px) 92vw, 66rem" />
                   </div>
-                </Reveal>
-                <div className="max-md:order-first md:col-span-8">
-                  {/* a soft reflection on the floor below the picture (where the browser can draw one) */}
-                  <div className="tilt-in [perspective:1600px] [-webkit-box-reflect:below_10px_linear-gradient(transparent_74%,rgb(255_255_255/0.16))]">
-                    {hasGen(p.image) ? (
-                      <Frame world={w}>
-                        <Media
-                          name={p.image}
-                          alt={`${p.name} on a laptop and a phone`}
-                          tone={p.tone}
-                          seed={520 + i * 7}
-                          sizes="(max-width: 768px) 92vw, 58vw"
-                          className="aspect-[16/10]"
-                        />
-                      </Frame>
-                    ) : (
-                      <Screen platform={p} seed={520 + i * 7} />
-                    )}
+                  <Reveal className="relative z-10 mx-auto mt-14 max-w-[66rem]">
+                    <Points p={p} row />
+                    <Stack p={p} />
+                  </Reveal>
+                </div>
+              ) : layout === "wide" ? (
+                // a front page: the picture across the page, the story beneath it
+                <div className="shell py-[28svh]">
+                  <Picture p={p} i={i} sizes="(max-width: 768px) 92vw, 84rem" />
+                  <div className="mt-12 grid gap-8 md:mt-16 md:grid-cols-12 md:gap-14">
+                    <Reveal className="relative z-10 md:col-span-5">
+                      <Head p={p} />
+                    </Reveal>
+                    <Reveal className="relative z-10 md:col-span-7 md:pt-8">
+                      <Lead p={p} className="!mt-0" />
+                      <Points p={p} />
+                      <Stack p={p} />
+                    </Reveal>
                   </div>
                 </div>
-              </div>
+              ) : layout === "overlap" ? (
+                // a large picture with the words on a card laid over its corner
+                <div className="shell grid items-center py-[30svh] md:grid-cols-12">
+                  <div className="max-md:order-first md:col-span-9 md:col-start-4 md:row-start-1">
+                    <Picture p={p} i={i} sizes="(max-width: 768px) 92vw, 66vw" />
+                  </div>
+                  <Reveal className="relative z-10 mt-10 md:col-span-5 md:col-start-1 md:row-start-1 md:mt-0 md:rounded-[1.6rem] md:border md:border-[var(--w-line)] md:bg-[color-mix(in_oklab,var(--w-card)_88%,transparent)] md:p-10 md:shadow-[0_30px_80px_rgb(0_0_0/0.45)] md:backdrop-blur-md">
+                    <Head p={p} />
+                    <Lead p={p} />
+                    <Points p={p} />
+                    <Stack p={p} />
+                  </Reveal>
+                </div>
+              ) : (
+                // side by side, alternating
+                <div className="shell grid items-center gap-10 py-[34svh] md:grid-cols-12 md:gap-14">
+                  <Reveal className={`relative z-10 md:col-span-4 ${i % 2 ? "md:order-2 md:pl-2" : "md:pr-2"}`}>
+                    <Head p={p} />
+                    <Lead p={p} />
+                    <Points p={p} />
+                    <Stack p={p} />
+                  </Reveal>
+                  <div className="max-md:order-first md:col-span-8">
+                    <Picture p={p} i={i} sizes="(max-width: 768px) 92vw, 58vw" />
+                  </div>
+                </div>
+              )}
             </World>
           );
         })}
