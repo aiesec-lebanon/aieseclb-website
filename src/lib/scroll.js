@@ -40,6 +40,18 @@ export function scrollToSection(id, tries = 40) {
   }
   if (lenis) lenis.scrollTo(el, { immediate: true, force: true });
   else el.scrollIntoView();
+  // and keyboard focus with it, so the next Tab goes on from the section, not from the link that
+  // was on the page before (a section is not normally focusable: it is made so, without a ring)
+  if (!el.matches("a[href], button, input, select, textarea, [tabindex]")) el.setAttribute("tabindex", "-1");
+  el.focus({ preventScroll: true });
+}
+
+// Focus an element once it exists: a page loaded in parts (Platforms picks its phone or desktop
+// half after the route has arrived) has no title yet when the route changes.
+export function focusWhenThere(id, tries = 40) {
+  const el = document.getElementById(id);
+  if (el) el.focus({ preventScroll: true });
+  else if (tries > 0) setTimeout(() => focusWhenThere(id, tries - 1), 60);
 }
 
 export const clamp01 = (n) => Math.min(1, Math.max(0, n));

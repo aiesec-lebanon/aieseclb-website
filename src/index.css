@@ -63,6 +63,12 @@
   }
   /* sun yellow cannot be seen on the light sections (about 1.4:1 on sky): there the ring is the
      deep AIESEC blue (5:1). The header says which it is over. */
+  /* a section that took focus because a link led to it: no ring round the whole of it */
+  section[tabindex="-1"]:focus,
+  div[tabindex="-1"]:focus,
+  article[tabindex="-1"]:focus {
+    outline: none;
+  }
   [data-scheme="light"] :focus-visible {
     outline-color: var(--color-aiesec-deep);
   }

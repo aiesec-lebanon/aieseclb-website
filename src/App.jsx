@@ -4,7 +4,7 @@ import Nav from "./components/Nav";
 import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
-import { scrollToSection, scrollToTop, startSmoothScroll, stopSmoothScroll } from "./lib/scroll";
+import { focusWhenThere, scrollToSection, scrollToTop, startSmoothScroll, stopSmoothScroll } from "./lib/scroll";
 import { NOT_FOUND_META, PAGE_META } from "./content/site";
 
 // the page's own title and description, in the tab and in what a share or a search shows
@@ -47,7 +47,7 @@ function Layout() {
       return;
     }
     scrollToTop();
-    document.getElementById("page-title")?.focus({ preventScroll: true });
+    focusWhenThere("page-title");
   }, [location.pathname, location.hash]);
 
   return (
