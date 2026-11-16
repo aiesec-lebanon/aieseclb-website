@@ -111,14 +111,14 @@ export default function Nav() {
               </span>
             </Link>
 
-            <nav aria-label="Main" className="hidden items-center gap-1 md:flex">
+            <nav aria-label="Main" className="hidden items-center gap-1 lg:flex">
               {NAV.map((item) => (
                 <NavLink
                   key={item.to}
                   to={item.to}
                   viewTransition
                   className={({ isActive }) =>
-                    `rounded-full px-4 py-2 text-[0.98rem] font-bold transition-colors duration-300 ${
+                    `rounded-full px-3 py-2 text-[0.98rem] font-bold xl:px-4 transition-colors duration-300 ${
                       light
                         ? isActive
                           ? "bg-ink/8 text-ink"
@@ -147,15 +147,15 @@ export default function Nav() {
               ))}
               <a
                 href={SIGNUP_URL}
-                className={`hidden items-center rounded-full bg-sun px-5 font-bold text-ink transition-[background-color,height] duration-300 hover:bg-white sm:inline-flex ${
-                  compact ? "h-10" : "h-12"
+                className={`inline-flex items-center rounded-full bg-sun px-4 text-[0.95rem] font-bold text-ink transition-[background-color,height] duration-300 hover:bg-white sm:px-5 sm:text-base ${
+                  compact ? "h-10" : "h-10 sm:h-12"
                 }`}
               >
                 Sign up
               </a>
               <button
                 type="button"
-                className={`grid h-11 w-11 place-items-center rounded-full transition-colors duration-500 md:hidden ${
+                className={`grid h-11 w-11 place-items-center rounded-full transition-colors duration-500 lg:hidden ${
                   light && !open ? "bg-ink/8 text-ink" : "bg-white/10 text-white"
                 }`}
                 aria-expanded={open}
@@ -183,7 +183,7 @@ export default function Nav() {
 
       <div
         id="mobile-menu"
-        className={`fixed inset-0 z-40 bg-night text-white transition-[clip-path,visibility] duration-700 ease-[var(--ease-in-out-quart)] md:hidden ${
+        className={`fixed inset-0 z-40 bg-night text-white transition-[clip-path,visibility] duration-700 ease-[var(--ease-in-out-quart)] lg:hidden ${
           open ? "visible [clip-path:circle(150vmax_at_100%_0)]" : "invisible [clip-path:circle(0_at_100%_0)]"
         }`}
         inert={!open}
