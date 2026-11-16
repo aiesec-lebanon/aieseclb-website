@@ -79,11 +79,25 @@
   }
 }
 
-/* The cedar cursor is part of the brand of this site. */
-html,
-body,
-* {
-  cursor: url("/cedar.png") 0 0, auto !important;
+/* The cedar cursor is part of the brand of this site. It is the page's cursor, but whatever can
+   be clicked keeps the pointing hand, fields keep the text cursor, and anything that sets its own
+   (the event ring's grab) keeps that: the cursor is how people tell what they can do. */
+html {
+  cursor: url("/cedar.png") 0 0, auto;
+}
+a[href],
+button:not(:disabled),
+[role="button"],
+[role="tab"],
+summary,
+label[for],
+select {
+  cursor: pointer;
+}
+input:not([type="checkbox"], [type="radio"], [type="button"], [type="submit"]),
+textarea,
+[contenteditable="true"] {
+  cursor: text;
 }
 
 /* ------------------------------------------------------------------
