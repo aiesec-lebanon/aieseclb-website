@@ -253,7 +253,7 @@ function Programs() {
             <Lines text={["Three ways to go."]} />
           </h2>
           <p className="fade text-lead max-w-[27rem] text-ink-soft" style={{ "--i": 2 }}>
-            Every AIESEC exchange is a real job to do, in a place you have never lived, with people you have not met yet.
+            Every AIESEC exchange is real work to do, in a place you have never lived, with people you have not met yet.
           </p>
         </Reveal>
 
