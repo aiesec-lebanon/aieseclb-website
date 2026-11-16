@@ -60,12 +60,13 @@ export default function Exchange() {
             <div
               role="tablist"
               aria-label="Which direction"
-              className="fade flex w-max rounded-full bg-white p-1.5 shadow-[0_6px_30px_rgb(11_27_51/0.08)]"
+              className="fade flex w-full rounded-full bg-white p-1.5 shadow-[0_6px_30px_rgb(11_27_51/0.08)] sm:w-max"
               style={{ "--i": 2 }}
             >
               {[
-                { id: "out", label: "I live in Lebanon" },
-                { id: "in", label: "I am coming to Lebanon" },
+                // on a phone the two halves share the column, with the short labels
+                { id: "out", label: "I live in Lebanon", short: "From Lebanon" },
+                { id: "in", label: "I am coming to Lebanon", short: "To Lebanon" },
               ].map((t) => (
                 <button
                   key={t.id}
@@ -75,11 +76,12 @@ export default function Exchange() {
                   aria-selected={side === t.id}
                   aria-controls="steps-panel"
                   onClick={() => setSide(t.id)}
-                  className={`rounded-full px-5 py-3 text-[0.98rem] font-bold transition-colors duration-300 md:px-7 ${
+                  className={`flex-1 rounded-full px-3 py-3 text-[0.98rem] font-bold transition-colors duration-300 sm:flex-none sm:px-5 md:px-7 ${
                     side === t.id ? "bg-aiesec-deep text-white" : "text-ink-soft hover:text-ink"
                   }`}
                 >
-                  {t.label}
+                  <span className="sm:hidden">{t.short}</span>
+                  <span className="max-sm:hidden">{t.label}</span>
                 </button>
               ))}
             </div>
