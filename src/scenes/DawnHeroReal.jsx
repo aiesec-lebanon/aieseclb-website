@@ -4,6 +4,8 @@ import { createQuad, prelink } from "../gl/quad";
 import HeroLoader from "./HeroLoader";
 import { Governor, TIERS, detectDevice, readStored, tierIndex, writeStored } from "../gl/quality";
 import { DAWN_REAL_FRAG } from "../gl/dawnReal.frag";
+import { DAWN_FRAG } from "../gl/dawn.frag";
+import { warmUp } from "../gl/warm";
 import { clamp01, mix, sectionProgress, smoothstep } from "../lib/scroll";
 import { SIGNUP_URL } from "../content/site";
 
@@ -179,7 +181,10 @@ export default function DawnHeroReal({ onTooSlow }) {
       quad.set("uExposure", 1 + 0.9 * smoothstep(0.12, 0.28, s) * (1 - smoothstep(0.46, 0.58, s)));
       // the title in the scene: in with the intro, gone just before the first words of the flight
       // appear (0.16), after the coast has risen in front of it
-      quad.set("uTitleA", titleOn ? intro * intro * (3 - 2 * intro) * (1 - smoothstep(0.1, 0.16, s)) : 0);
+      const titleA = titleOn ? intro * intro * (3 - 2 * intro) * (1 - smoothstep(0.1, 0.16, s)) : 0;
+      // drawn sharp at screen resolution over the scene where the runner can (quad.js), else in it
+      if (quad.crispTitle) quad.setTitle({ a: titleA });
+      quad.set("uTitleA", quad.crispTitle ? 0 : titleA);
 
       for (const b of BEATS) {
         const el = beatRefs.current[b.id];
@@ -248,6 +253,7 @@ export default function DawnHeroReal({ onTooSlow }) {
       timer: !params.has("notimer"),
       accumulate: !params.has("noaccum"),
       reproject: !params.has("noreproj"),
+      crispTitle: !params.has("softtitle"),
       shouldDraw: (now) => {
         const t = sectionProgress(section);
         if (Math.abs(t - lastTarget) > 1e-4) {
@@ -307,6 +313,12 @@ export default function DawnHeroReal({ onTooSlow }) {
       quad.setScale(scale);
       idleThrottle = !params.has("nothrottle") && (device.mobile || ti <= 2);
     };
+    // A device down to the lowest quality may be about to fall back. The drawn scene's shader is
+    // compiled now, in the background, in a canvas the drawn hero takes over (gl/warm.js): if the
+    // switch comes, it is ready in a moment instead of after several seconds of compiling.
+    const warmDrawn = () => {
+      if (!heroForced && !params.has("nowarm")) warmUp(DAWN_FRAG);
+    };
     const cssPixels = () => Math.max(1, canvas.clientWidth * canvas.clientHeight);
     governor = new Governor({
       tier,
@@ -318,14 +330,32 @@ export default function DawnHeroReal({ onTooSlow }) {
       mobile: device.mobile,
       apply: (q) => {
         applyQuality(q);
+        if (q.tier === 0 && forcedTier < 0) warmDrawn();
         if (forcedTier < 0 && startTier < 0 && !reduce) writeStored({ renderer: device.renderer, tier: q.tier, scale: q.scale });
       },
       giveUp: () => {
         if (heroForced) return;
         writeStored({ renderer: device.renderer, fallback: true });
-        if (tooSlowRef.current) tooSlowRef.current("slow");
+        // While the scene fills the screen, hand over a still of it: the page holds it there
+        // while the drawn hero starts, then fades across, so nothing goes blank or jumps.
+        let still = null;
+        const r = section.getBoundingClientRect();
+        if (revealed && r.top <= 1 && r.bottom >= window.innerHeight - 1) {
+          try {
+            still = quad.still();
+          } catch {
+            still = null;
+          }
+        }
+        if (tooSlowRef.current) tooSlowRef.current("slow", still);
       },
     });
+    // ?giveup=6000 acts out a device that cannot keep up, that long after the start (testing the switch)
+    if (params.has("giveup")) {
+      const g = governor;
+      warmDrawn();
+      timers.push(setTimeout(() => g.giveUpFn && g.giveUpFn(), parseFloat(params.get("giveup")) || 6000));
+    }
     // a single still frame for reduced motion can afford full resolution
     if (reduce) governor.scale = 1;
     // ?scale=0.5 pins the resolution too (testing)
@@ -406,7 +436,9 @@ export default function DawnHeroReal({ onTooSlow }) {
       };
       const p0 = hit(hr.left, hr.bottom);
       const p1 = hit(hr.right, hr.top);
-      quad.set("uTitleRect", Math.min(p0[0], p1[0]), Math.min(p0[1], p1[1]), Math.max(p0[0], p1[0]), Math.max(p0[1], p1[1]));
+      const rect = [Math.min(p0[0], p1[0]), Math.min(p0[1], p1[1]), Math.max(p0[0], p1[0]), Math.max(p0[1], p1[1])];
+      quad.set("uTitleRect", ...rect);
+      if (quad.crispTitle) quad.setTitle({ rect, z: TITLE_Z });
       quad.set("uTitleZ", TITLE_Z);
       titleOn = true;
       setTitleInScene(true);

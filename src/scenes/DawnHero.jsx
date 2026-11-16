@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { createQuad } from "../gl/quad";
+import { createQuad, prelink } from "../gl/quad";
+import { takeWarm } from "../gl/warm";
 import { DAWN_FRAG } from "../gl/dawn.frag";
 import { clamp01, mix, sectionProgress, smoothstep } from "../lib/scroll";
 import { SIGNUP_URL } from "../content/site";
@@ -118,7 +119,15 @@ const BEATS = [
   { id: "b3", in: [0.75, 0.8], out: [0.87, 0.92] },
 ];
 
-export default function DawnHero() {
+// arrive: taking over from the realistic hero mid-visit, so start already lit and as tall as it
+// was (nothing below moves). onReady: called once the first frames with the title are on screen.
+// children: drawn over the scene and under the words (the realistic hero's last picture, fading).
+export default function DawnHero({ arrive = false, onReady, children }) {
+  const arriveRef = useRef(arrive);
+  const readyRef = useRef(onReady);
+  useEffect(() => {
+    readyRef.current = onReady;
+  }, [onReady]);
   const sectionRef = useRef(null);
   const canvasRef = useRef(null);
   const beatRefs = useRef({});
@@ -131,7 +140,18 @@ export default function DawnHero() {
 
   useEffect(() => {
     const section = sectionRef.current;
-    const canvas = canvasRef.current;
+    // taking over from the realistic hero: its warm-up canvas, with the shader compiled or compiling
+    // in it, goes in place of this one (alongside it, so React keeps the node it made)
+    const warm = takeWarm();
+    const own = canvasRef.current;
+    let canvas = own;
+    if (warm) {
+      warm.canvas.className = own.className;
+      warm.canvas.setAttribute("aria-hidden", "true");
+      own.after(warm.canvas);
+      own.style.display = "none";
+      canvas = warm.canvas;
+    }
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     let s = 0;
@@ -139,8 +159,10 @@ export default function DawnHero() {
     let py = 0;
     let tx = 0;
     let ty = 0;
-    let intro = 0;
+    let intro = arriveRef.current ? 1 : 0;
     let titleReady = 0;
+    let drawn = 0;
+    let readySent = false;
     let titleAspect = 2.6;
     let dims = { cssWidth: 1, cssHeight: 1 };
     const params = new URLSearchParams(window.location.search);
@@ -219,78 +241,103 @@ export default function DawnHero() {
         el.style.visibility = o < 0.01 ? "hidden" : "visible";
       }
       if (cueRef.current) cueRef.current.style.opacity = (1 - smoothstep(0.01, 0.05, s)).toFixed(3);
+      // the first frames with the title in them are on screen: tell whoever is waiting
+      drawn += 1;
+      if (!readySent && drawn > 2 && titleReady >= 1 && readyRef.current) {
+        readySent = true;
+        readyRef.current();
+      }
     };
-
-    let quad = createQuad(canvas, DAWN_FRAG, {
-      maxDpr: 1.5,
-      onFrame: (time, dt) => apply(quad, time, dt),
-    });
-    if (!quad.ok) {
-      queueMicrotask(() => setMode("fallback"));
-      return undefined;
-    }
-    quad.set("uPageBg", 0.949, 0.973, 1.0);
-    quad.set("uTitleA", 0);
-    // 1x1 placeholders so the samplers are valid before the fonts arrive
-    const blank = document.createElement("canvas");
-    blank.width = blank.height = 2;
-    quad.texture("uTitle", blank, 0);
-    quad.texture("uCedar", blank, 1);
-    dims = quad.resize();
 
     let alive = true;
-    drawTitle().then((t) => {
+    let teardown = null;
+    // Compiled in the background, so the page keeps scrolling meanwhile. This shader reports
+    // itself done (the realistic one does not), so it is given the time it needs.
+    const boot = (programs) => {
       if (!alive) return;
-      quad.texture("uTitle", t.canvas, 0);
-      titleAspect = t.aspect;
-      titleReady = reduce ? 1 : 0.001;
-      if (reduce) quad.renderOnce();
-    });
-    loadCedar()
-      .then((c) => {
-        if (!alive) return;
-        quad.texture("uCedar", c, 1);
-        if (reduce) quad.renderOnce();
-      })
-      .catch(() => {});
-
-    const onResize = () => {
-      dims = quad.resize();
-      if (reduce) quad.renderOnce();
-    };
-    const ro = new ResizeObserver(onResize);
-    ro.observe(canvas);
-
-    const onPointer = (e) => {
-      tx = (e.clientX / window.innerWidth) * 2 - 1;
-      ty = (e.clientY / window.innerHeight) * 2 - 1;
-    };
-
-    let io;
-    if (reduce) {
-      quad.renderOnce();
-    } else {
-      window.addEventListener("pointermove", onPointer, { passive: true });
-      // only burn frames while the hero is on screen and the tab is visible
-      io = new IntersectionObserver(([entry]) => (entry.isIntersecting ? quad.start() : quad.stop()), {
-        rootMargin: "80px",
+      const quad = createQuad(canvas, DAWN_FRAG, {
+        programs,
+        maxDpr: 1.5,
+        onFrame: (time, dt) => apply(quad, time, dt),
       });
-      io.observe(section);
-    }
-    const onVis = () => {
-      if (reduce) return;
-      if (document.hidden) quad.stop();
-      else if (section.getBoundingClientRect().bottom > 0) quad.start();
+      if (!quad.ok) {
+        setMode("fallback");
+        return;
+      }
+      quad.set("uPageBg", 0.949, 0.973, 1.0);
+      quad.set("uTitleA", 0);
+      // 1x1 placeholders so the samplers are valid before the fonts arrive
+      const blank = document.createElement("canvas");
+      blank.width = blank.height = 2;
+      quad.texture("uTitle", blank, 0);
+      quad.texture("uCedar", blank, 1);
+      dims = quad.resize();
+
+      drawTitle().then((t) => {
+        if (!alive) return;
+        quad.texture("uTitle", t.canvas, 0);
+        titleAspect = t.aspect;
+        // taking over from the realistic hero: already risen, no second sunrise
+        titleReady = reduce || arriveRef.current ? 1 : 0.001;
+        if (reduce) quad.renderOnce();
+      });
+      loadCedar()
+        .then((c) => {
+          if (!alive) return;
+          quad.texture("uCedar", c, 1);
+          if (reduce) quad.renderOnce();
+        })
+        .catch(() => {});
+
+      const onResize = () => {
+        dims = quad.resize();
+        if (reduce) quad.renderOnce();
+      };
+      const ro = new ResizeObserver(onResize);
+      ro.observe(canvas);
+
+      const onPointer = (e) => {
+        tx = (e.clientX / window.innerWidth) * 2 - 1;
+        ty = (e.clientY / window.innerHeight) * 2 - 1;
+      };
+
+      let io;
+      if (reduce) {
+        quad.renderOnce();
+      } else {
+        window.addEventListener("pointermove", onPointer, { passive: true });
+        // only burn frames while the hero is on screen and the tab is visible
+        io = new IntersectionObserver(([entry]) => (entry.isIntersecting ? quad.start() : quad.stop()), {
+          rootMargin: "80px",
+        });
+        io.observe(section);
+      }
+      const onVis = () => {
+        if (reduce) return;
+        if (document.hidden) quad.stop();
+        else if (section.getBoundingClientRect().bottom > 0) quad.start();
+      };
+      document.addEventListener("visibilitychange", onVis);
+
+      teardown = () => {
+        ro.disconnect();
+        if (io) io.disconnect();
+        window.removeEventListener("pointermove", onPointer);
+        document.removeEventListener("visibilitychange", onVis);
+        quad.destroy();
+      };
     };
-    document.addEventListener("visibilitychange", onVis);
+    // (on its own it gets three seconds in the background, then finishes outright: the scene is up
+    // sooner; taking over, the held picture covers the wait, so it never blocks)
+    (warm ? warm.programs : prelink(canvas, DAWN_FRAG, { limit: arriveRef.current ? 15000 : 3000 })).then(boot, () => boot(null));
 
     return () => {
       alive = false;
-      ro.disconnect();
-      if (io) io.disconnect();
-      window.removeEventListener("pointermove", onPointer);
-      document.removeEventListener("visibilitychange", onVis);
-      quad.destroy();
+      if (teardown) teardown();
+      if (warm) {
+        warm.canvas.remove();
+        own.style.display = "";
+      }
     };
   }, []);
 
@@ -302,7 +349,7 @@ export default function DawnHero() {
   return (
     <section
       ref={sectionRef}
-      className={`relative bg-night text-white ${pinned ? "h-[520vh]" : ""}`}
+      className={`relative bg-night text-white ${pinned ? (arrive ? "h-[560vh]" : "h-[520vh]") : ""}`}
       aria-label="Hope rises in Lebanon"
     >
       <div className={`${pinned ? "sticky top-0" : "relative"} h-svh min-h-[34rem] overflow-clip`}>
@@ -314,6 +361,8 @@ export default function DawnHero() {
         ) : (
           <canvas ref={canvasRef} aria-hidden="true" className="absolute inset-0 h-full w-full" />
         )}
+        {/* over the scene and under the words: the picture handed over by the realistic hero */}
+        {children}
 
         <h1
           id="page-title"

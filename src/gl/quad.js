@@ -116,6 +116,45 @@ void main() {
   o = vec4(col, min(hw + w, 15.9) / 16.0);
 }`;
 
+// Puts the rebuilt image on the screen with words standing in it at full resolution. The scene is
+// drawn below screen resolution, which suits land and sky but leaves printed letters soft, so a
+// title on a plane across the scene is drawn here instead, per screen pixel, from its own sharp
+// texture. Whatever the scene found nearer than the plane (its distance per pixel, in the alpha
+// of the scene image) stands in front of the letters.
+const PRESENT_FRAG = `#version 300 es
+precision highp float;
+out vec4 o;
+uniform sampler2D uHist;
+uniform sampler2D uScene;
+uniform sampler2D uTitle;
+uniform vec2  uSceneRes;
+uniform vec2  uOutRes;
+uniform vec2  uJitter;
+uniform vec3  uCamPos, uCamFw, uCamRt, uCamUp;
+uniform float uFocal;
+uniform vec4  uTitleRect;   // x0, y0, x1, y1 on the plane z = uTitleZ
+uniform float uTitleZ;
+uniform float uTitleA;
+uniform vec3  uTitleCol;
+
+void main() {
+  vec3 col = texelFetch(uHist, ivec2(gl_FragCoord.xy), 0).rgb;
+  vec2 uv = gl_FragCoord.xy / uOutRes;
+  vec2 n = (gl_FragCoord.xy - 0.5 * uOutRes) / (0.5 * uOutRes.y);
+  vec3 rd = normalize(n.x * uCamRt + n.y * uCamUp + uFocal * uCamFw);
+  float tt = (uTitleZ - uCamPos.z) / max(rd.z, 1e-4);
+  vec2 tuv = ((uCamPos + rd * tt).xy - uTitleRect.xy) / (uTitleRect.zw - uTitleRect.xy);
+  // sampled outside any branch, so the texture's own filtering knows its footprint
+  float cov = texture(uTitle, tuv).r;
+  float inside = step(0.0, tuv.x) * step(tuv.x, 1.0) * step(0.0, tuv.y) * step(tuv.y, 1.0) * step(1e-4, rd.z);
+  // the scene's distance here, at the scene's own resolution
+  float a = texture(uScene, (uv * uSceneRes - uJitter) / uSceneRes).a;
+  float t = (exp2(a * 18.873) - 1.0) / 8.0;
+  float clear = smoothstep(tt * 0.94, tt * 1.06, t);
+  col = mix(col, uTitleCol, cov * inside * clear * uTitleA);
+  o = vec4(col, 1.0);
+}`;
+
 function compile(gl, type, src) {
   const sh = gl.createShader(type);
   gl.shaderSource(sh, src);
@@ -156,7 +195,9 @@ const GL_OPTIONS = {
 // waits for it a frame at a time. Some drivers only compile when the result is asked for (a
 // large shader on Chrome over Direct3D never reports done on its own), so after a short wait it
 // asks, which compiles it there and then. Hand the result to createQuad({ programs }).
-export function prelink(canvas, frag, { accumulate = false } = {}) {
+// limit: how long to let the browser compile in the background before waiting for it outright
+// (the realistic scene's shader never reports itself done on Chrome on Windows, so it gets little)
+export function prelink(canvas, frag, { accumulate = false, limit = 1200 } = {}) {
   const gl = canvas.getContext("webgl2", GL_OPTIONS);
   if (!gl) return Promise.reject(new Error("no webgl2"));
   const start = (src) => {
@@ -195,7 +236,7 @@ export function prelink(canvas, frag, { accumulate = false } = {}) {
   return new Promise((resolve, reject) => {
     const poll = () => {
       const done = jobs.every((j) => !j || gl.getProgramParameter(j.p, ext.COMPLETION_STATUS_KHR));
-      if (done || performance.now() - t0 > 1200) {
+      if (done || performance.now() - t0 > limit) {
         try {
           resolve(finish());
         } catch (err) {
@@ -238,6 +279,7 @@ export function createQuad(
     accumulate = false,
     reproject = true,
     programs = null, // from prelink(): already compiled
+    crispTitle = false, // draw a title plane at full resolution over the rebuilt image (setTitle)
   } = {},
 ) {
   const gl = canvas.getContext("webgl2", GL_OPTIONS);
@@ -245,6 +287,7 @@ export function createQuad(
 
   let program;
   let accProg = null;
+  let presProg = null;
   try {
     program = programs ? programs.main : link(gl, frag);
     if (accumulate) accProg = programs && programs.accum ? programs.accum : link(gl, ACCUM_FRAG);
@@ -252,6 +295,20 @@ export function createQuad(
     console.error(err);
     return { ok: false, error: err, gl };
   }
+  if (accumulate && crispTitle) {
+    try {
+      presProg = link(gl, PRESENT_FRAG);
+    } catch (err) {
+      console.error(err); // the scene draws the title itself then
+    }
+  }
+  const title = { rect: [0, 0, 1, 1], z: 20, a: 0, col: [0.95, 0.945, 0.965], unit: 0 };
+  const setTitle = (o) => Object.assign(title, o);
+  const presLoc = new Map();
+  const P = (n) => {
+    if (!presLoc.has(n)) presLoc.set(n, gl.getUniformLocation(presProg, n));
+    return presLoc.get(n);
+  };
 
   gl.useProgram(program);
   const buf = gl.createBuffer();
@@ -517,10 +574,34 @@ export function createQuad(
     gl.bindFramebuffer(gl.FRAMEBUFFER, histFbo[next]);
     gl.viewport(0, 0, outW, outH);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
-    // 3. onto the screen
-    gl.bindFramebuffer(gl.READ_FRAMEBUFFER, histFbo[next]);
-    gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
-    gl.blitFramebuffer(0, 0, outW, outH, 0, 0, outW, outH, gl.COLOR_BUFFER_BIT, gl.NEAREST);
+    // 3. onto the screen, with the title drawn sharp over it while there is one
+    if (presProg && title.a > 0) {
+      gl.useProgram(presProg);
+      gl.activeTexture(gl.TEXTURE7);
+      gl.bindTexture(gl.TEXTURE_2D, hist[next]);
+      gl.uniform1i(P("uHist"), 7);
+      gl.uniform1i(P("uScene"), 6);
+      gl.uniform1i(P("uTitle"), title.unit);
+      gl.uniform2f(P("uSceneRes"), width, height);
+      gl.uniform2f(P("uOutRes"), outW, outH);
+      gl.uniform2f(P("uJitter"), jx, jy);
+      gl.uniform3f(P("uCamPos"), camNow[0], camNow[1], camNow[2]);
+      gl.uniform3f(P("uCamFw"), camNow[3], camNow[4], camNow[5]);
+      gl.uniform3f(P("uCamRt"), camNow[6], camNow[7], camNow[8]);
+      gl.uniform3f(P("uCamUp"), camNow[9], camNow[10], camNow[11]);
+      gl.uniform1f(P("uFocal"), camNow[12]);
+      gl.uniform4f(P("uTitleRect"), title.rect[0], title.rect[1], title.rect[2], title.rect[3]);
+      gl.uniform1f(P("uTitleZ"), title.z);
+      gl.uniform1f(P("uTitleA"), title.a);
+      gl.uniform3f(P("uTitleCol"), title.col[0], title.col[1], title.col[2]);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+      gl.viewport(0, 0, outW, outH);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+    } else {
+      gl.bindFramebuffer(gl.READ_FRAMEBUFFER, histFbo[next]);
+      gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
+      gl.blitFramebuffer(0, 0, outW, outH, 0, 0, outW, outH, gl.COLOR_BUFFER_BIT, gl.NEAREST);
+    }
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     cur = next;
     reset = false;
@@ -616,6 +697,7 @@ export function createQuad(
     gl.deleteBuffer(buf);
     gl.deleteProgram(program);
     if (accProg) gl.deleteProgram(accProg);
+    if (presProg) gl.deleteProgram(presProg);
     // The context itself is left alone: the same canvas can be handed a new program straight
     // away (React runs effects twice in development), and a lost context cannot compile one.
   };
@@ -641,5 +723,16 @@ export function createQuad(
     getSize: () => ({ width, height, outW, outH }),
     hasTimer: Boolean(tq),
     reprojection,
+    crispTitle: Boolean(presProg),
+    setTitle,
+    // the picture as it stands, copied while the drawing is still there to copy
+    still: () => {
+      drawScene();
+      const c = document.createElement("canvas");
+      c.width = canvas.width;
+      c.height = canvas.height;
+      c.getContext("2d").drawImage(canvas, 0, 0);
+      return c;
+    },
   };
 }

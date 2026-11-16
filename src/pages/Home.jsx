@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import DawnHero from "../scenes/DawnHero";
 import DawnHeroReal from "../scenes/DawnHeroReal";
@@ -461,15 +461,101 @@ function initialHero() {
   return stored && stored.fallback ? { kind: "graphic", why: "remembered" } : { kind: "real", why: null };
 }
 
+// The switch, when the realistic scene proves too heavy mid-visit: its last picture stays on the
+// screen while the drawn one starts underneath, then fades away, and a short note says why.
+function Handover({ still, ready }) {
+  const pic = useRef(null);
+  const [fading, setFading] = useState(false);
+  const [gone, setGone] = useState(false);
+  const [drift, setDrift] = useState(false);
+  useEffect(() => {
+    // the held picture drifts a little closer, so it does not sit dead while the switch happens
+    const r = requestAnimationFrame(() => setDrift(true));
+    return () => cancelAnimationFrame(r);
+  }, []);
+  useLayoutEffect(() => {
+    const c = pic.current;
+    if (!c || !still) return;
+    c.width = still.width;
+    c.height = still.height;
+    c.getContext("2d").drawImage(still, 0, 0);
+  }, [still]);
+  useEffect(() => {
+    // fade once the drawn scene is on screen, or after a while whatever happens
+    const t = setTimeout(() => setFading(true), ready ? 60 : 12000);
+    return () => clearTimeout(t);
+  }, [ready]);
+  useEffect(() => {
+    if (!fading) return undefined;
+    const t = setTimeout(() => setGone(true), 1000);
+    return () => clearTimeout(t);
+  }, [fading]);
+  if (gone || !still) return null;
+  return (
+    <div
+      aria-hidden="true"
+      className={`pointer-events-none absolute inset-0 transition-opacity duration-[900ms] ease-out ${fading ? "opacity-0" : "opacity-100"}`}
+    >
+      <canvas
+        ref={pic}
+        className={`block h-full w-full transition-transform duration-[14s] ease-linear motion-reduce:transition-none ${drift ? "scale-[1.035]" : "scale-100"}`}
+      />
+    </div>
+  );
+}
+
+// Says what is happening while it happens, and what happened once it has; then goes.
+function LighterNote({ ready }) {
+  const [open, setOpen] = useState(true);
+  useEffect(() => {
+    if (!ready) return undefined;
+    const t = setTimeout(() => setOpen(false), 6000);
+    return () => clearTimeout(t);
+  }, [ready]);
+  return (
+    <div role="status" className="pointer-events-none fixed inset-x-0 top-24 z-40 flex justify-center px-4">
+      <p
+        className={`pointer-events-auto flex max-w-[30rem] items-center gap-3 rounded-full border border-white/15 bg-night/75 py-2.5 pl-4 pr-2 text-[0.92rem] text-white shadow-[0_12px_40px_rgb(0_0_0/0.35)] backdrop-blur-md transition-[opacity,translate] duration-500 ${
+          open ? "opacity-100" : "invisible -translate-y-2 opacity-0"
+        }`}
+      >
+        <span
+          aria-hidden="true"
+          className={`h-2.5 w-2.5 shrink-0 rounded-full bg-sun shadow-[0_0_12px_#ffc845] ${ready ? "" : "animate-pulse"}`}
+        />
+        <span>
+          {ready
+            ? "Switched to a lighter version of this scene, so it runs smoothly on this device."
+            : "Switching to a lighter version of this scene, so it runs smoothly on this device…"}
+        </span>
+        <button
+          type="button"
+          onClick={() => setOpen(false)}
+          className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-white/70 hover:bg-white/10 hover:text-white"
+          aria-label="Dismiss"
+        >
+          ×
+        </button>
+      </p>
+    </div>
+  );
+}
+
 function Hero() {
   const [state, setState] = useState(initialHero);
+  const [drawnReady, setDrawnReady] = useState(false);
+  const onReady = useCallback(() => setDrawnReady(true), []);
+  const handedOver = Boolean(state.still);
   return (
     <>
       {state.kind === "graphic" ? (
-        <DawnHero />
+        <DawnHero arrive={state.why === "slow"} onReady={onReady}>
+          {handedOver && <Handover still={state.still} ready={drawnReady} />}
+        </DawnHero>
       ) : (
-        <DawnHeroReal onTooSlow={(reason) => setState({ kind: "graphic", why: reason })} />
+        <DawnHeroReal onTooSlow={(reason, still) => setState({ kind: "graphic", why: reason, still })} />
       )}
+      {handedOver && <LighterNote ready={drawnReady} />}
       {/* while developing: switch between the two heroes in place (and the address keeps the choice) */}
       {import.meta.env.DEV && (
         <div role="group" aria-label="Hero, development only" className="fixed bottom-3 left-3 z-[80] flex items-center gap-1 rounded-full bg-black/80 p-1 text-[13px] font-bold text-white backdrop-blur">

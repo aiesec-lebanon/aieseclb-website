@@ -516,34 +516,47 @@ const float SH = 0.064;
 const float ROCK_K = 1.7;
 const vec3  ROCK_S2 = ROCK_B + (ROCK_S - ROCK_B) * ROCK_K;
 
-// Weathered limestone: broad, rounded lumps seen from two directions so no grain shows, and
-// only the faintest relief from the beds. The layering itself is drawn in the colour.
+// Weathered limestone: the sea and the rain have eaten into it unevenly, so the walls are pitted
+// and hollowed at two sizes, and the beds stand out as shelves where a harder layer resisted.
 float rockNoise(vec3 q) {
-  float a = n2(vec2(q.x * 70.0 + q.z * 31.0, q.y * 40.0));
-  float b = n2(vec2(q.z * 70.0 - q.x * 23.0, q.y * 40.0 + 7.0));
-  float fine = n2g(vec2(q.x * 260.0 + q.z * 190.0, q.y * 210.0));
-  float beds = sin(q.y * 1150.0 + 5.0 * a);
-  return (a + b - 1.0) * 0.0016 + (fine - 0.5) * 0.0005 + beds * 0.0;
+  float a = n2g(vec2(q.x * 62.0 + q.z * 37.0, q.y * 46.0));
+  float b = n2g(vec2(q.z * 62.0 - q.x * 29.0, q.y * 46.0 + 7.0));
+  float c = n2(vec2(q.x * 175.0 + q.z * 131.0, q.y * 150.0 + 2.0));
+  // a harder bed now and then, standing out only where it has not broken away
+  float bp = fract(q.y * 96.0 + 2.4 * a + 1.3 * b);
+  float shelf = smoothstep(0.0, 0.22, bp) * (1.0 - smoothstep(0.5, 1.0, bp)) * smoothstep(0.45, 0.8, c);
+  // pits and hollows where the salt has eaten the softer stone (tafoni)
+  float pit = smoothstep(0.58, 0.86, n2(vec2(q.x * 120.0 - q.z * 95.0, q.y * 110.0 + 11.0)));
+  return (a + b - 1.0) * 0.0040 + (c - 0.5) * 0.0018 - shelf * 0.0004 + pit * 0.0022;
 }
 
 float sdBigRock(vec3 q) {
   float yn = clamp(q.y / RH, 0.0, 1.0);
-  float notch = exp(-pow((q.y - 0.002) / 0.003, 2.0));     // where the waves cut in
-  float hw = 0.037 * (1.0 + 0.05 * (1.0 - yn) + 0.04 * sin(yn * 3.1416)) - 0.0024 * notch;
-  float hd = 0.027 * (1.0 + 0.05 * (1.0 - yn) + 0.03 * sin(yn * 3.1416)) - 0.0018 * notch;
-  // a domed crown, highest toward the open-sea side
-  // a domed, uneven crown, clearly lower over the arch, rounding over into the walls
-  float top = RH * (0.80 + 0.20 * smoothstep(-0.030, 0.016, q.x))
-            - RH * 0.12 * pow(clamp(length(vec2((q.x - 0.006) / 0.040, q.z / 0.030)), 0.0, 1.0), 2.4)
-            + RH * 0.05 * (n2(vec2(q.x * 55.0, q.z * 55.0 + 3.0)) - 0.5);
-  float r = 0.0105;
+  float notch = exp(-pow((q.y - 0.002) / 0.004, 2.0));     // where the waves cut in
+  // sheer walls, a little wider at the foot, cut back at the waterline
+  float hw = 0.036 * (1.0 + 0.04 * (1.0 - yn)) - 0.0030 * notch;
+  float hd = 0.027 * (1.0 + 0.04 * (1.0 - yn)) - 0.0022 * notch;
+  // a broken plateau, higher toward the open sea, lower over the arch
+  float top = RH * (0.82 + 0.18 * smoothstep(-0.030, 0.016, q.x))
+            + RH * 0.07 * (n2g(vec2(q.x * 48.0, q.z * 48.0 + 3.0)) - 0.5);
+  float r = 0.0030;
   float cy = (top - 0.03) * 0.5;
   vec3 e = vec3(abs(q.x) - hw + r, abs(q.y - cy) - (top + 0.03) * 0.5 + r, abs(q.z) - hd + r);
   float d = length(max(e, 0.0)) + min(max(e.x, max(e.y, e.z)), 0.0) - r;
-  // the arch: straight legs and a round head, a little ragged, running right through
-  float ax = q.x + 0.0130 + 0.0012 * (n2(vec2(q.y * 420.0, 3.0)) - 0.5);
-  float aw = 0.0128, ah = 0.0380, ar = aw * 1.05;
-  float f = length(vec2(ax / aw, max(q.y - (ah - ar), 0.0) / ar)) - 1.0;
+  // fallen corners: the block split along joints, so its plan is an uneven polygon, not a box
+  d = max(d, dot(q.xz, vec2(0.70, 0.71)) - 0.0375);
+  d = max(d, dot(q.xz, vec2(-0.74, 0.67)) - 0.0360);
+  d = max(d, dot(q.xz, vec2(0.66, -0.75)) - 0.0385);
+  d = max(d, dot(q.xz, vec2(-0.71, -0.70)) - 0.0350);
+  // and the sea-side shoulder broken back
+  d = max(d, dot(vec2(q.x - 0.036, q.y - top), vec2(0.62, 0.78)) + 0.0060);
+  // the arch: worn through by the sea, wide at the water and narrowing to a ragged head
+  float wob = n2(vec2(q.y * 260.0, q.z * 210.0 + 3.0)) - 0.5;
+  float ax = q.x + 0.0120 + 0.0020 * wob;
+  float aw = 0.0150 * (1.0 + 0.25 * (1.0 - smoothstep(0.0, 0.018, q.y)));
+  float ah = 0.0440 + 0.0030 * (n2(vec2(q.z * 160.0, 9.0)) - 0.5);
+  float ar = aw * 1.10;
+  float f = length(vec2(ax / aw, max(q.y - (ah - ar), 0.0) / ar)) - 1.0 + 0.16 * wob;
   return max(d, -f * aw * 0.9);
 }
 
@@ -579,8 +592,9 @@ float sdLedge(vec3 p) {
   shelf = max(shelf, q.y - 0.015 - 0.005 * n2(q.xz * 120.0));                // a broken, flattened top
   float boulder = sdEllipsoid(q - vec3(0.062, 0.0, -0.018), vec3(0.022, 0.019, 0.020));
   float d = min(shelf, boulder);
-  // pits, cracks and beds of the stone
-  d += (n2(vec2(q.x * 260.0 + q.z * 170.0, q.y * 300.0)) - 0.5) * 0.0020
+  // lumps, pits, cracks and beds of the stone
+  d += (n2g(vec2(q.x * 85.0 + q.z * 60.0, q.z * 85.0 - q.x * 40.0)) - 0.5) * 0.0060
+     + (n2(vec2(q.x * 260.0 + q.z * 170.0, q.y * 300.0)) - 0.5) * 0.0030
      + (n2g(vec2(q.z * 610.0 - q.x * 420.0, q.y * 700.0)) - 0.5) * 0.0007
      + sin(q.y * 2600.0 + 4.0 * n2(q.xz * 90.0)) * 0.00016;
   return d;
@@ -645,10 +659,12 @@ vec3 shadeRocks(vec3 p, vec3 rd, vec3 n, float sh) {
   vec3 nb = normalize(n + (tang * (bx - b0) + bit * (by - b0)) * 0.75 * (1.0 - smoothstep(0.4, 2.0, dist)));
 
   // the beds: faint and wavering, not ruled lines
-  float beds = 0.95 + 0.05 * sin(q.y * 1150.0 + 9.0 * n2(vec2(q.x * 90.0 + q.z * 70.0, q.y * 18.0)));
+  float beds = 0.90 + 0.10 * sin(q.y * 740.0 + 9.0 * n2(vec2(q.x * 90.0 + q.z * 70.0, q.y * 18.0)));
   // broad patches of paler and darker stone, in two sizes
   float tone = n2(ROT * vec2(q.x * 120.0 + q.z * 80.0, q.y * 95.0)) * 0.6 + n2(ROT * vec2(q.z * 310.0 - q.x * 190.0, q.y * 240.0 + 5.0)) * 0.4;
-  vec3 albedo = mix(vec3(0.50, 0.45, 0.37), vec3(0.72, 0.66, 0.55), tone) * beds;
+  vec3 albedo = mix(vec3(0.48, 0.40, 0.30), vec3(0.74, 0.64, 0.50), tone) * beds;
+  // the ledge is low enough for the spray: darker, browner stone
+  albedo *= 1.0 - 0.45 * (1.0 - smoothstep(0.10, 0.16, length(p.xz - LEDGE.xz)));
   // rain streaks: a few, broad and soft, wandering, only down the steep faces
   float sx = q.x * 160.0 + q.z * 120.0 + 3.0 * n2(vec2(q.y * 40.0, q.x * 50.0));
   float streak = smoothstep(0.62, 0.9, n2(vec2(sx, q.y * 9.0))) * (1.0 - smoothstep(0.3, 0.7, nb.y));
@@ -662,7 +678,7 @@ vec3 shadeRocks(vec3 p, vec3 rd, vec3 n, float sh) {
   float rough = mix(0.82, 0.22, wet);
 
   // darker in hollows and inside the arch
-  float ao = clamp(0.4 + 0.6 * sdStone(p + n * 0.003) / 0.003, 0.0, 1.0);
+  float ao = clamp(0.2 + 0.8 * sdStone(p + n * 0.004) / 0.004, 0.0, 1.0);
   float ndl = max(dot(nb, uSunDir), 0.0);
   vec3 sun = sunColor() * 5.5 * smoothstep(-0.02, 0.05, uSunDir.y);
   vec3 skyAmb = mix(vec3(0.020, 0.036, 0.085), vec3(0.230, 0.340, 0.560), uDay);
@@ -681,13 +697,13 @@ vec3 shadeRocks(vec3 p, vec3 rd, vec3 n, float sh) {
   float F = 0.04 + 0.96 * pow(1.0 - max(dot(hv, v), 0.0), 5.0);
   float spec = D * G * F / max(4.0 * ndl * nv, 1e-3);
 
-  vec3 col = albedo * (sun * ndl * sh + (skyAmb * (0.45 + 0.55 * nb.y) + seaBounce) * ao) + sun * spec * ndl * sh;
+  vec3 col = albedo * (sun * ndl * sh + (skyAmb * (0.38 + 0.42 * nb.y) + seaBounce) * ao) + sun * spec * ndl * sh;
   // the wet stone mirrors a little of the sky
   col += skyAmb * 0.7 * wet * (0.04 + 0.96 * pow(1.0 - nv, 5.0)) * ao;
   // light wrapping round only the edges that face the sun behind
   vec2 sunH = normalize(uSunDir.xz);
   float rim = pow(1.0 - max(dot(n, -rd), 0.0), 3.0) * max(dot(normalize(n.xz + 1e-4), sunH), 0.0);
-  col += sunColor() * rim * 0.55 * ao * smoothstep(-0.02, 0.04, uSunDir.y);
+  col += sunColor() * rim * 0.40 * ao * smoothstep(-0.02, 0.04, uSunDir.y);
   return col;
 }
 
