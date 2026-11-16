@@ -53,7 +53,7 @@ function Screen({ platform, seed, className = "", priority = false }) {
 function OpenIt({ platform }) {
   const cls =
     "group inline-flex h-12 items-center gap-3 rounded-full bg-[var(--w-ink)] px-6 font-bold text-[var(--w-bg)] transition-[gap] duration-300 hover:gap-4";
-  const label = platform.cta || "Open it";
+  const label = platform.cta || `Open ${platform.name}`;
   if (!platform.url) return null;
   return platform.url.startsWith("http") ? (
     <a href={platform.url} target="_blank" rel="noreferrer" className={cls}>

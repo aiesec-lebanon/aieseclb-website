@@ -18,12 +18,12 @@ function OpenIt({ p }) {
   const cls = "inline-flex h-12 items-center gap-3 rounded-full bg-[var(--w-ink)] px-6 font-bold text-[var(--w-bg)]";
   return p.url.startsWith("http") ? (
     <a href={p.url} target="_blank" rel="noreferrer" className={cls}>
-      {p.cta || "Open it"}
+      {p.cta || `Open ${p.name}`}
       <Arrow />
     </a>
   ) : (
     <Link to={p.url} viewTransition className={cls}>
-      {p.cta || "Open it"}
+      {p.cta || `Open ${p.name}`}
       <Arrow />
     </Link>
   );
