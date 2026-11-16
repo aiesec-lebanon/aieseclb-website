@@ -14,10 +14,8 @@
 // text on a glass card over the corner of a large picture). `card: true` puts a split world's text on
 // a glass card too, where the world's scenery runs behind the words.
 //
-// `url` is where the "Open <name>" button goes (the live, deployed address); `cta` changes its
-// label. `repo` is the address of its code, for the "Source code" link (they are open source).
-// Either can be null: nothing is shown for it then. Tools that need an AIESEC account have
-// no url. Check the lines before going live: they describe what each README says the platform
+// `url` is where the "Open <name>" button goes (the live, deployed address; null shows no
+// button); `cta` changes its label. Check the lines before going live: they describe what each README says the platform
 // does, not usage numbers or launch dates, which are not known here.
 
 export const PLATFORMS = [
@@ -25,7 +23,6 @@ export const PLATFORMS = [
     id: "signup",
     name: "Sign-up portal",
     url: "https://signup.aieseclb.org",
-    repo: null,
     kind: "For applicants",
     line: "The front door for going abroad. Pick Global Volunteer, Teacher or Talent, fill in one form, and you are in AIESEC's global system.",
     points: [
@@ -48,7 +45,6 @@ export const PLATFORMS = [
     card: true,
     name: "Membership portal",
     url: "https://members.aieseclb.org",
-    repo: null,
     kind: "For new members",
     line: "Where a student becomes a member: what the experience is, and one application to join.",
     points: ["What membership is, in pictures", "One application form", "For students in Lebanon"],
@@ -67,7 +63,6 @@ export const PLATFORMS = [
     layout: "overlap",
     name: "Partner Portal",
     url: "https://partners.aieseclb.org",
-    repo: null,
     kind: "For partners",
     line: "Where organisations partner with AIESEC in Lebanon: a page of their own, and every promised deliverable tracked with proof they accept.",
     points: [
@@ -90,8 +85,7 @@ export const PLATFORMS = [
     id: "xp",
     card: true,
     name: "AIESEC XP",
-    url: null,
-    repo: null,
+    url: "https://xp.aieseclb.org",
     kind: "For members",
     line: "Exchange work as a game. Every step an exchange takes in AIESEC's global system becomes points, ranks and rewards.",
     points: [
@@ -113,8 +107,7 @@ export const PLATFORMS = [
   {
     id: "forms",
     name: "AIESEC Forms",
-    url: null,
-    repo: "https://github.com/aiesec-lebanon/form-builder",
+    url: "https://forms.aieseclb.org",
     kind: "For every team",
     line: "A form builder that keeps the form, not the answers. Responses go straight to your own Google Sheet, webhook or database.",
     points: [
@@ -136,8 +129,7 @@ export const PLATFORMS = [
     id: "pulse",
     card: true,
     name: "AIESEC Pulse",
-    url: null,
-    repo: null,
+    url: "https://pulse.aieseclb.org",
     kind: "For the network",
     line: "News for the AIESEC network. Entity leaders publish, members read and react, and every update reaches the people it is meant for.",
     points: [
@@ -159,8 +151,7 @@ export const PLATFORMS = [
     id: "learn-git",
     card: true,
     name: "Learn Git",
-    url: null,
-    repo: null,
+    url: "https://learn-git-rose-sigma.vercel.app",
     kind: "For members, and anyone",
     line: "Git and GitHub, taught at a whiteboard. Every command you run in the browser is drawn as it happens and explained in plain words.",
     points: [
@@ -183,7 +174,6 @@ export const PLATFORMS = [
     id: "website",
     name: "aieseclb.org",
     url: null, // this site: a button to open the page you are on would go nowhere
-    repo: null,
     kind: "For everyone",
     line: "The site you are on: built in-house, drawn in code, and maintained by the team.",
     points: ["React and Vite", "A real-time dawn rendered in a single shader", "Fast on a phone, usable without motion"],

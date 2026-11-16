@@ -29,16 +29,6 @@ function OpenIt({ p }) {
   );
 }
 
-// the code: these platforms are open source (repo in content/platforms.js)
-function Code({ p }) {
-  if (!p.repo) return null;
-  return (
-    <a href={p.repo} target="_blank" rel="noreferrer" className="font-bold text-[var(--w-ink)] underline decoration-[var(--w-accent)] decoration-2 underline-offset-[6px]">
-      Source code
-    </a>
-  );
-}
-
 function Card({ p, i, total }) {
   const w = p.world;
   const h = headingProps(w);
@@ -84,10 +74,7 @@ function Card({ p, i, total }) {
           ))}
         </ul>
         <div className="mt-auto pt-6">
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
-            <OpenIt p={p} />
-            <Code p={p} />
-          </div>
+          <OpenIt p={p} />
         </div>
       </div>
     </article>
