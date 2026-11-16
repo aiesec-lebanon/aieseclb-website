@@ -2,9 +2,8 @@ import PageHero from "../components/PageHero";
 import HorizontalStory from "../components/HorizontalStory";
 import Reveal, { Lines } from "../components/Reveal";
 import Media from "../components/Scenic";
-import Arrow from "../components/Arrow";
 import { ONE_DAY, PLACES, QUICK_FACTS, WELCOME } from "../content/lebanon";
-import { INCOMING_SITE, INCOMING_URL } from "../content/site";
+import ComeToLebanon from "../components/ComeToLebanon";
 
 export default function Lebanon() {
   return (
@@ -17,7 +16,10 @@ export default function Lebanon() {
         tone="day"
         seed={4}
         arabic="لبنان"
-      />
+      >
+        {/* the way in, from the start: people coming to Lebanon should not have to read to the end */}
+        <ComeToLebanon />
+      </PageHero>
 
       <section data-scheme="light" className="dawn-light bg-sky py-24 md:py-36">
         <div className="shell grid gap-12 md:grid-cols-[1.2fr_1fr] md:items-end">
@@ -101,6 +103,14 @@ export default function Lebanon() {
         <div className="w-[10vw] shrink-0" />
       </HorizontalStory>
 
+      {/* after the day: the moment someone wants it for longer than a day */}
+      <section aria-label="Come to Lebanon" className="bg-night pb-20 pt-4 text-white md:pb-28 md:pt-10">
+        <div className="shell flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+          <p className="display text-[clamp(2rem,4vw,3.4rem)]">Live it for longer than a day.</p>
+          <ComeToLebanon />
+        </div>
+      </section>
+
       <section data-shot="places" data-scheme="light" className="dawn-light bg-sky py-24 md:py-40">
         <div className="shell">
           <Reveal className="grid gap-8 md:grid-cols-2 md:items-end">
@@ -174,17 +184,7 @@ export default function Lebanon() {
                 </div>
               ))}
             </dl>
-            <a
-              href={INCOMING_URL}
-              target="_blank"
-              rel="noreferrer"
-              className="fade group inline-flex h-14 items-center gap-3 rounded-full bg-sun px-8 text-lg font-bold text-ink transition-colors duration-300 hover:bg-white"
-              style={{ "--i": 2 }}
-            >
-              Come to Lebanon
-              <span className="text-[0.78em] font-semibold opacity-70">on {INCOMING_SITE}</span>
-              <Arrow className="transition-transform duration-500 group-hover:translate-x-1.5" />
-            </a>
+            <ComeToLebanon className="fade bg-sun text-ink hover:bg-white" style={{ "--i": 2 }} />
           </Reveal>
         </div>
       </section>
