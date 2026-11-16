@@ -289,10 +289,10 @@ function Whiteboard({ world }) {
 // content, never through it).
 function Studio({ world }) {
   const chips = [
-    { t: "+25 XP", c: "#037ef3", w: "#e2eeff", x: "8%", y: "13%", d: 0 },
-    { t: "+10 XP", c: "#08704a", w: "#d9f4e6", x: "62%", y: "9%", d: 1.6 },
-    { t: "Rank up", c: "#8a6108", w: "#fff1d0", x: "30%", y: "86%", d: 3.1 },
-    { t: "+50 XP", c: "#b23a22", w: "#ffe4dd", x: "80%", y: "83%", d: 4.4 },
+    { t: "+15 XP", c: "#037ef3", w: "#e2eeff", x: "8%", y: "13%", d: 0 },
+    { t: "+40 XP", c: "#08704a", w: "#d9f4e6", x: "62%", y: "9%", d: 1.6 },
+    { t: "New reward", c: "#8a6108", w: "#fff1d0", x: "30%", y: "86%", d: 3.1 },
+    { t: "+5 XP", c: "#b23a22", w: "#ffe4dd", x: "80%", y: "83%", d: 4.4 },
   ];
   return (
     <>

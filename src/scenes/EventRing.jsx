@@ -147,7 +147,7 @@ void main() {
   float face = clamp(dot(normalize(vN), normalize(uCam - vP)), 0.0, 1.0);
   vec3 col = texture2D(uMap, vUv).rgb;
   // panels dim as they turn away, the one in front is fully lit
-  col *= mix(0.10, 1.0, pow(face, 2.2)) * mix(0.62, 1.0, uLit);
+  col *= mix(0.28, 1.0, pow(face, 1.6)) * mix(0.7, 1.0, uLit);
   // the reflection on the floor: the poster's lower part, fading away from the floor line
   if (uMirror > 0.5) {
     a *= 0.30 * smoothstep(0.42, 0.0, vUv.y);
