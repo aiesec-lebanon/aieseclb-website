@@ -5,7 +5,7 @@ import Route from "../components/Route";
 import Arrow from "../components/Arrow";
 import SampleNote from "../components/SampleNote";
 import { STORIES, storyPhoto as photo } from "../content/stories";
-import { PROGRAMS, SIGNUP_URL } from "../content/site";
+import { INCOMING_SITE, INCOMING_URL, PROGRAMS, SIGNUP_URL } from "../content/site";
 import "@fontsource/instrument-serif/400-italic.css";
 
 const programme = (id) => PROGRAMS.find((p) => p.id === id);
@@ -135,8 +135,9 @@ export default function Stories() {
                 Go abroad
                 <Arrow className="transition-transform duration-500 group-hover:translate-x-1.5" />
               </a>
-              <a href="https://aiesec.org" target="_blank" rel="noreferrer" className="inline-flex h-14 items-center rounded-full border border-white/40 px-8 text-lg font-bold text-white transition-colors duration-300 hover:border-white hover:bg-white/10">
+              <a href={INCOMING_URL} target="_blank" rel="noreferrer" className="inline-flex h-14 items-center gap-2 rounded-full border border-white/40 px-8 text-lg font-bold text-white transition-colors duration-300 hover:border-white hover:bg-white/10">
                 Come to Lebanon
+                <span className="text-[0.78em] font-semibold opacity-70">on {INCOMING_SITE}</span>
               </a>
             </div>
           </Reveal>

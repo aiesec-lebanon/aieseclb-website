@@ -4,6 +4,7 @@ import Reveal, { Lines } from "../components/Reveal";
 import Media from "../components/Scenic";
 import Arrow from "../components/Arrow";
 import { ONE_DAY, PLACES, QUICK_FACTS, WELCOME } from "../content/lebanon";
+import { INCOMING_SITE, INCOMING_URL } from "../content/site";
 
 export default function Lebanon() {
   return (
@@ -172,13 +173,14 @@ export default function Lebanon() {
               ))}
             </dl>
             <a
-              href="https://aiesec.org"
+              href={INCOMING_URL}
               target="_blank"
               rel="noreferrer"
               className="fade group inline-flex h-14 items-center gap-3 rounded-full bg-sun px-8 text-lg font-bold text-ink transition-colors duration-300 hover:bg-white"
               style={{ "--i": 2 }}
             >
               Come to Lebanon
+                <span className="text-[0.78em] font-semibold opacity-70">on {INCOMING_SITE}</span>
               <Arrow className="transition-transform duration-500 group-hover:translate-x-1.5" />
             </a>
           </Reveal>

@@ -2,6 +2,11 @@
 
 export const SIGNUP_URL = "https://signup.aieseclb.org";
 
+// Where someone abroad finds an exchange in Lebanon: AIESEC's global site.
+// TODO: the aiesec.org opportunity search already filtered to Lebanon (until then, aiesec.org).
+export const INCOMING_URL = "https://aiesec.org";
+export const INCOMING_SITE = "aiesec.org";
+
 export const NAV = [
   { to: "/lebanon", label: "Lebanon" },
   { to: "/exchange", label: "Exchange" },

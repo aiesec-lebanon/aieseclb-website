@@ -3,7 +3,7 @@ import PageHero from "../components/PageHero";
 import Reveal, { Lines } from "../components/Reveal";
 import Media from "../components/Scenic";
 import Arrow from "../components/Arrow";
-import { MEMBER_URL, PROGRAMS, SIGNUP_URL } from "../content/site";
+import { INCOMING_SITE, INCOMING_URL, MEMBER_URL, PROGRAMS, SIGNUP_URL } from "../content/site";
 
 const BG = { ember: "bg-ember", teal: "bg-teal", tangerine: "bg-tangerine" };
 const TEXT = { ember: "text-ember", teal: "text-teal", tangerine: "text-tangerine" };
@@ -128,12 +128,13 @@ export default function Exchange() {
               </a>
             ) : (
               <a
-                href="https://aiesec.org"
+                href={INCOMING_URL}
                 target="_blank"
                 rel="noreferrer"
                 className="group inline-flex h-14 items-center gap-3 rounded-full bg-aiesec-deep px-8 text-lg font-bold text-white transition-colors duration-300 hover:bg-night"
               >
                 Come to Lebanon
+                <span className="text-[0.78em] font-semibold opacity-70">on {INCOMING_SITE}</span>
                 <Arrow className="transition-transform duration-500 group-hover:translate-x-1.5" />
               </a>
             )}
