@@ -156,7 +156,8 @@ export default function Lebanon() {
             {WELCOME.map((w, i) => (
               <Reveal key={w.title} delay={i * 110}>
                 <div className="fade h-full rounded-[1.8rem] bg-white/10 p-8 md:p-10">
-                  <h3 className="display text-[clamp(1.9rem,2.8vw,2.8rem)] text-sun">{w.title}</h3>
+                  <span aria-hidden="true" className="mb-5 block h-1.5 w-12 rounded-full bg-sun" />
+                  <h3 className="display text-[clamp(1.9rem,2.8vw,2.8rem)] text-white">{w.title}</h3>
                   <p className="mt-4 text-white/90">{w.body}</p>
                 </div>
               </Reveal>

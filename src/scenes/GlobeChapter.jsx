@@ -485,7 +485,9 @@ export default function GlobeChapter() {
               style={pinned ? { opacity: 0, visibility: "hidden" } : undefined}
               className="max-w-[30rem] will-change-transform"
             >
-              <h3 className="display text-title text-sun">From Lebanon, out.</h3>
+              {/* white on the AIESEC blue (sun yellow there is 2.6:1); the sun stays as a bar */}
+              <span aria-hidden="true" className="mb-5 block h-1.5 w-14 rounded-full bg-sun" />
+              <h3 className="display text-title text-white">From Lebanon, out.</h3>
               <p className="text-lead mt-5 text-white/92">
                 Every year young people leave Beirut for a few weeks or a few months of work that matters, somewhere
                 they have never been.
