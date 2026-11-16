@@ -22,7 +22,8 @@ const logoUrl = (file) => logos[`../assets/images/${file}`];
 // The manifesto, with its key phrases marked (true): they fill to AIESEC blue over a band of sun,
 // like a highlighter, as the rest fills to ink.
 const MANIFEST = [
-  ["AIESEC is a global organisation run entirely", false],
+  ["AIESEC", true],
+  ["is a global organisation run entirely", false],
   ["by youth, for youth.", true],
   ["Since 1948", true],
   ["it has helped young people find", false],
