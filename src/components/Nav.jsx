@@ -73,7 +73,7 @@ export default function Nav() {
         Skip to content
       </a>
 
-      <header className="fixed inset-x-0 top-0 z-50">
+      <header data-scheme={light ? "light" : "dark"} className="fixed inset-x-0 top-0 z-50">
         <div className="shell pt-4 md:pt-5">
           <div
             className={`flex items-center justify-between rounded-full border pl-5 pr-2 transition-[background-color,border-color,height,box-shadow] duration-500 md:pl-7 ${

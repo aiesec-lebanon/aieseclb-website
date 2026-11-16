@@ -180,7 +180,7 @@ export default function Lebanon() {
               style={{ "--i": 2 }}
             >
               Come to Lebanon
-                <span className="text-[0.78em] font-semibold opacity-70">on {INCOMING_SITE}</span>
+              <span className="text-[0.78em] font-semibold opacity-70">on {INCOMING_SITE}</span>
               <Arrow className="transition-transform duration-500 group-hover:translate-x-1.5" />
             </a>
           </Reveal>

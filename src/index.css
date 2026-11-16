@@ -61,6 +61,11 @@
     outline-offset: 3px;
     border-radius: 6px;
   }
+  /* sun yellow cannot be seen on the light sections (about 1.4:1 on sky): there the ring is the
+     deep AIESEC blue (5:1). The header says which it is over. */
+  [data-scheme="light"] :focus-visible {
+    outline-color: var(--color-aiesec-deep);
+  }
   h1,
   h2,
   h3 {
