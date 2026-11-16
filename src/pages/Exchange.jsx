@@ -120,7 +120,7 @@ export default function Exchange() {
           <div className="mt-10">
             {side === "out" ? (
               <a
-                href={SIGNUP_URL} target="_blank" rel="noreferrer"
+                href={SIGNUP_URL}
                 className="group inline-flex h-14 items-center gap-3 rounded-full bg-aiesec-deep px-8 text-lg font-bold text-white transition-colors duration-300 hover:bg-night"
               >
                 Go abroad
@@ -209,7 +209,7 @@ export default function Exchange() {
               to plan, to lead people older than you, and to be responsible for someone else's best summer.
             </p>
             <a
-              href={MEMBER_URL} target="_blank" rel="noreferrer"
+              href={MEMBER_URL}
               className="fade group mt-8 inline-flex h-14 items-center gap-3 rounded-full bg-sun px-8 text-lg font-bold text-ink transition-colors duration-300 hover:bg-white"
               style={{ "--i": 2 }}
             >

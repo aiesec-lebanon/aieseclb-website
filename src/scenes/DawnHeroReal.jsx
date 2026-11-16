@@ -591,7 +591,7 @@ export default function DawnHeroReal({ onTooSlow }) {
             </p>
             <div className="flex flex-wrap gap-3">
               <a
-                href={SIGNUP_URL} target="_blank" rel="noreferrer"
+                href={SIGNUP_URL}
                 className="inline-flex h-13 items-center rounded-full bg-sun px-7 text-[1.02rem] font-bold text-ink transition-[background-color,scale] duration-300 hover:bg-white active:scale-[0.98]"
               >
                 Go abroad

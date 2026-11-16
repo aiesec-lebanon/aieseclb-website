@@ -293,7 +293,7 @@ function Programs() {
             </h3>
           </div>
           <a
-            href={MEMBER_URL} target="_blank" rel="noreferrer"
+            href={MEMBER_URL}
             className="fade inline-flex h-14 shrink-0 items-center rounded-full bg-sun px-8 text-lg font-bold text-ink transition-colors duration-300 hover:bg-white"
             style={{ "--i": 2 }}
           >
