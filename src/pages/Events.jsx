@@ -7,7 +7,7 @@ import Backdrop from "../components/Backdrop";
 import SampleNote from "../components/SampleNote";
 import { hasGen } from "../lib/media";
 import { EVENTS } from "../content/events";
-import { SIGNUP_URL } from "../content/site";
+import { MEMBER_URL } from "../content/site";
 import "@fontsource/instrument-serif/400.css";
 import "@fontsource/shantell-sans/700.css";
 import "@fontsource/shantell-sans/800.css";
@@ -117,7 +117,7 @@ export default function Events() {
             </h2>
           </Reveal>
           <a
-            href={SIGNUP_URL}
+            href={MEMBER_URL}
             className="inline-flex h-14 w-max items-center rounded-full bg-sun px-8 text-lg font-bold text-ink transition-colors duration-300 hover:bg-white"
           >
             Join AIESEC in Lebanon

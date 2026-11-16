@@ -18,6 +18,8 @@ export const PORTALS = [
   { id: "member-portal", label: "Membership", long: "Membership portal", url: "https://members.aieseclb.org" },
 ];
 export const portalHref = (p) => p.url || `/platforms#${p.id}`;
+// where someone in Lebanon applies to become a member (the membership portal)
+export const MEMBER_URL = portalHref(PORTALS.find((p) => p.id === "member-portal"));
 
 export const SOCIALS = [
   { label: "Instagram", href: "https://www.instagram.com/aiesecinleb" },

@@ -7,7 +7,7 @@ import World, { Frame, SceneryToggle } from "../components/World";
 import { headingProps } from "../components/worldType";
 import { hasGen } from "../lib/media";
 import { PLATFORMS } from "../content/platforms";
-import { SIGNUP_URL } from "../content/site";
+import { MEMBER_URL } from "../content/site";
 import "@fontsource/instrument-serif/400.css";
 import "@fontsource/shantell-sans/700.css";
 import "@fontsource/shantell-sans/800.css";
@@ -240,7 +240,7 @@ export default function PlatformsDesktop() {
               work. If that is you, there is room.
             </p>
             <a
-              href={SIGNUP_URL}
+              href={MEMBER_URL}
               className="fade mt-8 inline-flex h-14 items-center rounded-full bg-sun px-8 text-lg font-bold text-ink transition-colors duration-300 hover:bg-white"
               style={{ "--i": 2 }}
             >

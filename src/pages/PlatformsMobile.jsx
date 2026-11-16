@@ -6,7 +6,7 @@ import Arrow from "../components/Arrow";
 import { headingProps } from "../components/worldType";
 import { hasGen } from "../lib/media";
 import { PLATFORMS } from "../content/platforms";
-import { SIGNUP_URL } from "../content/site";
+import { MEMBER_URL } from "../content/site";
 
 // The platforms page on a phone: its own page rather than the desktop one squeezed. The worlds
 // become cards you swipe through, each in its platform's colours and type, with an index of all of
@@ -185,7 +185,7 @@ export default function PlatformsMobile() {
             The people behind these are students: developers, designers and people who just like making things work. If that
             is you, there is room.
           </p>
-          <a href={SIGNUP_URL} className="mt-8 inline-flex h-14 items-center rounded-full bg-sun px-8 text-lg font-bold text-ink">
+          <a href={MEMBER_URL} className="mt-8 inline-flex h-14 items-center rounded-full bg-sun px-8 text-lg font-bold text-ink">
             Join the team
           </a>
         </div>

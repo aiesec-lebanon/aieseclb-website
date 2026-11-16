@@ -12,7 +12,7 @@ import Media from "../components/Scenic";
 import LogoMarquee from "../components/LogoMarquee";
 import Arrow from "../components/Arrow";
 import LazyMount from "../components/LazyMount";
-import { PROGRAMS, SIGNUP_URL, STATS, UNIVERSITIES } from "../content/site";
+import { MEMBER_URL, PROGRAMS, STATS, UNIVERSITIES } from "../content/site";
 
 const GlobeChapter = lazy(() => import("../scenes/GlobeChapter"));
 
@@ -291,7 +291,7 @@ function Programs() {
             </h3>
           </div>
           <a
-            href={SIGNUP_URL}
+            href={MEMBER_URL}
             className="fade inline-flex h-14 shrink-0 items-center rounded-full bg-sun px-8 text-lg font-bold text-ink transition-colors duration-300 hover:bg-white"
             style={{ "--i": 2 }}
           >

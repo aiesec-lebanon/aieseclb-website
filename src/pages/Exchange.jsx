@@ -3,7 +3,7 @@ import PageHero from "../components/PageHero";
 import Reveal, { Lines } from "../components/Reveal";
 import Media from "../components/Scenic";
 import Arrow from "../components/Arrow";
-import { PROGRAMS, SIGNUP_URL } from "../content/site";
+import { MEMBER_URL, PROGRAMS, SIGNUP_URL } from "../content/site";
 
 const BG = { ember: "bg-ember", teal: "bg-teal", tangerine: "bg-tangerine" };
 const TEXT = { ember: "text-ember", teal: "text-teal", tangerine: "text-tangerine" };
@@ -208,7 +208,7 @@ export default function Exchange() {
               to plan, to lead people older than you, and to be responsible for someone else's best summer.
             </p>
             <a
-              href={SIGNUP_URL}
+              href={MEMBER_URL}
               className="fade group mt-8 inline-flex h-14 items-center gap-3 rounded-full bg-sun px-8 text-lg font-bold text-ink transition-colors duration-300 hover:bg-white"
               style={{ "--i": 2 }}
             >
