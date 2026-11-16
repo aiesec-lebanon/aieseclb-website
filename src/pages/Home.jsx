@@ -1,6 +1,5 @@
 import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import DawnHero from "../scenes/DawnHero";
 import DawnHeroReal from "../scenes/DawnHeroReal";
 import { clearFallback, readStored } from "../gl/quality";
 import Reveal, { Lines } from "../components/Reveal";
@@ -15,6 +14,9 @@ import LazyMount from "../components/LazyMount";
 import { MEMBER_URL, PROGRAMS, STATS, UNIVERSITIES } from "../content/site";
 
 const GlobeChapter = lazy(() => import("../scenes/GlobeChapter"));
+// the drawn hero is the fallback: loaded only when it is needed (the realistic one fetches it
+// ahead when a device starts to struggle, so a switch does not wait for it)
+const DawnHero = lazy(() => import("../scenes/DawnHero"));
 
 const logos = import.meta.glob("../assets/images/*_logo.png", { eager: true, query: "?url", import: "default" });
 const logoUrl = (file) => logos[`../assets/images/${file}`];
@@ -549,9 +551,11 @@ function Hero() {
   return (
     <>
       {state.kind === "graphic" ? (
-        <DawnHero arrive={state.why === "slow"} onReady={onReady}>
-          {handedOver && <Handover still={state.still} ready={drawnReady} />}
-        </DawnHero>
+        <Suspense fallback={<section aria-hidden="true" className={`relative bg-night ${state.why === "slow" ? "h-[560vh]" : "h-[520vh]"}`} />}>
+          <DawnHero arrive={state.why === "slow"} onReady={onReady}>
+            {handedOver && <Handover still={state.still} ready={drawnReady} />}
+          </DawnHero>
+        </Suspense>
       ) : (
         <DawnHeroReal onTooSlow={(reason, still) => setState({ kind: "graphic", why: reason, still })} />
       )}

@@ -317,7 +317,10 @@ export default function DawnHeroReal({ onTooSlow }) {
     // compiled now, in the background, in a canvas the drawn hero takes over (gl/warm.js): if the
     // switch comes, it is ready in a moment instead of after several seconds of compiling.
     const warmDrawn = () => {
-      if (!heroForced && !params.has("nowarm")) warmUp(DAWN_FRAG);
+      if (heroForced || params.has("nowarm")) return;
+      // the drawn hero's code too, so a switch does not wait for it to download
+      import("./DawnHero").catch(() => {});
+      warmUp(DAWN_FRAG);
     };
     const cssPixels = () => Math.max(1, canvas.clientWidth * canvas.clientHeight);
     governor = new Governor({
