@@ -21,7 +21,7 @@ const MANIFEST =
 function Manifest() {
   const words = MANIFEST.split(" ");
   return (
-    <section data-shot="manifest" className="bg-sky pb-24 pt-28 md:pb-36 md:pt-44">
+    <section data-shot="manifest" data-scheme="light" className="dawn-light bg-sky pb-24 pt-28 md:pb-36 md:pt-44">
       <div className="shell">
         <p className="display ink-fill max-w-[30ch] text-[clamp(2.2rem,6.1vw,6.2rem)] leading-[0.98] text-ink">
           {words.map((w, i) => (
@@ -72,7 +72,7 @@ function Doors() {
     },
   ];
   return (
-    <section data-shot="doors" className="bg-sky pb-28 pt-24 md:pb-40 md:pt-36">
+    <section data-shot="doors" data-scheme="light" className="dawn-light bg-sky pb-28 pt-24 md:pb-40 md:pt-36">
       <div className="shell">
         <Reveal>
           <h2 className="display text-mega text-ink">
@@ -136,7 +136,7 @@ function LebanonTeaser() {
             </h2>
           </Reveal>
           {/* the country itself: small enough to see whole */}
-          <LebanonMap className="mx-auto h-[26rem] w-full max-w-[24rem] md:col-span-5 md:h-[34rem] md:max-w-none" />
+          <LebanonMap className="mx-auto h-[26rem] w-full max-w-[24rem] md:col-span-5 md:h-[40rem] md:max-w-none" />
         </div>
 
         <div className="mt-16 grid gap-5 md:mt-24 md:grid-cols-12 md:gap-6">
@@ -211,7 +211,7 @@ const PROGRAM_BG = { ember: "bg-ember", teal: "bg-teal", tangerine: "bg-tangerin
 
 function Programs() {
   return (
-    <section data-shot="programs" className="bg-sky py-28 md:py-44">
+    <section data-shot="programs" data-scheme="light" className="dawn-light bg-sky py-28 md:py-44">
       <div className="shell">
         <Reveal className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <h2 className="display text-mega text-ink">
@@ -337,7 +337,7 @@ function Showcases() {
 
 function Company() {
   return (
-    <section data-shot="company" className="bg-white py-28 md:py-40">
+    <section data-shot="company" data-scheme="light" className="bg-white py-28 md:py-40">
       <div className="shell">
         <Reveal className="grid gap-10 md:grid-cols-2 md:items-end">
           <h2 className="display text-mega text-ink">

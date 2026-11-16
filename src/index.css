@@ -92,6 +92,13 @@ body,
     radial-gradient(55% 65% at 0% 100%, rgb(255 200 69 / 0.13), transparent 70%);
 }
 
+/* a light section with morning in it: warm light up high, a breath of blue below */
+@utility dawn-light {
+  background-image:
+    radial-gradient(50% 60% at 94% 0%, rgb(255 214 140 / 0.32), transparent 70%),
+    radial-gradient(45% 55% at 0% 100%, rgb(3 126 243 / 0.07), transparent 70%);
+}
+
 @utility display {
   font-family: var(--font-display);
   font-stretch: 76%;
