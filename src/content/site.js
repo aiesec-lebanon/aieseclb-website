@@ -88,3 +88,34 @@ export const PROGRAMS = [
     image: "program-teacher",
   },
 ];
+
+// Each page's title and description: the browser tab, history, bookmarks and search results.
+export const PAGE_META = {
+  "/": {
+    title: "AIESEC in Lebanon | Hope rises here",
+    description:
+      "AIESEC in Lebanon develops youth leadership through exchange. Volunteer, intern or teach abroad, or come and live Lebanon for yourself.",
+  },
+  "/lebanon": {
+    title: "Lebanon | AIESEC in Lebanon",
+    description: "Lebanon for people coming on exchange: a day in it, the places to see, and how to come.",
+  },
+  "/exchange": {
+    title: "Exchange | AIESEC in Lebanon",
+    description:
+      "Go abroad from Lebanon or come to Lebanon on exchange: Global Volunteer, Global Talent and Global Teacher.",
+  },
+  "/events": {
+    title: "Events | AIESEC in Lebanon",
+    description: "What AIESEC in Lebanon is running, and what it has run.",
+  },
+  "/platforms": {
+    title: "Platforms | AIESEC in Lebanon",
+    description: "The software AIESEC in Lebanon's volunteers have built, from the sign-up and membership portals to the partner portal.",
+  },
+  "/stories": {
+    title: "Stories | AIESEC in Lebanon",
+    description: "People who went out from Lebanon on exchange, and people who came to it, in their own words.",
+  },
+};
+export const NOT_FOUND_META = { title: "Page not found | AIESEC in Lebanon", description: PAGE_META["/"].description };

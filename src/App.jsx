@@ -5,6 +5,21 @@ import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
 import { scrollToSection, scrollToTop, startSmoothScroll, stopSmoothScroll } from "./lib/scroll";
+import { NOT_FOUND_META, PAGE_META } from "./content/site";
+
+// the page's own title and description, in the tab and in what a share or a search shows
+function setMeta(pathname) {
+  const m = PAGE_META[pathname.replace(/\/+$/, "") || "/"] || NOT_FOUND_META;
+  document.title = m.title;
+  for (const [sel, value] of [
+    ['meta[name="description"]', m.description],
+    ['meta[property="og:title"]', m.title],
+    ['meta[property="og:description"]', m.description],
+  ]) {
+    const el = document.head.querySelector(sel);
+    if (el) el.setAttribute("content", value);
+  }
+}
 
 function Layout() {
   const location = useLocation();
@@ -17,6 +32,10 @@ function Layout() {
 
   // New page: start at the top, and hand focus to its heading so keyboard and screen reader
   // users land in the new content instead of on a link that no longer exists.
+  useLayoutEffect(() => {
+    setMeta(location.pathname);
+  }, [location.pathname]);
+
   useLayoutEffect(() => {
     if (first.current) {
       first.current = false;
