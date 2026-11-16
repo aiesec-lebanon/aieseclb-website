@@ -161,12 +161,13 @@ export default function Exchange() {
         <section
           key={p.id}
           id={p.id}
-          className={`relative isolate flex min-h-[100svh] scroll-mt-0 flex-col overflow-clip text-ink md:block md:h-[100svh] md:min-h-[38rem] ${BG[p.color]}`}
+          className={`relative isolate flex min-h-[112svh] scroll-mt-0 flex-col overflow-clip text-ink md:block md:h-[112svh] md:min-h-[42rem] ${BG[p.color]}`}
           style={{ "--prog": `var(--color-${p.color})` }}
         >
           {/* the photograph bleeds into the programme's colour: above the words on a phone, to one
               side on a large screen. Light falls on the colour from the words' side. Each programme
-              is a screen: on a phone the photograph takes what the words leave of it; on a large
+              is a little more than a screen, so scrolling through, only it is in view: on a phone the
+              photograph takes what the words leave of it; on a large
               screen the section is the screen's height and the words are sized to fit it. */}
           <div aria-hidden="true" className={`pointer-events-none absolute inset-0 -z-20 bg-[radial-gradient(60%_70%_at_${i % 2 ? "92%" : "8%"}_12%,rgb(255_255_255/0.28),transparent_70%)]`} />
           <div className={`relative -z-10 min-h-[30svh] w-full flex-1 md:absolute md:inset-y-0 md:h-auto md:w-[58%] ${i % 2 ? "md:left-0" : "md:right-0"}`}>
