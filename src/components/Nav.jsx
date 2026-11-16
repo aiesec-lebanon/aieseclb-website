@@ -56,10 +56,14 @@ export default function Nav() {
 
   useEffect(() => {
     document.documentElement.style.overflow = open ? "hidden" : "";
+    // while the menu covers the page, what is behind it cannot be reached by Tab or a screen reader
+    const behind = [document.getElementById("main"), document.querySelector("body > div footer, footer")].filter(Boolean);
+    behind.forEach((el) => (el.inert = open));
     const onKey = (e) => e.key === "Escape" && setOpen(false);
     window.addEventListener("keydown", onKey);
     return () => {
       document.documentElement.style.overflow = "";
+      behind.forEach((el) => (el.inert = false));
       window.removeEventListener("keydown", onKey);
     };
   }, [open]);
@@ -183,12 +187,12 @@ export default function Nav() {
 
       <div
         id="mobile-menu"
-        className={`fixed inset-0 z-40 bg-night text-white transition-[clip-path,visibility] duration-700 ease-[var(--ease-in-out-quart)] lg:hidden ${
+        className={`fixed inset-0 z-40 bg-night text-white transition-[clip-path,visibility] duration-700 ease-[var(--ease-in-out-quart)] overflow-y-auto overscroll-contain lg:hidden ${
           open ? "visible [clip-path:circle(150vmax_at_100%_0)]" : "invisible [clip-path:circle(0_at_100%_0)]"
         }`}
         inert={!open}
       >
-        <nav aria-label="Mobile" className="shell flex h-full flex-col justify-center gap-2 pt-16">
+        <nav aria-label="Mobile" className="shell flex min-h-full flex-col justify-center gap-2 pb-10 pt-24">
           {[{ to: "/", label: "Home" }, ...NAV].map((item) => (
             <NavLink
               key={item.to}
