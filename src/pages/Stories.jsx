@@ -105,6 +105,10 @@ export default function Stories() {
               </button>
             ))}
           </div>
+          {/* the list changes below the fold: say so, here and to screen readers */}
+          <p role="status" className="mt-4 text-[0.95rem] font-bold text-white/70">
+            Showing {list.length} {list.length === 1 ? "story" : "stories"}
+          </p>
         </div>
       </section>
 
