@@ -185,7 +185,7 @@ export default function PlatformsMobile() {
             The people behind these are students: developers, designers and people who just like making things work. If that
             is you, there is room.
           </p>
-          <a href={MEMBER_URL} className="mt-8 inline-flex h-14 items-center rounded-full bg-sun px-8 text-lg font-bold text-ink">
+          <a href={MEMBER_URL} target="_blank" rel="noreferrer" className="mt-8 inline-flex h-14 items-center rounded-full bg-sun px-8 text-lg font-bold text-ink">
             Become a member
           </a>
         </div>

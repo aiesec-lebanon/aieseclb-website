@@ -117,7 +117,7 @@ export default function Events() {
             </h2>
           </Reveal>
           <a
-            href={MEMBER_URL}
+            href={MEMBER_URL} target="_blank" rel="noreferrer"
             className="inline-flex h-14 w-max items-center rounded-full bg-sun px-8 text-lg font-bold text-ink transition-colors duration-300 hover:bg-white"
           >
             Become a member

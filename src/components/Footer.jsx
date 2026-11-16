@@ -20,7 +20,7 @@ export default function Footer() {
           </h2>
           <div className="fade mt-10 flex flex-wrap gap-3" style={{ "--i": 3 }}>
             <a
-              href={SIGNUP_URL}
+              href={SIGNUP_URL} target="_blank" rel="noreferrer"
               className="inline-flex h-14 items-center rounded-full bg-sun px-8 text-lg font-bold text-ink transition-colors duration-300 hover:bg-white"
             >
               Go abroad
@@ -55,7 +55,7 @@ export default function Footer() {
               {PORTALS.map((p, i) => (
                 <li key={p.id} className={i === 0 ? "pt-5" : undefined}>
                   {p.url ? (
-                    <a href={p.url} className="font-bold text-sun transition-colors hover:text-white">
+                    <a href={p.url} target="_blank" rel="noreferrer" className="font-bold text-sun transition-colors hover:text-white">
                       {p.long}
                     </a>
                   ) : (
@@ -97,7 +97,7 @@ export default function Footer() {
         <p className="mt-14 flex flex-wrap gap-x-5 gap-y-2 text-sm text-white/62">
           <span>© {new Date().getFullYear()} AIESEC in Lebanon. All rights reserved.</span>
           {CONTACT.privacy && (
-            <a href={CONTACT.privacy} className="underline underline-offset-4 hover:text-white">
+            <a href={CONTACT.privacy} target="_blank" rel="noreferrer" className="underline underline-offset-4 hover:text-white">
               Privacy
             </a>
           )}

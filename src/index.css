@@ -85,6 +85,20 @@
   }
 }
 
+/* Every link that leaves this site opens in a new tab (the site is a heavy one to come back to),
+   and says so: a small arrow to see, words to hear. A link that already ends in an arrow icon
+   only gets the words. */
+a[target="_blank"]:not(:has(svg))::after {
+  content: "\2197";
+  content: "\2197" / " (opens in a new tab)";
+  margin-left: 0.3em;
+  font-size: 0.8em;
+  opacity: 0.7;
+}
+a[target="_blank"]:has(svg)::after {
+  content: "" / " (opens in a new tab)";
+}
+
 /* The cedar cursor is part of the brand of this site. It is the page's cursor, but whatever can
    be clicked keeps the pointing hand, fields keep the text cursor, and anything that sets its own
    (the event ring's grab) keeps that: the cursor is how people tell what they can do. */

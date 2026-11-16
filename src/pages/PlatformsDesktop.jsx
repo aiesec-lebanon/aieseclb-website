@@ -240,7 +240,7 @@ export default function PlatformsDesktop() {
               work. If that is you, there is room.
             </p>
             <a
-              href={MEMBER_URL}
+              href={MEMBER_URL} target="_blank" rel="noreferrer"
               className="fade mt-8 inline-flex h-14 items-center rounded-full bg-sun px-8 text-lg font-bold text-ink transition-colors duration-300 hover:bg-white"
               style={{ "--i": 2 }}
             >

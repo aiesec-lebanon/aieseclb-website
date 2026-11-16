@@ -9,7 +9,7 @@ import { glideToTop } from "../lib/scroll";
 function PortalLink({ portal, className, onClick, children }) {
   const label = children || portal.label;
   return portal.url ? (
-    <a href={portal.url} className={className} onClick={onClick}>
+    <a href={portal.url} target="_blank" rel="noreferrer" className={className} onClick={onClick}>
       {label}
     </a>
   ) : (
@@ -150,7 +150,7 @@ export default function Nav() {
                 />
               ))}
               <a
-                href={SIGNUP_URL}
+                href={SIGNUP_URL} target="_blank" rel="noreferrer"
                 className={`inline-flex items-center rounded-full bg-sun px-4 text-[0.95rem] font-bold text-ink transition-[background-color,height] duration-300 hover:bg-white sm:px-5 sm:text-base ${
                   compact ? "h-10" : "h-10 sm:h-12"
                 }`}
@@ -220,7 +220,7 @@ export default function Nav() {
             ))}
           </div>
           <a
-            href={SIGNUP_URL}
+            href={SIGNUP_URL} target="_blank" rel="noreferrer"
             className="mt-6 inline-flex h-14 w-max items-center rounded-full bg-sun px-8 text-lg font-bold text-ink"
           >
             Sign up
