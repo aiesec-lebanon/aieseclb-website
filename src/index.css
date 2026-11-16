@@ -469,6 +469,21 @@ html.lenis body {
     display: none;
   }
 }
+/* Routes (components/Route.jsx): the journey traces itself as the story arrives */
+.route {
+  view-timeline: --route block;
+}
+@media (prefers-reduced-motion: no-preference) {
+  @supports ((animation-timeline: view()) and (animation-range: entry)) {
+    .route .route-draw {
+      stroke-dasharray: 1;
+      animation: draw-on linear both;
+      animation-timeline: --route;
+      animation-range: entry 20% cover 50%;
+    }
+  }
+}
+
 /* Lebanon map (components/LebanonMap.jsx): the outline draws, then the places come up */
 .lebanon-map svg {
   view-timeline: --lbmap block;

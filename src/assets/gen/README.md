@@ -86,3 +86,17 @@ repository; ask whoever has it to rerun them when a platform changes.
 
 To add a platform: an entry in `src/content/platforms.js` (its `image` and `screen` names), a job in
 `cook/tools/compose.mjs`, and the two steps above.
+
+## Stories page
+
+Real photographs from the people featured, sent by them, are best: a portrait taken on their
+exchange and two photographs of it. Name them after the story's `id` in `src/content/stories.js`:
+
+`story-<id>-portrait.jpg` (4:5, the person), `story-<id>-1.jpg` and `story-<id>-2.jpg` (4:3, their exchange).
+
+Until then the page uses stand-ins from the photographs above. If you need generated stand-ins
+that look closer to the real thing, a prompt to adapt per story (change the first sentence):
+
+> A young volunteer in her twenties laughing with children in a bright community centre in São Paulo, painted mural behind them, candid, natural light, portrait orientation. Photorealistic editorial travel photography, shot on a full-frame camera, natural light, rich but true colour, deep clean blues and warm golden highlights, slight film grain, no text, no logos, no watermark, no border.
+
+Generated people must never be presented as real participants: they are layout stand-ins only.

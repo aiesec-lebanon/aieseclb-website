@@ -7,6 +7,7 @@ export const NAV = [
   { to: "/exchange", label: "Exchange" },
   { to: "/events", label: "Events" },
   { to: "/platforms", label: "Platforms" },
+  { to: "/stories", label: "Stories" },
 ];
 
 // The two platforms that stakeholders come to this website for, besides sign-up: partners and

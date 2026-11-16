@@ -5,6 +5,8 @@ import DawnHeroReal from "../scenes/DawnHeroReal";
 import { clearFallback, readStored } from "../gl/quality";
 import Reveal, { Lines } from "../components/Reveal";
 import LebanonMap from "../components/LebanonMap";
+import { STORIES, storyPhoto } from "../content/stories";
+import "@fontsource/instrument-serif/400-italic.css";
 import Counter from "../components/Counter";
 import Media from "../components/Scenic";
 import LogoMarquee from "../components/LogoMarquee";
@@ -278,6 +280,60 @@ function Programs() {
   );
 }
 
+// Back with stories: three people who have been, and a way to the rest
+function StoriesTeaser() {
+  return (
+    <section data-shot="stories" className="bg-night py-28 text-white md:py-40">
+      <div className="shell">
+        <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
+          <Reveal>
+            <h2 className="display text-mega max-w-[12ch]">
+              <Lines text={["Back with", "stories."]} />
+            </h2>
+          </Reveal>
+          <Reveal>
+            <Link
+              to="/stories"
+              viewTransition
+              className="fade group inline-flex h-14 items-center gap-3 rounded-full border border-white/35 px-7 text-lg font-bold transition-colors duration-300 hover:border-white hover:bg-white/10"
+            >
+              Every story
+              <Arrow className="transition-transform duration-500 group-hover:translate-x-1.5" />
+            </Link>
+          </Reveal>
+        </div>
+        <div className="mt-14 grid gap-10 md:mt-20 md:grid-cols-3 md:gap-6">
+          {STORIES.slice(0, 3).map((s, i) => (
+            <Reveal key={s.id}>
+              <Link to={`/stories#${s.id}`} className="fade group block" style={{ "--i": i }}>
+                <div className="overflow-clip rounded-[1.6rem]">
+                  <Media
+                    name={storyPhoto(s, 0)}
+                    alt={`${s.name}, on exchange in ${s.to.city}`}
+                    tone="dawn"
+                    seed={790 + i}
+                    sizes="(max-width: 768px) 92vw, 30vw"
+                    className="aspect-[4/5]"
+                    imgClassName="transition-transform duration-[1.2s] ease-[var(--ease-out-expo)] group-hover:scale-[1.04]"
+                  />
+                </div>
+                <p className="mt-5 font-bold text-sun">
+                  {s.from.city} <span aria-hidden="true">→</span>
+                  <span className="sr-only">to</span> {s.to.city}
+                </p>
+                <p className="mt-2 text-[1.45rem] italic leading-snug" style={{ fontFamily: '"Instrument Serif", Georgia, serif' }}>
+                  “{s.quote}”
+                </p>
+                <p className="mt-3 font-bold text-white/70">{s.name}</p>
+              </Link>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function Showcases() {
   const items = [
     {
@@ -419,6 +475,7 @@ export default function Home() {
       <Doors />
       <LebanonTeaser />
       <Programs />
+      <StoriesTeaser />
       <Showcases />
       <Company />
     </>
