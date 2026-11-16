@@ -170,7 +170,8 @@ export default function DawnHero() {
       const sunKx = mix(sunX, passX, smoothstep(0.0, 0.3, s));
       const sunKy = passY + 0.014 + 0.1 * smoothstep(0.0, 0.8, s);
       // at the very end the disc opens until it is the whole sky: the same move as the page transition
-      const sunR = 0.074 + 1.7 * Math.pow(smoothstep(0.84, 1.0, s), 2.2);
+      // a big, warm sun: the first thing the page is about (user: "a bigger warmer sun")
+      const sunR = 0.112 + 1.7 * Math.pow(smoothstep(0.84, 1.0, s), 2.2);
 
       quad.set("uDay", day);
       quad.set("uCam", camX, camY, cam.z);

@@ -101,8 +101,9 @@ vec3 skyGlow(vec2 k, float stretch) {
   vec3 tint = sunTint();
   float g = glowAmount();
   float band = exp(-e * 9.0) * exp(-pow((k.x - uSun.x) / 0.46, 2.0));
-  col += tint * band * 0.55 * g;
-  col += tint * (exp(-dist * 3.4) * 0.30 + exp(-dist * 11.0) * 0.55) * g;
+  col += tint * band * 0.72 * g;
+  // the glow round the sun: wide and warm
+  col += tint * (exp(-dist * 2.5) * 0.42 + exp(-dist * 8.5) * 0.72) * g;
   return col;
 }
 
@@ -150,7 +151,7 @@ vec3 skyColor(vec2 k, float stretch) {
   float px = 1.5 / (uRes.y * 0.5 * F);
   float disc = smoothstep(uSunR + px, uSunR - px, dist);
   float grad = clamp((k.y - uSun.y) / uSunR * 0.5 + 0.5, 0.0, 1.0);
-  vec3 sunCol = mix(mix(vec3(1.00, 0.74, 0.30), vec3(1.00, 0.93, 0.66), grad),
+  vec3 sunCol = mix(mix(vec3(1.00, 0.62, 0.22), vec3(1.00, 0.86, 0.52), grad),
                     vec3(1.00, 0.98, 0.90), smoothstep(0.35, 1.0, uDay));
   // as the disc opens at the end of the flight it becomes the colour of the page it turns into
   sunCol = mix(sunCol, uPageBg, smoothstep(0.10, 0.70, uSunR));

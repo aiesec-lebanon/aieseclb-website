@@ -10,6 +10,9 @@
 // Until a picture exists the page draws a generic interface instead (`mock`: form, site,
 // dashboard, board, calendar).
 //
+// `layout` gives a world its own composition: split (the default, side by side), stage (centred),
+// wide (picture across the page, text beneath), overlap (text on a card over the picture).
+//
 // `url` is where "Open it" goes; `cta` changes its label. Tools that need an AIESEC account have
 // no url. Check the lines before going live: they describe what each README says the platform
 // does, not usage numbers or launch dates, which are not known here.
@@ -55,6 +58,7 @@ export const PLATFORMS = [
   },
   {
     id: "partner-portal",
+    layout: "overlap",
     name: "Partner Portal",
     url: null,
     kind: "For partners",
@@ -77,6 +81,7 @@ export const PLATFORMS = [
   },
   {
     id: "xp",
+    layout: "stage",
     name: "AIESEC XP",
     url: null,
     kind: "For members",
@@ -121,6 +126,7 @@ export const PLATFORMS = [
   },
   {
     id: "pulse",
+    layout: "wide",
     name: "AIESEC Pulse",
     url: null,
     kind: "For the network",

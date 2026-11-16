@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import logoWhite from "../assets/images/aiesec_logo_white.png";
 import logoBlue from "../assets/images/aiesec_logo_wide_blue.png";
@@ -7,21 +7,16 @@ import { NAV, SIGNUP_URL } from "../content/site";
 export default function Nav() {
   const [open, setOpen] = useState(false);
   const [compact, setCompact] = useState(false);
-  const [hidden, setHidden] = useState(false);
   // the nav takes the scheme of whatever is under it: sections say data-scheme="light" when
   // they are light (the worlds on the events and platforms pages, for one)
   const [light, setLight] = useState(false);
-  const lastY = useRef(0);
   const { pathname } = useLocation();
 
   useEffect(() => {
     const onScroll = () => {
       const y = window.scrollY;
+      // the header stays on screen (the logo is the way home); it only gets more compact
       setCompact(y > 40);
-      // step aside while reading down, come back on the way up
-      setHidden(y > 500 && y > lastY.current + 4);
-      if (y < lastY.current - 4 || y < 500) setHidden(false);
-      lastY.current = y;
       probe();
     };
     const probe = () => {
@@ -63,11 +58,7 @@ export default function Nav() {
         Skip to content
       </a>
 
-      <header
-        className={`fixed inset-x-0 top-0 z-50 transition-transform duration-500 ease-[var(--ease-out-expo)] ${
-          hidden && !open ? "-translate-y-[130%]" : "translate-y-0"
-        }`}
-      >
+      <header className="fixed inset-x-0 top-0 z-50">
         <div className="shell pt-4 md:pt-5">
           <div
             className={`flex items-center justify-between rounded-full border pl-5 pr-2 transition-[background-color,border-color,height,box-shadow] duration-500 md:pl-7 ${
