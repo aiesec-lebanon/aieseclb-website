@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import logoWhite from "../assets/images/aiesec_logo_white.png";
+import logoBlue from "../assets/images/aiesec_logo_wide_blue.png";
 import { NAV, SIGNUP_URL } from "../content/site";
 
 export default function Nav() {
@@ -78,13 +79,11 @@ export default function Nav() {
             }`}
           >
             <Link to="/" viewTransition aria-label="AIESEC in Lebanon, home" className="flex items-center gap-3">
-              {/* the logo as a mask, so it can be white over dark worlds and AIESEC blue over light ones */}
-              <span
-                role="img"
-                aria-label="AIESEC"
-                className={`block aspect-[1265/259] h-[1.35rem] transition-colors duration-500 md:h-6 ${light ? "bg-aiesec" : "bg-white"}`}
-                style={{ mask: `url(${logoWhite}) center / contain no-repeat`, WebkitMask: `url(${logoWhite}) center / contain no-repeat` }}
-              />
+              {/* the white logo over dark worlds, the blue one over light ones */}
+              <span className="relative block aspect-[1265/259] h-[1.35rem] md:h-6">
+                <img src={logoWhite} alt="AIESEC" className={`absolute inset-0 h-full w-full transition-opacity duration-500 ${light ? "opacity-0" : "opacity-100"}`} />
+                <img src={logoBlue} alt="" aria-hidden="true" className={`absolute inset-0 h-full w-full transition-opacity duration-500 ${light ? "opacity-100" : "opacity-0"}`} />
+              </span>
               <span
                 className={`hidden border-l pl-3 text-[0.95rem] font-bold transition-colors duration-500 sm:block ${
                   light ? "border-ink/20 text-ink/85" : "border-white/25 text-white/90"
