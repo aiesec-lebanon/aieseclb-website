@@ -70,9 +70,12 @@ export default function Stories() {
       {/* Back with stories: photographs coming up through first light like postcards */}
       <section className="relative isolate overflow-clip bg-[linear-gradient(180deg,#030b1c_0%,#06142e_55%,#0b2350_100%)] text-white">
         <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-[radial-gradient(60%_80%_at_50%_100%,rgb(255_200_69/0.22),transparent_70%)]" />
+        {/* the opening runs into the next section instead of stopping at a line */}
+        <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-28 bg-[linear-gradient(180deg,transparent,#0b2350)]" />
         <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
           {STORIES.slice(0, 6).map((s, i) => {
-            const spots = ["left-[4%] top-[18%] w-[13vw] -rotate-6", "left-[16%] top-[58%] w-[11vw] rotate-3", "right-[6%] top-[14%] w-[12vw] rotate-6", "right-[18%] top-[56%] w-[14vw] -rotate-3", "left-[25%] top-[84%] w-[8vw] rotate-2", "right-[34%] top-[6%] w-[8vw] -rotate-2"];
+            // clear of the header, the title, the words and the buttons, and inside the opening's foot
+            const spots = ["left-[4%] top-[15%] w-[13vw] -rotate-6", "left-[12%] top-[52%] w-[11vw] rotate-3", "right-[5%] top-[15%] w-[12vw] rotate-6", "right-[11%] top-[50%] w-[13vw] -rotate-3", "left-[27%] top-[77%] w-[7vw] rotate-2", "right-[26%] top-[78%] w-[7vw] -rotate-2"];
             return (
               <div key={s.id} className={`parallax absolute hidden rounded-[0.3rem] bg-white p-1.5 pb-5 opacity-80 shadow-[0_20px_50px_rgb(0_0_0/0.5)] md:block ${spots[i]}`} style={{ "--py": `${3 + i * 1.4}rem` }}>
                 <Media name={photo(s, 0)} alt="" tone="dawn" seed={760 + i} sizes="14vw" className="aspect-[4/5] rounded-[0.1rem]" />
