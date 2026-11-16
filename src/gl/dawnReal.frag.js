@@ -433,13 +433,13 @@ vec3 shadeLand(vec3 p, vec3 rd, float t, vec3 n, float sh) {
     float hh = hash12(id);
     vec2 o = vec2(hash12(id + 1.3), hash12(id + 9.1)) - 0.5;
     float d = length(fract(g) - 0.5 - o * 0.7);
-    float town = smoothstep(0.62, 0.84, n2(p.xz * 0.55 + 31.0));
+    float town = smoothstep(0.70, 0.90, n2(p.xz * 0.55 + 31.0));
     float coast = (1.0 - smoothstep(0.03, 0.16, alt)) * smoothstep(0.45, 0.75, n2(p.xz * 0.21 + 5.0));
     float low = 1.0 - smoothstep(0.25, 1.20, alt);
-    float on = step(1.0 - 0.30 * town * low - 0.26 * coast, hh) * (1.0 - smoothstep(0.26, 0.44, slope));
+    float on = step(1.0 - 0.34 * town * low - 0.22 * coast, hh) * (1.0 - smoothstep(0.26, 0.44, slope));
     float size = clamp(0.012 * t, 0.10, 0.45);              // never smaller than a pixel or two
     float tw = 0.8 + 0.2 * sin(uTime * (1.0 + hh * 2.0) + hh * 40.0);
-    col += vec3(1.00, 0.62, 0.26) * on * smoothstep(size, size * 0.2, d) * night * tw * 2.4 * clamp(0.25 / size, 0.4, 1.0);
+    col += vec3(1.00, 0.50, 0.16) * on * smoothstep(size, size * 0.2, d) * night * tw * 3.4 * clamp(0.25 / size, 0.4, 1.0) * (1.0 - smoothstep(6.0, 14.0, t));
   }
   return col;
 }
@@ -797,7 +797,7 @@ void main() {
     if (tr > 0.0 && tr < tHit) { tHit = tr; what = 3; }
 
     // the title stands in the air on a plane across the valley
-    float titleA = 0.0;
+    titleA = 0.0;
     if (uTitleA > 0.0 && rd.z > 1e-4) {
       float tt = (uTitleZ - ro.z) / rd.z;
       if (tt > 0.0 && tt < tHit) {
@@ -852,8 +852,8 @@ void main() {
     if (what == 1) col = shadeLand(p, rd, tHit, n, sh);
     else if (what == 2) col = shadeSea(p, rd, seaN, seaRR, seaCalm, rLand, rRock, sky);
     else if (what == 3) col = shadeRocks(p, rd, n, sh);
-    else col = vec3(2.2);
-    col = applyAir(col, rd, what == 4 ? tHit * 0.25 : tHit);
+    else col = vec3(2.8);
+    col = applyAir(col, rd, what == 4 ? tHit * 0.08 : tHit);
   }
 
   // cloud between the eye and whatever was hit
@@ -861,7 +861,7 @@ void main() {
   col = col * cl.a + cl.rgb;
 
   // the soft edge of the title, drawn over the scene where it was not solid enough to stop the ray
-  if (what != 4 && titleA > 0.0) col = mix(col, vec3(2.2), titleA * cl.a);
+  if (what != 4 && titleA > 0.0) col = mix(col, vec3(2.8), titleA * cl.a);
 
   col = tonemap(col * uExposure);
   col = pow(col, vec3(1.0 / 2.2));

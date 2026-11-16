@@ -354,8 +354,22 @@ export default function DawnHeroReal({ onTooSlow }) {
         /* draw with what is there */
       }
       if (disposed) return;
-      const cr = canvas.getBoundingClientRect();
-      const hr = h1.getBoundingClientRect();
+      // Where things sit in the stage's layout, not where they are drawn at this moment: on a fast
+      // load the lines are still rising in, and the beats move the title as the page scrolls. Either
+      // put the words in the wrong place, and a line still below its mask fell off the texture (the
+      // second line went missing). Offsets ignore transforms.
+      const stage = canvas.offsetParent;
+      const box = (el) => {
+        let x = 0;
+        let y = 0;
+        for (let e = el; e && e !== stage; e = e.offsetParent) {
+          x += e.offsetLeft;
+          y += e.offsetTop;
+        }
+        return { left: x, top: y, width: el.offsetWidth, height: el.offsetHeight, right: x + el.offsetWidth, bottom: y + el.offsetHeight };
+      };
+      const cr = box(canvas);
+      const hr = box(h1);
       if (!hr.width || !cr.width) return;
       const W = 2048;
       const k = W / hr.width;
@@ -373,7 +387,7 @@ export default function DawnHeroReal({ onTooSlow }) {
       if ("letterSpacing" in g) g.letterSpacing = `${-0.022 * fontPx}px`;
       g.textBaseline = "middle";
       for (const line of h1.querySelectorAll(".rl > span")) {
-        const r = line.getBoundingClientRect();
+        const r = box(line);
         g.fillText(line.textContent, (r.left - hr.left) * k, (r.top - hr.top + r.height / 2) * k);
       }
       quad.texture("uTitle", c, 0);
