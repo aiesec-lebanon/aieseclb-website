@@ -421,7 +421,7 @@ export default function EventRing({ events }) {
             href={`#${current.id}`}
             className="ml-2 inline-flex h-13 items-center rounded-full bg-sun px-6 font-bold text-ink transition-colors hover:bg-white"
           >
-            Read about it
+            Read about it<span className="sr-only">: {current.name}</span>
           </a>
         </div>
       </div>
