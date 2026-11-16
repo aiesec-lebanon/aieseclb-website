@@ -124,9 +124,10 @@ function Doors() {
                   className="aspect-[4/5] md:aspect-[5/6]"
                   imgClassName="transition-transform duration-[1.4s] ease-[var(--ease-out-expo)] group-hover:scale-[1.06] group-focus-visible:scale-[1.06]"
                 />
-                <div className="absolute inset-0 bg-[linear-gradient(180deg,rgb(3_11_28/0.05)_30%,rgb(3_11_28/0.82)_100%)]" />
+                <div className="absolute inset-0 bg-[linear-gradient(180deg,rgb(3_11_28/0.05)_22%,rgb(3_11_28/0.55)_48%,rgb(3_11_28/0.88)_100%)]" />
                 <div className="absolute inset-x-0 bottom-0 p-7 md:p-11">
-                  <p className="text-[1.05rem] font-bold text-sun">{d.who}</p>
+                  {/* on a solid pill: these say which door is whose, over any part of the photo */}
+                  <p className="inline-block rounded-full bg-night/75 px-4 py-1.5 text-[1.02rem] font-bold text-sun backdrop-blur-sm">{d.who}</p>
                   <h3 className="display mt-3 text-[clamp(2.4rem,4.6vw,4.6rem)]">
                     {d.line.map((l) => (
                       <span key={l} className="block">
