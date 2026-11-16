@@ -130,14 +130,45 @@ vec4 house(vec2 p) {
 // The houses in the land's shape. Level of detail: only within about 4 km of the camera (fading out
 // from 2), only for the camera's view and its shading (oct >= 4: shadows and reflections use 3),
 // and not on the lightest setting. Further off they are colour only (shadeLand).
+// Woods: the same places the colour of the land calls woods (shadeLand), without its slope test.
+float woodsAt(vec2 p, float alt) {
+  return smoothstep(0.42, 0.62, n2(p * 1.7 + 2.0) * 0.6 + n2(p * 0.6 + 9.0) * 0.6)
+       * (1.0 - smoothstep(1.55, 2.05, alt)) * smoothstep(0.02, 0.12, alt);
+}
+// A cedar in this cell of a 16 m grid: standing off-centre, in about four cells out of nine,
+// 10 to 22 m tall (a little taller than life, so they read on the skyline as in the drawn hero),
+// a rounded cone. Returns its height above the ground at p.
+float tree(vec2 p) {
+  vec2 g = p * 64.0;
+  vec2 id = floor(g);
+  float hh = hash12(id + 29.0);
+  // in stands, with clearings between them, rather than an even carpet
+  if (hh < 0.55 + 0.4 * (1.0 - smoothstep(0.3, 0.6, n2(p * 5.0 + 11.0)))) return 0.0;
+  vec2 c = (vec2(hash12(id + 31.0), hash12(id + 37.0)) - 0.5) * 0.5;
+  float r = 0.36 + 0.12 * hash12(id + 41.0);                 // crown radius, in cells
+  float d = length(fract(g) - 0.5 - c) / r;
+  if (d >= 1.0) return 0.0;
+  float hgt = 0.010 + 0.012 * hash12(id + 43.0);
+  return hgt * pow(1.0 - d, 0.9);
+}
+// What stands on the land near the camera: houses where a village is, trees where the woods are.
+// Level of detail: houses within about 4 km (fading from 2), trees within about 3.5 km (fading from
+// 1.5; further off a crown is under a pixel and would only sparkle); only for the camera's view and its shading (oct >= 4: shadows and reflections use 3), and
+// not on the lightest setting. Further off both are colour only (shadeLand).
 float houses(vec2 p, float h) {
-  float near = 1.0 - smoothstep(2.0, 4.0, length(p - uCamPos.xz));
-  if (near <= 0.0) return 0.0;
+  float dist = length(p - uCamPos.xz);
+  if (dist > 5.0) return 0.0;
   float vil = villageAt(p, h);
-  if (vil <= 0.0) return 0.0;
-  vec4 c = house(p);
-  float roof = c.y > 0.85 ? max(c.w, 0.0) * 0.016 : 0.0;
-  return c.x * (c.z + roof) * vil * near;
+  if (vil > 0.05) {
+    float near = 1.0 - smoothstep(2.0, 4.0, dist);
+    if (near <= 0.0) return 0.0;
+    vec4 c = house(p);
+    float roof = c.y > 0.85 ? max(c.w, 0.0) * 0.016 : 0.0;
+    return c.x * (c.z + roof) * vil * near;
+  }
+  float woods = woodsAt(p, h);
+  if (woods <= 0.05) return 0.0;
+  return tree(p) * smoothstep(0.05, 0.4, woods) * (1.0 - smoothstep(1.5, 3.5, dist));
 }
 
 float terrain(vec2 p, int oct) {
@@ -375,6 +406,14 @@ vec3 shadeLand(vec3 p, vec3 rd, float t, vec3 n, float sh) {
   float snowLine = 1.95 + 0.45 * (nA - 0.5) - 0.25 * n.z;    // lower on the shaded, seaward faces
   float snow = smoothstep(snowLine - 0.12, snowLine + 0.18, alt) * (1.0 - smoothstep(0.30, 0.58, slope + (nC - 0.5) * 0.2));
   albedo = mix(albedo, vec3(0.86, 0.90, 0.96), snow);
+  // the cedars themselves, near the camera: dark needles, after the snow, so their crowns stay
+  // dark against the white instead of catching it
+  // (where the trees stand is decided without the slope, as for their shape: a cone's sides are
+  // steep, and would otherwise be painted as bare rock)
+  if (t < 3.5 && woodsAt(p.xz, alt) > 0.05) {
+    float tr = tree(p.xz);
+    albedo = mix(albedo, vec3(0.012, 0.030, 0.016) * (0.8 + 0.5 * nC), smoothstep(0.0, 0.003, tr) * (1.0 - smoothstep(1.5, 3.5, t)));
+  }
 
   float ndl = max(dot(n, uSunDir), 0.0);
   vec3 sun = sunColor() * 5.5 * smoothstep(-0.02, 0.05, uSunDir.y);

@@ -83,6 +83,7 @@ export default function DawnHeroReal({ onTooSlow }) {
   const [opened, setOpened] = useState(false);
   const [loaderGone, setLoaderGone] = useState(false);
   const [creep, setCreep] = useState(false);
+  const [titleInScene, setTitleInScene] = useState(false);
 
   useEffect(() => {
     tooSlowRef.current = onTooSlow;
@@ -99,6 +100,7 @@ export default function DawnHeroReal({ onTooSlow }) {
     let tx = 0;
     let ty = 0;
     let intro = 0;
+    let titleOn = false;
     let frameNo = 0;
     // the scene is ready once its first frames are drawn: the loader opens, the intro begins
     let revealed = false;
@@ -113,18 +115,9 @@ export default function DawnHeroReal({ onTooSlow }) {
     const params = new URLSearchParams(window.location.search);
     const forced = params.has("s") ? clamp01(parseFloat(params.get("s"))) : null;
 
-    const apply = (quad, time, dt) => {
-      const target = forced ?? (reduce ? 0 : sectionProgress(section));
-      s = dt === 0 ? target : s + (target - s) * (1 - Math.exp(-dt * 6));
-      if (Math.abs(target - s) < 2e-5) s = target;
-      px += (tx - px) * (1 - Math.exp(-dt * 3));
-      py += (ty - py) * (1 - Math.exp(-dt * 3));
-      if (Math.abs(tx - px) < 1e-4) px = tx;
-      if (Math.abs(ty - py) < 1e-4) py = ty;
-      intro = dt === 0 ? 1 : revealed ? Math.min(1, intro + dt / 1.8) : 0;
-      frameNo += 1;
-      if (frameNo === 8) reveal();
-
+    // Where the camera is and where it looks at progress s (px, py: the pointer's sway). One
+    // function for the frame and for placing the title in the scene, so the two always agree.
+    const frameAt = (s, px, py) => {
       const cam = cameraAt(s);
       // Look up the valley: partly along its bends, partly straight at the pass, and at the very
       // end straight into the sun.
@@ -144,6 +137,22 @@ export default function DawnHeroReal({ onTooSlow }) {
       const dirZ = Math.cos(az) * Math.cos(pitch);
 
       const focal = mix(4.2, 2.5, smoothstep(0.08, 0.5, s));
+      return { cam, dirX, dirY, dirZ, focal, sunElev };
+    };
+
+    const apply = (quad, time, dt) => {
+      const target = forced ?? (reduce ? 0 : sectionProgress(section));
+      s = dt === 0 ? target : s + (target - s) * (1 - Math.exp(-dt * 6));
+      if (Math.abs(target - s) < 2e-5) s = target;
+      px += (tx - px) * (1 - Math.exp(-dt * 3));
+      py += (ty - py) * (1 - Math.exp(-dt * 3));
+      if (Math.abs(tx - px) < 1e-4) px = tx;
+      if (Math.abs(ty - py) < 1e-4) py = ty;
+      intro = dt === 0 ? 1 : revealed ? Math.min(1, intro + dt / 1.8) : 0;
+      frameNo += 1;
+      if (frameNo === 8) reveal();
+
+      const { cam, dirX, dirY, dirZ, focal, sunElev } = frameAt(s, px, py);
       // hand the camera to the runner, which carries the sharp image along as it moves
       if (quad.setCamera) {
         const rl = Math.hypot(dirZ, dirX) || 1;
@@ -168,7 +177,9 @@ export default function DawnHeroReal({ onTooSlow }) {
       quad.set("uCover", smoothstep(0.08, 0.42, s));
       // inland, in the shadow of the range and under the cloud, the camera opens up
       quad.set("uExposure", 1 + 0.9 * smoothstep(0.12, 0.28, s) * (1 - smoothstep(0.46, 0.58, s)));
-      quad.set("uTitleA", 0);
+      // the title in the scene: in with the intro, gone just before the first words of the flight
+      // appear (0.16), after the coast has risen in front of it
+      quad.set("uTitleA", titleOn ? intro * intro * (3 - 2 * intro) * (1 - smoothstep(0.1, 0.16, s)) : 0);
 
       for (const b of BEATS) {
         const el = beatRefs.current[b.id];
@@ -329,6 +340,72 @@ export default function DawnHeroReal({ onTooSlow }) {
     quad.set("uTitleZ", 20);
     quad.resize();
 
+    // The title set in the scene, like the drawn hero's: the words are drawn into a texture with
+    // the page title's own font, and stand on a plane 16 km up the valley, placed so that at the
+    // start they sit exactly where the page title is. The nearer land, trees and cloud pass in
+    // front of them as the flight goes in. (The page title stays, see-through, for screen readers.)
+    const TITLE_Z = 16;
+    const placeTitle = async () => {
+      const h1 = section.querySelector("#page-title");
+      if (!h1) return;
+      try {
+        await document.fonts.ready;
+      } catch {
+        /* draw with what is there */
+      }
+      if (disposed) return;
+      const cr = canvas.getBoundingClientRect();
+      const hr = h1.getBoundingClientRect();
+      if (!hr.width || !cr.width) return;
+      const W = 2048;
+      const k = W / hr.width;
+      const c = document.createElement("canvas");
+      c.width = W;
+      c.height = Math.max(2, Math.round(hr.height * k));
+      const g = c.getContext("2d");
+      const cs = getComputedStyle(h1);
+      const fontPx = parseFloat(cs.fontSize) * k;
+      g.fillStyle = "#000";
+      g.fillRect(0, 0, c.width, c.height);
+      g.fillStyle = "#fff";
+      g.font = `${cs.fontWeight} ${fontPx}px ${cs.fontFamily}`;
+      if ("fontStretch" in g) g.fontStretch = "condensed";
+      if ("letterSpacing" in g) g.letterSpacing = `${-0.022 * fontPx}px`;
+      g.textBaseline = "middle";
+      for (const line of h1.querySelectorAll(".rl > span")) {
+        const r = line.getBoundingClientRect();
+        g.fillText(line.textContent, (r.left - hr.left) * k, (r.top - hr.top + r.height / 2) * k);
+      }
+      quad.texture("uTitle", c, 0);
+      // the plane's rectangle: the rays from the start through the corners of the page title
+      const fr = frameAt(0, 0, 0);
+      const fw = [fr.dirX, fr.dirY, fr.dirZ];
+      const rl = Math.hypot(fw[2], fw[0]) || 1;
+      const rt = [fw[2] / rl, 0, -fw[0] / rl];
+      const up = [fw[1] * rt[2], fw[2] * rt[0] - fw[0] * rt[2], -fw[1] * rt[0]];
+      const hit = (x, y) => {
+        const u = (x - cr.left - cr.width / 2) / (cr.height / 2);
+        const v = (cr.height / 2 - (y - cr.top)) / (cr.height / 2);
+        const d = [0, 1, 2].map((i) => u * rt[i] + v * up[i] + fr.focal * fw[i]);
+        const t = (TITLE_Z - fr.cam.z) / d[2];
+        return [fr.cam.x + d[0] * t, fr.cam.y + d[1] * t];
+      };
+      const p0 = hit(hr.left, hr.bottom);
+      const p1 = hit(hr.right, hr.top);
+      quad.set("uTitleRect", Math.min(p0[0], p1[0]), Math.min(p0[1], p1[1]), Math.max(p0[0], p1[0]), Math.max(p0[1], p1[1]));
+      quad.set("uTitleZ", TITLE_Z);
+      titleOn = true;
+      setTitleInScene(true);
+      if (reduce) quad.renderOnce();
+    };
+    placeTitle();
+    let titleTimer = 0;
+    const onTitleResize = () => {
+      clearTimeout(titleTimer);
+      titleTimer = setTimeout(placeTitle, 250);
+    };
+    window.addEventListener("resize", onTitleResize);
+
     const onResize = () => {
       governor.resize(cssPixels());
       if (reduce) quad.renderOnce();
@@ -370,6 +447,8 @@ export default function DawnHeroReal({ onTooSlow }) {
 
     if (reduce) reveal();
     cleanup = () => {
+      clearTimeout(titleTimer);
+      window.removeEventListener("resize", onTitleResize);
       ro.disconnect();
       if (io) io.disconnect();
       window.removeEventListener("pointermove", onPointer);
@@ -438,7 +517,9 @@ export default function DawnHeroReal({ onTooSlow }) {
             <h1
               id="page-title"
               tabIndex={-1}
-              className="display hero-title text-hero max-w-[9ch] outline-none [text-shadow:0_2px_60px_rgb(3_11_28/0.45)]"
+              className={`display hero-title text-hero max-w-[9ch] outline-none ${
+                titleInScene ? "text-transparent" : "[text-shadow:0_2px_60px_rgb(3_11_28/0.45)]"
+              }`}
             >
               <span className="rl" style={{ "--i": 0 }}>
                 <span>Hope rises</span>
