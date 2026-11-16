@@ -60,6 +60,18 @@ export default function Exchange() {
             <div
               role="tablist"
               aria-label="Which direction"
+              // tabs behave as tabs: the arrow keys (and Home, End) move between them, and only the
+              // chosen one is a Tab stop
+              onKeyDown={(e) => {
+                const order = ["out", "in"];
+                const at = order.indexOf(side);
+                const next =
+                  e.key === "ArrowRight" ? order[(at + 1) % 2] : e.key === "ArrowLeft" ? order[(at + 1) % 2] : e.key === "Home" ? "out" : e.key === "End" ? "in" : null;
+                if (!next) return;
+                e.preventDefault();
+                setSide(next);
+                document.getElementById(`tab-${next}`)?.focus();
+              }}
               className="fade flex w-full rounded-full bg-white p-1.5 shadow-[0_6px_30px_rgb(11_27_51/0.08)] sm:w-max"
               style={{ "--i": 2 }}
             >
@@ -74,6 +86,7 @@ export default function Exchange() {
                   role="tab"
                   id={`tab-${t.id}`}
                   aria-selected={side === t.id}
+                  tabIndex={side === t.id ? 0 : -1}
                   aria-controls="steps-panel"
                   onClick={() => setSide(t.id)}
                   className={`flex-1 rounded-full px-3 py-3 text-[0.98rem] font-bold transition-colors duration-300 sm:flex-none sm:px-5 md:px-7 ${
