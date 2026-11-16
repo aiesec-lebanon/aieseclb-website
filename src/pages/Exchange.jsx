@@ -51,7 +51,7 @@ export default function Exchange() {
         seed={9}
       />
 
-      <section className="bg-[linear-gradient(180deg,var(--color-sky)_0%,#eef4fb_45%,#f8efe2_100%)] py-24 md:py-36">
+      <section data-scheme="light" className="bg-[linear-gradient(180deg,var(--color-sky)_0%,#eef4fb_45%,#f8efe2_100%)] py-24 md:py-36">
         <div className="shell">
           <Reveal className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
             <h2 className="display text-mega text-ink">
@@ -181,7 +181,7 @@ export default function Exchange() {
               <p className="fade text-lead mt-5 max-w-[32rem]" style={{ "--i": 3 }}>
                 {DETAIL[p.id].who}
               </p>
-              <ul className="fade mt-8 space-y-3" style={{ "--i": 4 }}>
+              <ul className="fade mt-8 space-y-3 text-[1.08rem] md:text-[1.15rem]" style={{ "--i": 4 }}>
                 {DETAIL[p.id].what.map((w) => (
                   <li key={w} className="flex gap-3 border-t border-ink/20 pt-3">
                     <span aria-hidden="true" className="mt-[0.55em] h-2 w-2 shrink-0 rounded-full bg-ink" />

@@ -404,9 +404,9 @@ function Showcase({ world }) {
     <>
       <div className="absolute inset-0" style={{ background: `radial-gradient(60% 50% at 50% 40%, ${rgba(world.accent, 0.16)}, transparent 75%)` }} />
       <div className="absolute inset-0 [perspective:1200px]">
-        <div data-depth="" className="absolute inset-x-[-6%] top-[8%] grid grid-cols-6 gap-5 [transform:rotateX(14deg)]" style={{ "--depth": 0.7 }}>
+        <div data-depth="" className="absolute inset-x-[-6%] top-[8%] grid grid-cols-6 gap-5 opacity-90 [transform:rotateX(14deg)]" style={{ "--depth": 0.7 }}>
           {tiles.map((t) => (
-            <div key={t.i} className="relative grid aspect-[4/3] place-items-center rounded-2xl border shadow-[0_10px_30px_rgb(0_0_0/0.18)]" style={{ background: world.card, borderColor: world.line }}>
+            <div key={t.i} className="relative grid aspect-[4/3] place-items-center rounded-2xl border shadow-[0_10px_30px_rgb(0_0_0/0.18)]" style={{ background: `linear-gradient(180deg, ${mixHex(world.card, "#ffffff", 0.09)}, ${world.card})`, borderColor: mixHex(world.line, "#ffffff", 0.14) }}>
               <span
                 style={{ background: rgba(world.ink, 0.14) }}
                 className={`block h-8 w-8 ${t.shape === 0 ? "rounded-full" : t.shape === 1 ? "rounded-md" : "rotate-45 rounded-sm"}`}
@@ -442,11 +442,11 @@ function Ascent({ world }) {
               y={900 - i * 70}
               width={1600}
               height={80}
-              fill={mixHex(world.bg, "#ffffff", 0.04 + i * 0.012)}
+              fill={mixHex(world.bg, "#ffffff", 0.07 + i * 0.022)}
             />
           ))}
           {steps.map((i) => (
-            <rect key={`e${i}`} x={360 + i * 130} y={900 - i * 70} width={1600} height={2} fill={rgba(world.accent, 0.25 + i * 0.06)} />
+            <rect key={`e${i}`} x={360 + i * 130} y={900 - i * 70} width={1600} height={2} fill={rgba(world.accent, 0.4 + i * 0.06)} />
           ))}
         </g>
       </Svg>

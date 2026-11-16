@@ -73,8 +73,10 @@ export default function HorizontalStory({ children, className = "", label }) {
       style={pinned ? { height: `calc(100svh + ${span}px)` } : undefined}
     >
       <div className={pinned ? "sticky top-0 flex h-svh flex-col justify-center overflow-clip" : "overflow-x-auto overscroll-x-contain"}>
-        <div ref={trackRef} className="flex w-max items-stretch will-change-transform">
-          {children}
+        <div className={pinned ? "[mask-image:linear-gradient(90deg,transparent,#000_5%,#000_95%,transparent)]" : undefined}>
+          <div ref={trackRef} className="flex w-max items-stretch will-change-transform">
+            {children}
+          </div>
         </div>
         {pinned && (
           <div className="shell absolute inset-x-0 bottom-7">

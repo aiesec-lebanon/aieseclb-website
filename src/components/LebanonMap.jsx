@@ -33,13 +33,13 @@ export default function LebanonMap({ className = "" }) {
         </g>
         {PLACES.map((p, i) => (
           <g key={p.name} className="map-pin" style={{ "--n": i }}>
-            <circle cx={p.at[0]} cy={p.at[1]} r="9" fill="#ffc845" opacity="0.18" />
-            <circle cx={p.at[0]} cy={p.at[1]} r="4" fill="#ffc845" />
+            <circle cx={p.at[0]} cy={p.at[1]} r="11" fill="#ffc845" opacity="0.2" />
+            <circle cx={p.at[0]} cy={p.at[1]} r="5" fill="#ffc845" />
             <text
               x={p.at[0] + (p.side === "left" ? -12 : 12)}
               y={p.at[1] + 5}
               textAnchor={p.side === "left" ? "end" : "start"}
-              className="fill-white text-[15px] font-bold"
+              className="fill-white text-[19px] font-bold"
             >
               {p.name}
             </text>

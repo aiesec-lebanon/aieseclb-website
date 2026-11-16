@@ -54,7 +54,7 @@ void main() {
   vec2 mirrored = 1.0 - abs(mod(uv, 2.0) - 1.0);
   float lod = 0.8 + min(away * 30.0, 5.5);
   vec3 c = textureLod(uImg, mirrored, lod).rgb;
-  float keep = uGrade.x * (1.0 - smoothstep(0.02, 0.24, away));
+  float keep = uGrade.x * (1.0 - smoothstep(0.04, 0.32, away));
   // the side of the text gives way to the world
   float s;
   if (uScrim.x < 0.5) s = 1.0 - smoothstep(uScrim.y, uScrim.z, p.x);
@@ -141,7 +141,7 @@ export default function Backdrop({ photo, world, textSide = "left" }) {
     gl.uniform1i(u("uDepth"), 1);
     gl.uniform3fv(U.bg, hexRgb(world.bg));
     // dark worlds keep the picture dimmer, light worlds let more of it through
-    gl.uniform2f(U.grade, world.scheme === "dark" ? 0.78 : 0.62, world.scheme === "dark" ? 0.72 : 1.0);
+    gl.uniform2f(U.grade, world.scheme === "dark" ? 0.9 : 0.8, world.scheme === "dark" ? 0.84 : 1.0);
 
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let still = reduce || paused;
